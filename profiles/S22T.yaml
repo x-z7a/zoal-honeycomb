@@ -3,7 +3,6 @@ metadata:
   description: Laminar Cirrus SR-22 FOSM
   selectors:
     - Cirrus SR-22
-    - Cirrus SR22 (G1000)
 buttons:
   
   nav:
