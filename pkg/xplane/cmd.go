@@ -14,11 +14,11 @@ func (s *xplaneService) changeApValue(command utilities.CommandRef, phase utilit
 	// Handle only when command phase is CommandEnd
 	if phase == utilities.Phase_CommandEnd {
 		now := time.Now()
-
+		elapsed := now.Sub(s.lastKnobTime).Milliseconds()
 		// Determine speed multiplier based on time elapsed
 		var multiplier float64
 		if !s.lastKnobTime.IsZero() {
-			elapsed := now.Sub(s.lastKnobTime).Milliseconds()
+
 			if elapsed < 100 {
 				multiplier = 5.0 // Fast turn
 			} else if elapsed < 200 {
@@ -59,6 +59,11 @@ func (s *xplaneService) changeApValue(command utilities.CommandRef, phase utilit
 				step = altStep
 			} else {
 				step = 100
+			}
+			if elapsed < 100 {
+				multiplier *= 5
+			} else if elapsed < 200 {
+				multiplier *= 2
 			}
 		case "vs":
 			myProfile = s.profile.Knobs.AP_VS

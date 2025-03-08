@@ -18,37 +18,37 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
 
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v5
         with:
           go-version: '1.23.4' # The Go version to download (if necessary) and use.
       - run: |
           brew install FiloSottile/musl-cross/musl-cross
           brew install mingw-w64
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
           key: go-mod-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             go-mod-
 
-      - name: Build wails
-        uses: dAppServer/wails-build-action@main
-        id: build
-        with:
-          build-name: bravo
-          build-platform: darwin/universal,windows/amd64
-          nsis: false
-          go-version: '1.23.4'
-
-      - name: Download Wails Build Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: Wails Build macOS bravo
+#      - name: Build wails
+#        uses: dAppServer/wails-build-action@main
+#        id: build
+#        with:
+#          build-name: bravo
+#          build-platform: darwin/universal,windows/amd64
+#          nsis: false
+#          go-version: '1.23.4'
+#
+#      - name: Download Wails Build Artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: Wails Build macOS bravo
 
       - run: |
           go mod tidy
@@ -59,10 +59,6 @@ jobs:
           cp ${{ github.workspace }}/skunkcrafts_updater.cfg ${{ github.workspace }}/build/xa-honeycomb/
           cp -r ${{ github.workspace }}/profiles ${{ github.workspace }}/build/xa-honeycomb/
           sed -i '' "s/REPLACE_ME/${TAG}/g" ${{ github.workspace }}/build/xa-honeycomb/skunkcrafts_updater.cfg
-          
-          mv build/bin/bravo build/bin/bravo.exe
-          cp -r build/bin/bravo.exe ${{ github.workspace }}/build/xa-honeycomb/
-          cp -r build/bin/bravo.app ${{ github.workspace }}/build/xa-honeycomb/
           
           root=$(pwd)
           cd ${{ github.workspace }}/build/ && zip -r xa-honeycomb.zip xa-honeycomb && cd $root
@@ -92,7 +88,7 @@ jobs:
           git push -f -u origin ${TARGET_BRANCH}
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           body_path: ${{ github.workspace }}/README.md
