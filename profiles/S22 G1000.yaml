@@ -1,8 +1,8 @@
 metadata:
-  name: Cirrus SR-22 G1000
+  name: Cirrus SR-22
   description: TorqueSim SR-22
   selectors:
-    - Cirrus SR-22 
+    - Cirrus SR22 (G1000)
 buttons:
   
   nav:
