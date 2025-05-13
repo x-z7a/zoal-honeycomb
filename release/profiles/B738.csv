@@ -1,0 +1,27 @@
+name,datarefs,operators,thresholds,conditions,description
+BUS_VOLTAGE,laminar/B738/electric/batbus_status,>,0.01,any,this led ligths up when master electric switch is on
+HDG,laminar/B738/autopilot/hdg_sel_status,==,1,any,description
+NAV,laminar/B738/autopilot/lnav_status,==,1,any,description
+APR,laminar/B738/autopilot/app_status,==,1,any,description
+REV,laminar/B738/autopilot/vnav_status1,>=,1,any,description
+ALT,laminar/B738/autopilot/alt_hld_status,==,1,any,description
+VS,laminar/B738/autopilot/vs_status,==,1,any,description
+IAS,laminar/B738/autopilot/speed_status1,>=,1,any,description
+AP,laminar/B738/autopilot/cmd_a_status;laminar/B738/autopilot/cmd_b_status,>,0.01,any,description
+AP_STATE,sim/cockpit/autopilot/autopilot_state,==,0,any,description
+GEAR,sim/flightmodel2/gear/deploy_ratio,==,0,any,description
+RETRACTABLE_GEAR,sim/aircraft/gear/acf_gear_retract,==,0,any,description
+MASTER_WARN,sim/cockpit2/annunciators/master_warning,>,0.01,any,description
+FIRE,laminar/B738/annunciator/six_pack_fire,>,0.01,any,description
+OIL_LOW_P,laminar/B738/engine/eng1_oil_press;laminar/B738/engine/eng2_oil_press,<,0.075,any,description
+FUEL_LOW_P,laminar/B738/engine/fuel_flow_kg_sec,<,0.01,any,description
+ANTI_ICE,laminar/B738/annunciator/six_pack_ice,>,0.01,any,description
+ENG_STARTER,laminar/B738/engine/start_valve1;laminar/B738/engine/start_valve2,>,0.01,any,description
+APU,sim/cockpit2/electrical/APU_running,>,0.01,any,description
+MASTER_CAUTION,laminar/B738/annunciator/master_caution_light,>,0.01,any,description
+VACUUM,sim/cockpit/misc/vacuum;sim/cockpit/misc/vacuum2,<,1,any,description
+HYDRO_LOW_P,sim/cockpit2/hydraulics/indicators/hydraulic_pressure_1;sim/cockpit2/hydraulics/indicators/hydraulic_pressure_2,<,3300,any,description
+AUX_FUEL_PUMP,sim/cockpit2/fuel/transfer_pump_right;sim/cockpit2/fuel/transfer_pump_left,>,0.01,any,description
+PARKING_BRAKE,laminar/B738/annunciator/parking_brake,>,0.2,any,description
+VOLT_LOW,sim/cockpit2/annunciators/low_voltage,<,-80,any,description
+DOORS,laminar/B738/annunciator/six_pack_doors;laminar/B738/toggle_switch/flt_dk_door;737u/doors/Fwd_Cargo;737u/doors/aft_Cargo,>,0.1,any,description
