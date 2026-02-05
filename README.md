@@ -33,7 +33,7 @@
 
 ## Install
 
-1. Download `xa-honeycombo.zip` from [Release Page](https://github.com/xairline/xa-honeycomb/releases/latest).
+1. Download `xa-honeycombo.zip` from [Release Page](https://github.com/x-z7a/zoal-honeycomb/releases/latest).
 2. Drop the folder into XP's plugins folder
 3. see above about knobs mapping
 4. (WIP) A gui tool is included to help adding/changing profiels. It is not ready yet. At this time, it is an read-only app. Mac users might need to run `chmod -R 755 bravo.app` to launch the UI.
