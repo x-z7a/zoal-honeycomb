@@ -56,7 +56,7 @@ Above can be found by searching "honeycomb" after click `Edit`.
 - [x] yaml based profile
 - [x] Auto reconnect 
 - [ ] GUI to help mapping dataref/cmds (WIP)
-- [ ] AP Buttons push/pull by single/double click
+- [x] AP Buttons push/pull by single/double click
 
 ## UI: current state
 
