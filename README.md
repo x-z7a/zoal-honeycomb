@@ -7,21 +7,29 @@
 ## Supported Planes
 > Note: unchecked are still in progress
 
-- [ ] A20N by toliss
+- [x] A20N by toliss
 - [x] A319 by toliss
-- [ ] A321 by toliss
+- [x] A321 by toliss
 - [x] A339 by toliss
-- [ ] A346 by toliss
+- [x] A346 by toliss
 - [x] B738 by Zibo
 - [ ] B752 by FF
 - [ ] B753 by FF
 - [ ] B763 by FF
 - [ ] B764 by FF
+- [x] B772 by FF
+- [x] B736/7/8/9 by Level Up
 - [x] C172 by LR
 - [ ] C172 by Airfoilabs
 - [x] DH8D by FlyJSim
-- [ ] E55P
+- [x] E55P
 - [x] MD11 by Rotate
+- [x] C750 by LR
+- [x] DA42NG
+- [x] DH8D
+- [x] P28R VFA Arrow III
+- [x] SR22
+- [x] SF50     
 
 ## Install
 
