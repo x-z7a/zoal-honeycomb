@@ -1,4 +1,4 @@
-# xa-honeycomb
+# zoal-honeycomb (Previously xa-honeycomb)
 
 >NOTE: I didn't test on Windows and Linux build is currently broken
 >
