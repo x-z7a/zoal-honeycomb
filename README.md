@@ -1,3 +1,5 @@
+# Check our WebGA here -> [https://zoal.app/](https://zoal.app/)
+>
 # zoal-honeycomb (Previously xa-honeycomb)
 
 >NOTE: I didn't test on Windows and Linux build is currently broken
