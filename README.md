@@ -1,4 +1,4 @@
-# Check our WebGA here -> [https://zoal.app/](https://zoal.app/)
+# :star: Check our WebGA here -> [https://zoal.app/](https://zoal.app/)
 >
 # zoal-honeycomb (Previously xa-honeycomb)
 
