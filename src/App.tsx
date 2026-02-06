@@ -119,6 +119,21 @@ function App() {
   const [nameDialogValue, setNameDialogValue] = useState<string>('new_profile.yaml');
   const [nameDialogAction, setNameDialogAction] = useState<'saveAs' | 'newProfile'>('saveAs');
 
+  useEffect(() => {
+    if (!hasSkyScript()) {
+      return;
+    }
+    try {
+      const flag = sessionStorage.getItem('zoal_honeycomb_initial_reload_done');
+      if (flag !== '1') {
+        sessionStorage.setItem('zoal_honeycomb_initial_reload_done', '1');
+        window.location.reload();
+      }
+    } catch {
+      // ignore storage failures
+    }
+  }, []);
+
   const loadIndex = useCallback(async (): Promise<LoadResult> => {
     setStatus('Loading profiles...');
     const content = await readFile('profiles/index.json');

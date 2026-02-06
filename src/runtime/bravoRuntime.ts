@@ -4,6 +4,7 @@ const BRAVO_VENDOR_ID = 0x294b;
 const BRAVO_PRODUCT_ID = 0x1901;
 const CMD_PHASE_END = 2;
 const DOUBLE_CLICK_THRESHOLD_MS = 500;
+const DEBUG_RUNTIME = true;
 
 const OPERATORS: Record<string, (left: number, right: number) => boolean> = {
   '==': (l, r) => l === r,
@@ -61,16 +62,27 @@ class BravoRuntime {
   private lastKnobTs = 0;
   private clickTimers = new Map<string, number>();
 
+  private log(message: string, payload?: unknown) {
+    if (!DEBUG_RUNTIME) return;
+    if (payload === undefined) {
+      console.log(`[BravoRuntime] ${message}`);
+      return;
+    }
+    console.log(`[BravoRuntime] ${message}`, payload);
+  }
+
   start() {
     if (!this.hasXPlane() || this.initialized) {
       return;
     }
+    this.log('start');
     this.registerCommands();
     this.ledTimerId = window.setInterval(() => this.tickLeds(), 100);
     this.initialized = true;
   }
 
   stop() {
+    this.log('stop');
     if (this.ledTimerId != null) {
       window.clearInterval(this.ledTimerId);
       this.ledTimerId = null;
@@ -95,6 +107,11 @@ class BravoRuntime {
 
   setProfile(profile: AnyRecord | null) {
     this.profile = profile;
+    this.log('setProfile', {
+      name: profile?.metadata?.name || 'unknown',
+      hasButtons: !!profile?.buttons,
+      hasKnobs: !!profile?.knobs,
+    });
   }
 
   private hasXPlane() {
@@ -125,13 +142,14 @@ class BravoRuntime {
     if (!this.profile) {
       return;
     }
-    if (!this.ensureDeviceOpen()) {
-      return;
-    }
 
     const bytes = this.computeLedBytes(this.profile);
     const payloadKey = bytes.join(',');
     if (payloadKey === this.lastPayload) {
+      return;
+    }
+
+    if (!this.ensureDeviceOpen()) {
       return;
     }
 
@@ -154,8 +172,14 @@ class BravoRuntime {
     report[4] = bytes[3] || 0;
 
     try {
-      return (globalThis as any).XPlane.hid.sendFeatureReport(this.deviceId, report);
+      const res=(globalThis as any).XPlane.hid.sendFeatureReport(this.deviceId, report);
+      return res;
     } catch {
+      try {
+        (globalThis as any).XPlane.hid.close(this.deviceId);
+      } catch {
+        // ignore close errors
+      }
       this.deviceId = null;
       return -1;
     }
@@ -345,6 +369,7 @@ class BravoRuntime {
 
   private registerCommands() {
     const util = (globalThis as any).XPlane.utilities;
+    this.log('registerCommands');
 
     const increase = this.getOrCreateCommand(
       'Honeycomb Bravo/increase',
@@ -362,6 +387,7 @@ class BravoRuntime {
     const modeCrs = this.getOrCreateCommand('Honeycomb Bravo/mode_crs', 'Set AP selector to CRS.');
 
     util.registerCommandHandler(increase, (_: number, phase: number) => {
+      this.log('cmd increase phase', phase);
       if (phase === CMD_PHASE_END) {
         this.handleKnobTurn(1);
       }
@@ -369,6 +395,7 @@ class BravoRuntime {
     }, true);
 
     util.registerCommandHandler(decrease, (_: number, phase: number) => {
+      this.log('cmd decrease phase', phase);
       if (phase === CMD_PHASE_END) {
         this.handleKnobTurn(-1);
       }
@@ -376,36 +403,46 @@ class BravoRuntime {
     }, true);
 
     util.registerCommandHandler(modeIas, (_: number, phase: number) => {
+      this.log('cmd mode_ias phase', phase);
       if (phase === CMD_PHASE_END) {
         this.apSelector = 'ias';
+        this.log('apSelector set', this.apSelector);
       }
       return 1;
     }, true);
 
     util.registerCommandHandler(modeAlt, (_: number, phase: number) => {
+      this.log('cmd mode_alt phase', phase);
       if (phase === CMD_PHASE_END) {
         this.apSelector = 'alt';
+        this.log('apSelector set', this.apSelector);
       }
       return 1;
     }, true);
 
     util.registerCommandHandler(modeVs, (_: number, phase: number) => {
+      this.log('cmd mode_vs phase', phase);
       if (phase === CMD_PHASE_END) {
         this.apSelector = 'vs';
+        this.log('apSelector set', this.apSelector);
       }
       return 1;
     }, true);
 
     util.registerCommandHandler(modeHdg, (_: number, phase: number) => {
+      this.log('cmd mode_hdg phase', phase);
       if (phase === CMD_PHASE_END) {
         this.apSelector = 'hdg';
+        this.log('apSelector set', this.apSelector);
       }
       return 1;
     }, true);
 
     util.registerCommandHandler(modeCrs, (_: number, phase: number) => {
+      this.log('cmd mode_crs phase', phase);
       if (phase === CMD_PHASE_END) {
         this.apSelector = 'crs';
+        this.log('apSelector set', this.apSelector);
       }
       return 1;
     }, true);
@@ -413,7 +450,9 @@ class BravoRuntime {
     const buttonCommands = ['ias', 'alt', 'vs', 'hdg', 'rev', 'nav', 'apr', 'ap'];
     buttonCommands.forEach((key) => {
       const cmd = this.getOrCreateCommand(`Honeycomb Bravo/ap_${key}`, `Bravo ${key.toUpperCase()} pressed.`);
+      this.log(`registered button command Honeycomb Bravo/ap_${key}`, cmd);
       util.registerCommandHandler(cmd, (_: number, phase: number) => {
+        this.log(`button ${key} phase`, phase);
         if (phase === CMD_PHASE_END) {
           this.handleApButton(key);
         }
@@ -424,11 +463,13 @@ class BravoRuntime {
 
   private handleApButton(ref: string) {
     const now = Date.now();
+    this.log('handleApButton', { ref, now });
     const existingTimer = this.clickTimers.get(ref);
 
     if (existingTimer != null) {
       window.clearTimeout(existingTimer);
       this.clickTimers.delete(ref);
+      this.log('double-click detected', ref);
       this.executeButtonCommands(ref, true);
       return;
     }
@@ -436,6 +477,7 @@ class BravoRuntime {
     const timerId = window.setTimeout(() => {
       if (this.clickTimers.has(ref)) {
         this.clickTimers.delete(ref);
+        this.log('single-click detected', ref);
         this.executeButtonCommands(ref, false);
       }
     }, DOUBLE_CLICK_THRESHOLD_MS);
@@ -447,28 +489,36 @@ class BravoRuntime {
   private executeButtonCommands(ref: string, doubleClick: boolean) {
     const btn = this.profile?.buttons?.[ref];
     if (!btn) {
+      this.log('no button profile', { ref, doubleClick });
       return;
     }
     const list = doubleClick ? btn.double_click : btn.single_click;
     if (!Array.isArray(list)) {
+      this.log('no command list', { ref, doubleClick });
       return;
     }
+    this.log('executeButtonCommands', { ref, doubleClick, count: list.length });
 
     list.forEach((entry: AnyRecord) => {
       const commandStr = entry?.command_str;
       if (!commandStr) {
+        this.log('skip empty command_str', { ref, doubleClick });
         return;
       }
       const cmd = (globalThis as any).XPlane.utilities.findCommand(commandStr);
       if (!cmd) {
+        this.log('target command not found', commandStr);
         return;
       }
+      this.log('commandOnce', { ref, commandStr, cmd });
+      this.log(cmd);
       (globalThis as any).XPlane.utilities.commandOnce(cmd);
     });
   }
 
   private handleKnobTurn(direction: -1 | 1) {
     if (!this.profile?.knobs) {
+      this.log('handleKnobTurn skipped; no profile knobs');
       return;
     }
 
@@ -507,6 +557,7 @@ class BravoRuntime {
     }
 
     const knobProfile = this.profile.knobs?.[knobKey] || {};
+    this.log('handleKnobTurn', { direction, selector, knobKey, multiplier, step });
     this.adjustKnob(knobProfile, direction, multiplier, step);
   }
 
