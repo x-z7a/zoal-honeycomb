@@ -1,0 +1,560 @@
+:root {
+  --bg: #0f141a;
+  --panel: #171d24;
+  --panel-2: #1f2630;
+  --border: #2a3340;
+  --text: #e7edf5;
+  --muted: #9aa7b6;
+  --accent: #f5b044;
+  --accent-2: #f26d5b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.App {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, #1b2430, #0f141a 50%, #0b1016 100%);
+  color: var(--text);
+  font-family: "Space Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.Sidebar {
+  background: linear-gradient(180deg, #141b24, #10161d);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px 14px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 14px;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.03);
+}
+
+.Sidebar-header .Brand {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.Sidebar-header .Sub {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.Sidebar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.PingDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #7ee08a;
+  box-shadow: 0 0 0 1px rgba(126, 224, 138, 0.35);
+}
+
+.InUsePinned {
+  background: rgba(64, 160, 94, 0.12);
+  border-color: rgba(64, 160, 94, 0.35);
+}
+
+.InUsePill {
+  font-size: 9px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(64, 160, 94, 0.22);
+  border: 1px solid rgba(64, 160, 94, 0.5);
+  color: #7ee08a;
+}
+
+.Sidebar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: auto;
+  padding: 0;
+}
+
+.ListItem {
+  text-align: left;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: #111821;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: all 0.15s ease;
+  min-height: 32px;
+}
+
+.ListItem-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ListItem:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: #141c26;
+}
+
+.ListItem.active {
+  border-color: rgba(245, 176, 68, 0.7);
+  background: #19222d;
+  box-shadow: inset 0 0 0 1px rgba(245, 176, 68, 0.1);
+}
+
+.ListItem-name {
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+
+.InUseBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(64, 160, 94, 0.22);
+  border: 1px solid rgba(64, 160, 94, 0.55);
+  color: #7ee08a;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.Sidebar-footer {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.Status {
+  color: var(--muted);
+}
+
+.Muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.Main {
+  padding: 24px 32px 40px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 16px;
+}
+
+.TopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--panel);
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+.FileName {
+  font-weight: 600;
+}
+
+.FileName input {
+  min-width: 220px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.FileName-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  font-size: 13px;
+}
+
+.IconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.IconButton svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.TopBar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  border: 1px solid var(--border);
+  background: #111821;
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.Primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #17110a;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(245, 176, 68, 0.25);
+}
+
+button.Danger {
+  background: #2a1313;
+  border-color: #6e2b2b;
+  color: #f8c1c1;
+}
+
+button.Small {
+  padding: 6px 10px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+button.Active {
+  border-color: var(--accent);
+}
+
+.Error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #6e2b2b;
+  background: #2a1313;
+  color: #f4b4b4;
+}
+
+.Form {
+  display: grid;
+  gap: 16px;
+}
+
+.Card {
+  background: var(--panel);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 16px 18px;
+}
+
+.Card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.Grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.Grid label,
+.Row label,
+.MetadataGrid label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.LabelRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.InfoIcon {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--muted);
+  cursor: default;
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.InfoIcon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: 140%;
+  transform: translateX(-50%);
+  min-width: 220px;
+  max-width: 320px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #0f141a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition: opacity 0.15s ease;
+  z-index: 10;
+}
+
+.InfoIcon:hover::after {
+  opacity: 1;
+}
+
+.Grid input,
+.Grid textarea,
+.Row input,
+.Row select,
+.Table-row input,
+.Table-row select,
+.MetadataGrid input,
+.MetadataGrid textarea,
+.YamlPanel textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.Span2 {
+  grid-column: span 2;
+}
+
+.Stack {
+  display: grid;
+  gap: 16px;
+}
+
+.Group {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  background: #121923;
+  display: grid;
+  gap: 12px;
+}
+
+.Group-title {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  color: var(--accent);
+}
+
+.Row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.Table {
+  display: grid;
+  gap: 8px;
+}
+
+.Table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.Table-row.header {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+
+.ValueList {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(245, 176, 68, 0.08);
+  border: 1px dashed rgba(245, 176, 68, 0.35);
+}
+
+.ValueRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.ValueName {
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  color: var(--text);
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ValueCell {
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.StatusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  border: 1px solid transparent;
+}
+
+.StatusBadge.good {
+  color: #7ee08a;
+  background: rgba(54, 120, 66, 0.2);
+  border-color: rgba(54, 120, 66, 0.5);
+}
+
+.StatusBadge.bad {
+  color: #f5b044;
+  background: rgba(245, 176, 68, 0.14);
+  border-color: rgba(245, 176, 68, 0.5);
+}
+
+.StatusIcon {
+  font-weight: 700;
+}
+
+.YamlPanel {
+  display: grid;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.YamlPanel textarea {
+  min-height: 420px;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .App {
+    grid-template-columns: 1fr;
+  }
+
+  .Sidebar {
+    grid-template-rows: auto auto auto auto;
+  }
+}
+
+.ModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 8, 12, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.Modal {
+  width: min(480px, 92vw);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.ModalTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.ModalLabel {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ModalLabel input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.ModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
