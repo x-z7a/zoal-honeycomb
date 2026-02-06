@@ -35,10 +35,9 @@
 
 ## Install
 
-1. Download `xa-honeycombo.zip` from [Release Page](https://github.com/x-z7a/zoal-honeycomb/releases/latest).
+1. Download `zoal-honeycombo.zip` from [Release Page](https://github.com/x-z7a/zoal-honeycomb/releases/latest).
+    > NOTE: If you already use SkyScript for other plugins, you will only need the zoal-honeycomb folder in the unzip file's `apps` folder 
 2. Drop the folder into XP's plugins folder
-3. see above about knobs mapping
-4. (WIP) A gui tool is included to help adding/changing profiels. It is not ready yet. At this time, it is an read-only app. Mac users might need to run `chmod -R 755 bravo.app` to launch the UI.
 
 ### Bravo Knobs Mapping
 ![image](https://github.com/user-attachments/assets/99477be6-2e40-4dc4-b57d-605c3d7457a0)
@@ -64,3 +63,4 @@ Above can be found by searching "honeycomb" after click `Edit`.
 
 ## How to read/change profiles
 [Profiles](./PROFILES.md) explanation
+TODO: new UI

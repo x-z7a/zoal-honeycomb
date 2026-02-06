@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build_web:
+    name: Build Web App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/
+
+  fetch_skyscript:
+    name: Download SkyScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download SkyScript.zip
+        run: curl -L "https://github.com/x-z7a/SkyScript/releases/latest/download/SkyScript.zip" -o SkyScript.zip
+
+      - name: Unzip SkyScript
+        run: |
+          mkdir -p skyscript
+          unzip -q SkyScript.zip -d skyscript
+
+      - name: Upload SkyScript Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: skyscript-unzipped
+          path: skyscript/
+
+  package_release:
+    name: Package Release
+    runs-on: ubuntu-latest
+    needs:
+      - build_web
+      - fetch_skyscript
+    steps:
+      - name: Download Web Build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: web-build
+
+      - name: Download SkyScript
+        uses: actions/download-artifact@v4
+        with:
+          name: skyscript-unzipped
+          path: skyscript
+
+      - name: Inject App Into SkyScript
+        run: |
+          set -euo pipefail
+          SKY_APPS_DIR="$(find skyscript -type d -name apps | head -n1)"
+          if [ -z "${SKY_APPS_DIR}" ]; then
+            echo "Could not locate SkyScript apps directory"
+            exit 1
+          fi
+          mkdir -p "${SKY_APPS_DIR}/zoal-honeycomb"
+          cp -R web-build/* "${SKY_APPS_DIR}/zoal-honeycomb/"
+
+      - name: Create Zip
+        run: |
+          set -euo pipefail
+          TAG_NAME="${GITHUB_REF_NAME}"
+          SKY_ROOT="$(dirname "$(find skyscript -type d -name apps | head -n1)")"
+          mkdir -p dist
+          (cd "${SKY_ROOT}" && zip -qr "../../dist/SkyScript-zoal-honeycomb-${TAG_NAME}.zip" .)
+
+      - name: Upload Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: skyscript-zoal-honeycomb-package
+          path: dist/SkyScript-zoal-honeycomb-*.zip
+
+      - name: Attach Zip and README.md To GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: README.md
+          files: |
+            dist/SkyScript-zoal-honeycomb-*.zip
+            README.md
