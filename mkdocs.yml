@@ -1,0 +1,17 @@
+site_name: zoal-honeycomb Docs
+site_description: Profile guides for non-programmers
+
+theme:
+  name: mkdocs
+
+nav:
+  - Home: index.md
+  - Profile Field Reference: profile-fields.md
+  - Edit an Existing Profile: edit-existing-profile.md
+  - Create a New Profile: create-new-profile.md
+  - Publish Docs to GitHub Pages: publish-docs.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - fenced_code

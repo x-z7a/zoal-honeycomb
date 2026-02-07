@@ -57,6 +57,11 @@ Above can be found by searching "honeycomb" after click `Edit`.
 - [ ] GUI to help mapping dataref/cmds (WIP)
 - [x] AP Buttons push/pull by single/double click
 
-## How to read/change profiles
-[Profiles](./PROFILES.md) explanation
-TODO: new UI
+## Documentation
+- Docs source: `docs/`
+- Main page: `docs/index.md`
+- Field reference: `docs/profile-fields.md`
+- Publish workflow: `.github/workflows/docs.yml`
+
+### Custom domain for docs
+Set repository variable `PAGES_CUSTOM_DOMAIN` (example: `docs.zoal.app`).
