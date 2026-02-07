@@ -75,8 +75,8 @@ jobs:
         run: |
           set -euo pipefail
           SKY_APPS_DIR="$(find skyscript -type d -name apps | head -n1)"
-          rm -rf ${SKY_APPS_DIR}/samples
-          rm -rf ${SKY_APPS_DIR}/apps/hello-world
+          rm -rf ${SKY_APPS_DIR}/zoal-honeycomb/samples
+          rm -rf ${SKY_APPS_DIR}/zoal-honeycomb/apps/hello-world
           if [ -z "${SKY_APPS_DIR}" ]; then
             echo "Could not locate SkyScript apps directory"
             exit 1
