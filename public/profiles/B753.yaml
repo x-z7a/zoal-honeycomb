@@ -1,0 +1,237 @@
+metadata:
+  name: Flight Factor B753
+  description: Profile for the Flight Factor B753
+  selectors:
+    - Boeing 757-300
+buttons:
+  hdg:
+    single_click:
+      - command_str: 1-sim/comm/HC/HDG
+    double_click:
+      - command_str: 1-sim/command/mcpHdgCelButton_button
+  ias:
+    single_click:
+      - command_str: 1-sim/command/mcpSpdRotary_push
+    double_click:
+      - command_str: 1-sim/command/mcpIasMachButton_button
+  alt:
+    single_click:
+      - command_str: 1-sim/command/mcpAltHoldButton_button
+    double_click:
+      - command_str: 1-sim/command/mcpAltRotary_push
+  vs:
+    single_click:
+      - command_str: 1-sim/command/mcpVsButton_button
+    double_click:
+      - command_str: 1-sim/command/mcpVsFpaButton_button
+  apr:
+    single_click:
+      - command_str: 1-sim/command/mcpAppButton_button
+    double_click:
+      - command_str: 1-sim/command/mcpLocButton_button
+  ap:
+    single_click:
+      - command_str: 1-sim/command/mcpApLButton_button
+    double_click:
+      - command_str: 1-sim/command/mcpApRButton_button
+  nav:
+    single_click:
+      - command_str: 1-sim/command/mcpLnavButton_button
+    double_click:
+      - command_str: 1-sim/command/mcpVnavButton_button
+knobs:
+  ap_hdg:
+    profile_type: knob
+    commands:
+      - command_str: 1-sim/command/mcpHdgRotary_rotary+
+      - command_str: 1-sim/command/mcpHdgRotary_rotary-
+  ap_alt:
+    profile_type: knob
+    commands:
+      - command_str: 1-sim/command/mcpAltRotary_rotary+
+      - command_str: 1-sim/command/mcpAltRotary_rotary-
+  ap_vs:
+    profile_type: knob
+    commands:
+      - command_str: 1-sim/command/mcpVsRotary_rotary+
+      - command_str: 1-sim/command/mcpVsRotary_rotary-
+  ap_ias:
+    profile_type: knob
+    commands:
+      - command_str: 1-sim/command/mcpSpdRotary_rotary+
+      - command_str: 1-sim/command/mcpSpdRotary_rotary-
+  ap_crs:
+    profile_type: knob
+    commands:
+      - command_str: 1-sim/command/cptHsiBaroRotary_rotary+
+      - command_str: 1-sim/command/cptHsiBaroRotary_rotary-
+leds:
+  hdg:
+    datarefs:
+      - dataref_str: sim/cockpit2/autopilot/heading_mode
+        operator: '=='
+        threshold: 1
+  nav:
+    datarefs:
+      - dataref_str: sim/cockpit2/autopilot/nav_status
+        operator: '=='
+        threshold: 1
+  apr:
+    datarefs:
+      - dataref_str: sim/cockpit2/autopilot/approach_status
+        operator: '=='
+        threshold: 1
+  rev:
+    datarefs:
+      - dataref_str: sim/cockpit/warnings/annunciators/reverse
+        operator: '>'
+        threshold: 0
+  alt:
+    datarefs:
+      - dataref_str: sim/cockpit2/autopilot/altitude_hold_status
+        operator: '=='
+        threshold: 1
+  vs:
+    datarefs:
+      - dataref_str: sim/cockpit2/autopilot/vvi_status
+        operator: '=='
+        threshold: 1
+  ias:
+    datarefs:
+      - dataref_str: sim/cockpit2/autopilot/autothrottle_on
+        operator: '=='
+        threshold: 1
+  ap:
+    datarefs:
+      - dataref_str: sim/cockpit2/autopilot/servos_on
+        operator: '>'
+        threshold: 0.01
+  gear:
+    datarefs:
+      - dataref_str: sim/flightmodel2/gear/deploy_ratio
+        operator: '!='
+        threshold: 0
+  master_warn:
+    datarefs:
+      - dataref_str: inst/loopwarning
+        operator: '>'
+        threshold: 0.01
+  fire:
+    datarefs:
+      - dataref_str: sim/cockpit/warnings/annunciators/engine_fires
+        operator: '>'
+        threshold: 0.01
+  oil_low_pressure:
+    datarefs:
+      - dataref_str: sim/cockpit2/engine/indicators/oil_pressure_psi
+        operator: <
+        threshold: 14
+  fuel_low_pressure:
+    datarefs:
+      - dataref_str: sim/flightmodel/engine/ENGN_fuel_press_psi
+        operator: <
+        threshold: 20
+  anti_ice:
+    condition: any
+    datarefs:
+      - dataref_str: sim/cockpit/switches/anti_ice_inlet_heat_per_engine
+        operator: '=='
+        threshold: 1
+      - dataref_str: sim/cockpit/switches/anti_ice_surf_heat
+        operator: '=='
+        threshold: 1
+  eng_starter:
+    datarefs:
+      - dataref_str: sim/cockpit2/engine/actuators/starter_hit
+        operator: '>'
+        threshold: 0.01
+  apu:
+    datarefs:
+      - dataref_str: sim/cockpit2/electrical/APU_running
+        operator: '>'
+        threshold: 0.01
+  master_caution:
+    datarefs:
+      - dataref_str: 1-sim/mcaution/masterButton
+        operator: '>'
+        threshold: 0.01
+  vacuum:
+    condition: any
+    datarefs:
+      - dataref_str: sim/cockpit/misc/vacuum
+        operator: <
+        threshold: 3
+      - dataref_str: sim/cockpit/misc/vacuum2
+        operator: <
+        threshold: 3
+  hydro_low_pressure:
+    datarefs:
+      - dataref_str: sim/cockpit2/hydraulics/indicators/hydraulic_pressure_1
+        operator: <
+        threshold: 3200
+  aux_fuel_pump:
+    condition: any
+    datarefs:
+      - dataref_str: sim/cockpit2/fuel/transfer_pump_right
+        operator: '>'
+        threshold: 0.01
+      - dataref_str: sim/cockpit2/fuel/transfer_pump_left
+        operator: '>'
+        threshold: 0.01
+  parking_brake:
+    datarefs:
+      - dataref_str: sim/cockpit2/controls/parking_brake_ratio
+        operator: '=='
+        threshold: 1
+  volt_low:
+    datarefs:
+      - dataref_str: 1-sim/elec/powerType
+        operator: '=='
+        threshold: 5
+  doors:
+    condition: any
+    datarefs:
+      - dataref_str: anim/door/FL
+        operator: '>'
+        threshold: 0.9
+      - dataref_str: anim/door/FR
+        operator: '>'
+        threshold: 0.9
+      - dataref_str: anim/door/ML
+        operator: '>'
+        threshold: 0.9
+      - dataref_str: anim/door/MR
+        operator: '>'
+        threshold: 0.9
+      - dataref_str: anim/door/BL
+        operator: '>'
+        threshold: 0.9
+      - dataref_str: anim/door/BR
+        operator: '>'
+        threshold: 0.9
+      - dataref_str: 1-sim/anim/doors/cargoBack/anim
+        operator: '>'
+        threshold: 0.9
+      - dataref_str: 1-sim/anim/doors/cargoSide/anim
+        operator: '>'
+        threshold: 0.9
+      - dataref_str: anim/doorC
+        operator: '>'
+        threshold: 0.9
+conditions:
+  bus_voltage:
+    datarefs:
+      - dataref_str: 1-sim/elec/powerType
+        operator: '!='
+        threshold: 0
+  retractable_gear:
+    datarefs:
+      - dataref_str: sim/aircraft/gear/acf_gear_retract
+        operator: '!='
+        threshold: 0
+data:
+  ap_state:
+    datarefs:
+      - dataref_str: sim/cockpit/autopilot/autopilot_state
+        operator: '!='
+        threshold: 0

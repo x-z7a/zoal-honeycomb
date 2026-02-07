@@ -1,0 +1,183 @@
+metadata:
+  name: Toliss A20N
+  description: Profile for the Toliss A20N
+  selectors:
+    - ToLiss A320 NEO
+buttons:
+  hdg:
+    single_click:
+      - command_str: AirbusFBW/PushHDGSel
+    double_click:
+      - command_str: AirbusFBW/PullHDGSel
+  ias:
+    single_click:
+      - command_str: AirbusFBW/PushSPDSel
+    double_click:
+      - command_str: AirbusFBW/PullSPDSel
+  alt:
+    single_click:
+      - command_str: AirbusFBW/PushAltitude
+    double_click:
+      - command_str: AirbusFBW/PullAltitude
+  vs:
+    single_click:
+      - command_str: AirbusFBW/PushVSSel
+    double_click:
+      - command_str: AirbusFBW/PullVSSel
+  apr:
+    single_click:
+      - command_str: AirbusFBW/APPRbutton
+    double_click:
+      - command_str: AirbusFBW/APPRbutton
+  ap:
+    single_click:
+      - command_str: toliss_airbus/ap1_push
+    double_click:
+      - command_str: toliss_airbus/ap2_push
+knobs:
+  ap_hdg:
+    datarefs:
+      - dataref_str: sim/cockpit2/autopilot/heading_dial_deg_mag_pilot
+  ap_alt:
+    datarefs:
+      - dataref_str: sim/cockpit2/autopilot/altitude_dial_ft
+  ap_vs:
+    datarefs:
+      - dataref_str: AirbusFBW/FCUVSKnobRotation
+  ap_ias:
+    datarefs:
+      - dataref_str: sim/cockpit2/autopilot/airspeed_dial_kts_mach
+  ap_crs:
+    datarefs:
+      - dataref_str: AirbusFBW/BaroKnobRotationCapt
+leds:
+  volt_low:
+    datarefs:
+      - dataref_str: sim/cockpit2/electrical/battery_amps
+        operator: <
+        threshold: -80
+  hdg:
+    datarefs:
+      - dataref_str: AirbusFBW/APLateralMode
+        operator: '=='
+        threshold: 101
+  nav:
+    datarefs:
+      - dataref_str: AirbusFBW/APLateralMode
+        operator: '=='
+        threshold: 2
+  apr:
+    datarefs:
+      - dataref_str: AirbusFBW/APPRilluminated
+        operator: '>='
+        threshold: 1
+  rev:
+    datarefs:
+      - dataref_str: AirbusFBW/ENGRevArray
+        operator: '>='
+        threshold: 1
+  alt:
+    datarefs:
+      - dataref_str: AirbusFBW/ALTmanaged
+        operator: '=='
+        threshold: 0
+  vs:
+    datarefs:
+      - dataref_str: AirbusFBW/APVerticalMode
+        operator: '=='
+        threshold: 107
+  ias:
+    datarefs:
+      - dataref_str: AirbusFBW/SPDmanaged
+        operator: '>='
+        threshold: 1
+  ap:
+    condition: any
+    datarefs:
+      - dataref_str: AirbusFBW/AP1Engage
+        operator: '>'
+        threshold: 0.01
+      - dataref_str: AirbusFBW/AP2Engage
+        operator: '>'
+        threshold: 0.01
+  master_warn:
+    datarefs:
+      - dataref_str: AirbusFBW/MasterWarn
+        operator: '>'
+        threshold: 0.01
+  fire:
+    condition: any
+    datarefs:
+      - dataref_str: AirbusFBW/OHPLightsATA26
+        operator: '>'
+        threshold: 0.01
+      - dataref_str: AirbusFBW/OHPLightsATA70
+        operator: '>'
+        threshold: 0.01
+  oil_low_pressure:
+    datarefs:
+      - dataref_str: AirbusFBW/ENGOilPressArray
+        operator: <
+        threshold: 0.075
+  fuel_low_pressure:
+    datarefs:
+      - dataref_str: AirbusFBW/ENGFuelFlowArray
+        operator: <
+        threshold: 0.075
+  anti_ice:
+    datarefs:
+      - dataref_str: AirbusFBW/OHPLightsATA30
+        operator: '>'
+        threshold: 0.01
+  eng_starter:
+    datarefs:
+      - dataref_str: AirbusFBW/StartValveArray
+        operator: '>'
+        threshold: 0.01
+  apu:
+    datarefs:
+      - dataref_str: AirbusFBW/APUAvail
+        operator: '>'
+        threshold: 0.01
+  master_caution:
+    datarefs:
+      - dataref_str: AirbusFBW/MasterCaut
+        operator: '>'
+        threshold: 0.01
+  vacuum:
+    condition: any
+    datarefs:
+      - dataref_str: sim/cockpit/misc/vacuum
+        operator: <
+        threshold: 1
+      - dataref_str: sim/cockpit/misc/vacuum2
+        operator: <
+        threshold: 1
+  hydro_low_pressure:
+    datarefs:
+      - dataref_str: AirbusFBW/HydSysPressArray
+        operator: <
+        threshold: 2500
+  parking_brake:
+    datarefs:
+      - dataref_str: AirbusFBW/ParkBrake
+        operator: '=='
+        threshold: 1
+  doors:
+    condition: any
+    datarefs:
+      - dataref_str: AirbusFBW/PaxDoorArray
+        operator: '>'
+        threshold: 0.9
+      - dataref_str: AirbusFBW/CargoDoorArray
+        operator: '>'
+        threshold: 0.9
+      - dataref_str: AirbusFBW/BulkDoor
+        operator: '>'
+        threshold: 0.9
+conditions:
+  bus_voltage:
+    datarefs:
+      - dataref_str: AirbusFBW/DCBusVoltages
+        operator: '>'
+        threshold: 0.01
