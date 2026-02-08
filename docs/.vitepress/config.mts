@@ -3,7 +3,7 @@ import { defineConfig } from "vitepress";
 export default defineConfig({
   title: "zoal-honeycomb Docs",
   description: "Profile guides for non-programmers",
-  base: process.env.DOCS_BASE || "/",
+  base: "/",
   cleanUrls: true,
   themeConfig: {
     nav: [

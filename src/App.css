@@ -7,6 +7,7 @@
   --muted: #9aa7b6;
   --accent: #f5b044;
   --accent-2: #f26d5b;
+  --font-scale: 1.2;
 }
 
 * {
@@ -33,7 +34,7 @@
 }
 
 .Sidebar-header .Brand {
-  font-size: 16px;
+  font-size: calc(16px * var(--font-scale));
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -41,7 +42,7 @@
 
 .Sidebar-header .Sub {
   color: var(--muted);
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   letter-spacing: 1.2px;
   text-transform: uppercase;
 }
@@ -65,7 +66,7 @@
 }
 
 .InUsePill {
-  font-size: 9px;
+  font-size: calc(9px * var(--font-scale));
   letter-spacing: 0.6px;
   text-transform: uppercase;
   padding: 1px 6px;
@@ -118,7 +119,7 @@
 
 .ListItem-name {
   font-weight: 600;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   letter-spacing: 0.3px;
 }
 
@@ -132,7 +133,7 @@
   background: rgba(64, 160, 94, 0.22);
   border: 1px solid rgba(64, 160, 94, 0.55);
   color: #7ee08a;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   line-height: 1;
   font-weight: 700;
 }
@@ -140,7 +141,7 @@
 .Sidebar-footer {
   display: grid;
   gap: 8px;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 
 .Status {
@@ -149,7 +150,7 @@
 
 .Muted {
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 
 .Main {
@@ -180,7 +181,7 @@
   background: var(--panel-2);
   padding: 6px 10px;
   color: var(--text);
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 
 .FileName-display {
@@ -191,7 +192,7 @@
   border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--panel-2);
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 
 .IconButton {
@@ -253,7 +254,7 @@ button.Danger {
 
 button.Small {
   padding: 6px 10px;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   margin-top: 8px;
 }
 
@@ -282,7 +283,7 @@ button.Active {
 }
 
 .Card-title {
-  font-size: 16px;
+  font-size: calc(16px * var(--font-scale));
   font-weight: 600;
   margin-bottom: 12px;
 }
@@ -298,7 +299,7 @@ button.Active {
 .MetadataGrid label {
   display: grid;
   gap: 6px;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: var(--muted);
 }
 
@@ -316,7 +317,7 @@ button.Active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: calc(10px * var(--font-scale));
   color: var(--muted);
   cursor: default;
   position: relative;
@@ -336,7 +337,7 @@ button.Active {
   background: #0f141a;
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: var(--text);
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   line-height: 1.4;
   opacity: 0;
   pointer-events: none;
@@ -364,7 +365,7 @@ button.Active {
   background: var(--panel-2);
   padding: 8px 10px;
   color: var(--text);
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 
 textarea {
@@ -393,7 +394,7 @@ textarea {
 .Group-title {
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   letter-spacing: 0.6px;
   color: var(--accent);
 }
@@ -417,7 +418,7 @@ textarea {
 }
 
 .Table-row.header {
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: var(--muted);
@@ -437,7 +438,7 @@ textarea {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   color: var(--muted);
 }
 
@@ -452,7 +453,7 @@ textarea {
 
 .ValueCell {
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   color: var(--accent);
   background: rgba(0, 0, 0, 0.25);
   border-radius: 999px;
@@ -465,7 +466,7 @@ textarea {
   gap: 6px;
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: calc(11px * var(--font-scale));
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
   border: 1px solid transparent;
 }
@@ -498,7 +499,7 @@ textarea {
 .YamlPanel textarea {
   min-height: 420px;
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
 }
 
 @media (max-width: 900px) {
@@ -532,14 +533,14 @@ textarea {
 }
 
 .ModalTitle {
-  font-size: 16px;
+  font-size: calc(16px * var(--font-scale));
   font-weight: 600;
 }
 
 .ModalLabel {
   display: grid;
   gap: 6px;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   color: var(--muted);
 }
 
@@ -550,7 +551,7 @@ textarea {
   background: var(--panel-2);
   padding: 8px 10px;
   color: var(--text);
-  font-size: 13px;
+  font-size: calc(13px * var(--font-scale));
 }
 
 .ModalActions {
