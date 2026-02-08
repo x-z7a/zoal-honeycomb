@@ -47,6 +47,48 @@
   text-transform: uppercase;
 }
 
+.ReleaseVersions {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  display: grid;
+  gap: 4px;
+}
+
+.ReleaseVersions-title {
+  color: var(--muted);
+  font-size: calc(9px * var(--font-scale));
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+}
+
+.ReleaseVersions-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ReleaseVersions-label {
+  color: var(--muted);
+  font-size: calc(10px * var(--font-scale));
+}
+
+.ReleaseVersions-value {
+  font-size: calc(11px * var(--font-scale));
+  font-weight: 600;
+}
+
+.ReleaseVersions-row.isUpdate .ReleaseVersions-label {
+  color: #d5f5a5;
+}
+
+.ReleaseVersions-row.isUpdate .ReleaseVersions-value {
+  color: #f5b044;
+}
+
 .Sidebar-actions {
   display: flex;
   gap: 8px;

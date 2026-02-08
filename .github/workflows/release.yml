@@ -28,6 +28,17 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Inject Release Version Into manifest.json
+        run: |
+          set -euo pipefail
+          MANIFEST_PATH="build/manifest.json"
+          if [ ! -f "${MANIFEST_PATH}" ]; then
+            echo "Missing ${MANIFEST_PATH}"
+            exit 1
+          fi
+          export RELEASE_VERSION="${GITHUB_REF_NAME#v}"
+          node -e "const fs=require('fs'); const p='build/manifest.json'; const v=process.env.RELEASE_VERSION; const m=JSON.parse(fs.readFileSync(p,'utf8')); m.version=v; fs.writeFileSync(p, JSON.stringify(m,null,2)+'\n'); console.log('Injected manifest version:', v);"
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
