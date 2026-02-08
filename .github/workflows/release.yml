@@ -77,6 +77,8 @@ jobs:
           SKY_APPS_DIR="$(find skyscript -type d -name apps | head -n1)"
           rm -rf ${SKY_APPS_DIR}/zoal-honeycomb/samples
           rm -rf ${SKY_APPS_DIR}/zoal-honeycomb/apps/hello-world
+          rm -rf ${SKY_APPS_DIR}/zoal-honeycomb/apps/inspector
+          rm -rf ${SKY_APPS_DIR}/zoal-honeycomb/apps/app-manager
           if [ -z "${SKY_APPS_DIR}" ]; then
             echo "Could not locate SkyScript apps directory"
             exit 1

@@ -404,6 +404,10 @@ function App() {
     }
   }, [yamlText]);
 
+  const handleRefreshPage = useCallback(() => {
+    window.location.reload();
+  }, []);
+
   return (
     <div className="App">
       <Sidebar
@@ -519,6 +523,15 @@ function App() {
           </div>
         </div>
       )}
+
+      <button
+        type="button"
+        className="FloatingRefreshButton"
+        onClick={handleRefreshPage}
+        title="Refresh page"
+      >
+        Refresh
+      </button>
     </div>
   );
 }
