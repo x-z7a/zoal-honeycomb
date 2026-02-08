@@ -261,23 +261,6 @@ button.Active {
   border-color: var(--accent);
 }
 
-.FloatingRefreshButton {
-  position: fixed;
-  right: max(20px, env(safe-area-inset-right));
-  bottom: max(20px, env(safe-area-inset-bottom));
-  z-index: 1200;
-  border-color: rgba(245, 176, 68, 0.65);
-  background: rgba(15, 20, 26, 0.92);
-  color: var(--accent);
-  font-weight: 700;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-}
-
-.FloatingRefreshButton:hover {
-  border-color: var(--accent);
-  background: #1a232f;
-}
-
 .Error {
   padding: 10px 12px;
   border-radius: 10px;

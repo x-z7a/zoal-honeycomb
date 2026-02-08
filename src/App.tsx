@@ -1,4 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import Fab from '@mui/material/Fab';
+import Tooltip from '@mui/material/Tooltip';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import yaml from 'js-yaml';
 import './App.css';
 import Sidebar from './components/Sidebar';
@@ -524,14 +527,23 @@ function App() {
         </div>
       )}
 
-      <button
-        type="button"
-        className="FloatingRefreshButton"
-        onClick={handleRefreshPage}
-        title="Refresh page"
-      >
-        Refresh
-      </button>
+      <Tooltip title="Refresh page">
+        <Fab
+          color="warning"
+          size="medium"
+          onClick={handleRefreshPage}
+          aria-label="Refresh page"
+          sx={{
+            position: 'fixed',
+            right: '20px',
+            bottom: '20px',
+            zIndex: 1200,
+            color: '#17110a',
+          }}
+        >
+          <RefreshRoundedIcon />
+        </Fab>
+      </Tooltip>
     </div>
   );
 }
