@@ -61,6 +61,8 @@ Above can be found by searching "honeycomb" after click `Edit`.
 - Docs source: `docs/`
 - Main page: `docs/index.md`
 - Field reference: `docs/profile-fields.md`
+- VitePress config: `docs/.vitepress/config.mts`
+- Local docs dev: `cd docs && npm install && npm run docs:dev`
 - Publish workflow: `.github/workflows/docs.yml`
 
 ### Custom domain for docs

@@ -5,21 +5,42 @@ This repo uses GitHub Actions to publish docs automatically.
 ## Files Used
 
 - Docs content: `docs/*.md`
-- MkDocs config: `mkdocs.yml`
+- VitePress config: `docs/.vitepress/config.mts`
+- Docs package: `docs/package.json`
 - Deploy workflow: `.github/workflows/docs.yml`
 
 ## How Deployment Works
 
 The workflow:
 
-1. Builds docs with MkDocs
-2. Uploads the static site artifact
-3. Deploys to GitHub Pages
+1. Installs docs dependencies in `docs/`
+2. Builds docs with VitePress
+3. Uploads the static site artifact
+4. Deploys to GitHub Pages
+
+Base URL behavior:
+
+- If `PAGES_CUSTOM_DOMAIN` is set, docs build with `/` base
+- Otherwise docs build with `/<repo-name>/` base for GitHub Pages project URLs
 
 Triggers:
 
 - Push to `main` for docs-related files
 - Manual run (`workflow_dispatch`)
+
+## Run Docs Locally
+
+From repository root:
+
+1. `cd docs`
+2. Use Node.js 18+ (`node -v`)
+3. `npm install`
+4. `npm run docs:dev`
+
+For production build preview:
+
+1. `npm run docs:build`
+2. `npm run docs:preview`
 
 ## Custom Domain Setup
 
