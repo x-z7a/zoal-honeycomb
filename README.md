@@ -65,5 +65,13 @@ Above can be found by searching "honeycomb" after click `Edit`.
 - Local docs dev: `cd docs && npm install && npm run docs:dev`
 - Publish workflow: `.github/workflows/docs.yml`
 
+## Conventional Commits
+- This repo enforces Conventional Commits with a `commit-msg` git hook.
+- Hook path is `.githooks/commit-msg`.
+- Install/update hooks: `npm run hooks:install`
+- Examples:
+  - `feat: add profile selector`
+  - `fix(runtime): guard null SkyScript fs`
+
 ### Custom domain for docs
 Set repository variable `PAGES_CUSTOM_DOMAIN` (example: `docs.zoal.app`).
