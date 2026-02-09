@@ -2,6 +2,7 @@ type AnyRecord = Record<string, any>;
 
 const BRAVO_VENDOR_ID = 0x294b;
 const BRAVO_PRODUCT_ID = 0x1901;
+const CMD_PHASE_BEGIN = 0;
 const CMD_PHASE_END = 2;
 const DOUBLE_CLICK_THRESHOLD_MS = 500;
 const DEBUG_RUNTIME = true;
@@ -172,7 +173,7 @@ class BravoRuntime {
     report[4] = bytes[3] || 0;
 
     try {
-      const res=(globalThis as any).XPlane.hid.sendFeatureReport(this.deviceId, report);
+      const res = (globalThis as any).XPlane.hid.sendFeatureReport(this.deviceId, report);
       return res;
     } catch {
       try {
@@ -367,6 +368,14 @@ class BravoRuntime {
     return (globalThis as any).XPlane.utilities.createCommand(name, description);
   }
 
+  private setApSelector(selector: string) {
+    if (this.apSelector === selector) {
+      return;
+    }
+    this.apSelector = selector;
+    this.log('apSelector set: ' + this.apSelector);
+  }
+
   private registerCommands() {
     const util = (globalThis as any).XPlane.utilities;
     this.log('registerCommands');
@@ -388,61 +397,47 @@ class BravoRuntime {
 
     util.registerCommandHandler(increase, (_: number, phase: number) => {
       this.log('cmd increase phase', phase);
-      if (phase === CMD_PHASE_END) {
-        this.handleKnobTurn(1);
-      }
+      this.handleKnobTurn(1);
       return 1;
     }, true);
 
     util.registerCommandHandler(decrease, (_: number, phase: number) => {
       this.log('cmd decrease phase', phase);
-      if (phase === CMD_PHASE_END) {
-        this.handleKnobTurn(-1);
-      }
+      this.handleKnobTurn(-1);
       return 1;
     }, true);
 
     util.registerCommandHandler(modeIas, (_: number, phase: number) => {
-      this.log('cmd mode_ias phase', phase);
-      if (phase === CMD_PHASE_END) {
-        this.apSelector = 'ias';
-        this.log('apSelector set', this.apSelector);
+      if (phase === CMD_PHASE_BEGIN) {
+        this.setApSelector('ias');
       }
       return 1;
     }, true);
 
     util.registerCommandHandler(modeAlt, (_: number, phase: number) => {
-      this.log('cmd mode_alt phase', phase);
-      if (phase === CMD_PHASE_END) {
-        this.apSelector = 'alt';
-        this.log('apSelector set', this.apSelector);
+      if (phase === CMD_PHASE_BEGIN) {
+        this.setApSelector('alt');
       }
       return 1;
     }, true);
 
     util.registerCommandHandler(modeVs, (_: number, phase: number) => {
-      this.log('cmd mode_vs phase', phase);
-      if (phase === CMD_PHASE_END) {
-        this.apSelector = 'vs';
-        this.log('apSelector set', this.apSelector);
+      if (phase === CMD_PHASE_BEGIN) {
+        this.setApSelector('vs');
       }
       return 1;
     }, true);
 
     util.registerCommandHandler(modeHdg, (_: number, phase: number) => {
-      this.log('cmd mode_hdg phase', phase);
-      if (phase === CMD_PHASE_END) {
-        this.apSelector = 'hdg';
-        this.log('apSelector set', this.apSelector);
+      if (phase === CMD_PHASE_BEGIN) {
+        this.setApSelector('hdg');
       }
       return 1;
     }, true);
 
     util.registerCommandHandler(modeCrs, (_: number, phase: number) => {
-      this.log('cmd mode_crs phase', phase);
-      if (phase === CMD_PHASE_END) {
-        this.apSelector = 'crs';
-        this.log('apSelector set', this.apSelector);
+      if (phase === CMD_PHASE_BEGIN) {
+        this.setApSelector('crs');
       }
       return 1;
     }, true);
@@ -557,7 +552,6 @@ class BravoRuntime {
     }
 
     const knobProfile = this.profile.knobs?.[knobKey] || {};
-    this.log('handleKnobTurn', { direction, selector, knobKey, multiplier, step });
     this.adjustKnob(knobProfile, direction, multiplier, step);
   }
 
@@ -584,7 +578,7 @@ class BravoRuntime {
     return fallback;
   }
 
-  private adjustKnob(knobProfile: AnyRecord, direction: -1 | 1, multiplier: number, step: number) {
+  private adjustKnob(knobProfile: AnyRecord, direction: number, multiplier: number, step: number) {
     const commands = Array.isArray(knobProfile?.commands) ? knobProfile.commands : [];
     if (commands.length >= 2) {
       const commandStr = direction > 0 ? commands[0]?.command_str : commands[1]?.command_str;
@@ -609,18 +603,19 @@ class BravoRuntime {
         if (!types) {
           return;
         }
-        const delta = direction * multiplier * step;
+        const delta: number = direction * multiplier * step;
         if (types.float) {
           const current = (globalThis as any).XPlane.dataref.getFloat(refName);
-          (globalThis as any).XPlane.dataref.setFloat(refName, current + delta);
+          const newValue: number = current + delta;
+          (globalThis as any).XPlane.dataref.setFloat(refName, newValue);
           return;
         }
         if (types.int) {
           const current = (globalThis as any).XPlane.dataref.getInt(refName);
-          (globalThis as any).XPlane.dataref.setInt(refName, Math.round(current + delta));
+          const newValue: number = current + delta;
+          (globalThis as any).XPlane.dataref.setInt(refName, Math.round(newValue));
         }
       } catch {
-        // ignore write failures
       }
     });
   }
