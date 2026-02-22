@@ -2,3 +2,5 @@
 build/bin
 node_modules
 frontend/dist
+docs/.vitepress/cache
+docs/.vitepress/dist
