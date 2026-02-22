@@ -67,3 +67,9 @@ Above can be found by searching "honeycomb" after click `Edit`.
 
 ## How to read/change profiles
 [Profiles](./PROFILES.md) explanation
+
+## License
+This project is licensed under the GNU General Public License v3.0 or later.
+
+- SPDX: `GPL-3.0-or-later`
+- Full text: [LICENSE](./LICENSE)

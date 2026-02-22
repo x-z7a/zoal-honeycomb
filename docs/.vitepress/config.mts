@@ -10,6 +10,7 @@ export default defineConfig({
       { text: 'Home', link: '/' },
       { text: 'Install', link: '/install' },
       { text: 'Supported Planes', link: '/supported-planes' },
+      { text: 'License', link: '/license' },
       { text: 'Profiles Guide', link: 'https://github.com/x-z7a/zoal-honeycomb/blob/main/PROFILES.md' },
       { text: 'WebGA', link: 'https://zoal.app/' }
     ],
@@ -20,7 +21,8 @@ export default defineConfig({
           { text: 'Overview', link: '/' },
           { text: 'Install', link: '/install' },
           { text: 'Supported Planes', link: '/supported-planes' },
-          { text: 'Roadmap', link: '/roadmap' }
+          { text: 'Roadmap', link: '/roadmap' },
+          { text: 'License', link: '/license' }
         ]
       }
     ],
