@@ -7,31 +7,34 @@
 >NOTE: UI is still WIP
 
 ## Supported Planes
-> Note: unchecked are still in progress
+> Based on `profiles/*.yaml` (excluding `default.yaml`)
 
-- [x] A20N by toliss
-- [x] A319 by toliss
-- [x] A321 by toliss
-- [x] A339 by toliss
-- [x] A346 by toliss
-- [x] B738 by Zibo
-- [ ] B752 by FF
-- [ ] B753 by FF
-- [ ] B763 by FF
-- [ ] B764 by FF
-- [x] B772 by FF
-- [x] B736/7/8/9 by Level Up
-- [x] C172 by LR
-- [ ] C172 by Airfoilabs
-- [x] DH8D by FlyJSim
-- [x] E55P
-- [x] MD11 by Rotate
-- [x] C750 by LR
-- [x] DA42NG
-- [x] DH8D
-- [x] P28R VFA Arrow III
-- [x] SR22
-- [x] SF50     
+- [x] Toliss A319
+- [x] Toliss A321
+- [x] Toliss A339
+- [x] Metro III AC Freighter
+- [x] Beechcraft King Air 350
+- [x] Level Up 737-600 NG
+- [x] Level Up 737-700 NG
+- [x] Level Up 737-800 NG
+- [x] Zibo 738
+- [x] Level Up 737-900 NG
+- [x] Flight Factor B772
+- [x] Laminar C172 Skyhawk (G1000)
+- [x] Laminar C172 Skyhawk
+- [x] C172 NG ANALOG
+- [x] Cessna 208 Caravan
+- [x] Cessna Citation X
+- [x] Diamond DA42NG
+- [x] Douglas DC-3
+- [x] FlyJSim Q400
+- [x] Phenom 300
+- [x] Rotate MD-11
+- [x] vFlyteAir Arrow III E1000
+- [x] vFlyteAir Arrow III
+- [x] Cirrus SR-22
+- [x] Cirrus SR-22 G1000
+- [x] Cirrus SF-50
 
 ## Install
 
