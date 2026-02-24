@@ -74,13 +74,13 @@ jobs:
           root=$(pwd)
           cd ${{ github.workspace }}/build/ && zip -r xa-honeycomb.zip xa-honeycomb && cd $root
 
-      # - name: sign and notarize mac builds
-      #   run: |
-      #     xcrun notarytool submit build/xa-honeycomb.zip \
-      #       --apple-id "${{ secrets.APPLE_ID }}" \
-      #       --password "${{ secrets.MAC_DEV_PASSWORD }}" \
-      #       --team-id "${{ secrets.APPLE_TEAMID }}" \
-      #       --wait
+      - name: sign and notarize mac builds
+        run: |
+          xcrun notarytool submit build/xa-honeycomb.zip \
+            --apple-id "${{ secrets.APPLE_ID }}" \
+            --password "${{ secrets.MAC_DEV_PASSWORD }}" \
+            --team-id "${{ secrets.APPLE_TEAMID }}" \
+            --wait
 
       - run: |
           cp -r ${{ github.workspace }}/build/xa-honeycomb/ release/
