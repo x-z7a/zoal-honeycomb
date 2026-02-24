@@ -7,15 +7,16 @@ package xplane
 import "C"
 import (
 	"context"
+	"path/filepath"
+	"sync"
+	"time"
+
 	"github.com/xairline/goplane/extra"
 	"github.com/xairline/goplane/xplm/menus"
 	"github.com/xairline/goplane/xplm/plugins"
 	"github.com/xairline/goplane/xplm/utilities"
 	"github.com/xairline/xa-honeycomb/pkg"
 	"github.com/xairline/xa-honeycomb/pkg/honeycomb"
-	"path/filepath"
-	"sync"
-	"time"
 )
 
 var VERSION = "development"
@@ -58,6 +59,7 @@ type xplaneService struct {
 	cancelFunc      context.CancelFunc
 	commandStates   map[string]*commandState
 	globalTime      float64
+	lastTrimTime    time.Time
 }
 
 var xplaneSvcLock = &sync.Mutex{}

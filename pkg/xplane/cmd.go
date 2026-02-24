@@ -2,10 +2,11 @@ package xplane
 
 import "C"
 import (
+	"time"
+
 	"github.com/xairline/goplane/xplm/dataAccess"
 	"github.com/xairline/goplane/xplm/utilities"
 	"github.com/xairline/xa-honeycomb/pkg"
-	"time"
 )
 
 const doubleClickThreshold = 500 * time.Millisecond // Define double-click threshold
@@ -173,6 +174,62 @@ func (s *xplaneService) setupApCmds() {
 	utilities.RegisterCommandHandler(ap_nav, s.apPressed, true, "nav")
 	utilities.RegisterCommandHandler(ap_apr, s.apPressed, true, "apr")
 	utilities.RegisterCommandHandler(ap, s.apPressed, true, "ap")
+}
+
+func (s *xplaneService) setupTrimCmds() {
+	pitchTrimUp := utilities.CreateCommand("Honeycomb Bravo/pitch_trim_up", "Bravo pitch trim up pressed.")
+	pitchTrimDown := utilities.CreateCommand("Honeycomb Bravo/pitch_trim_down", "Bravo pitch trim down pressed.")
+
+	// set up command handlers
+	utilities.RegisterCommandHandler(pitchTrimUp, s.trimPressed, true, "up")
+	utilities.RegisterCommandHandler(pitchTrimDown, s.trimPressed, true, "down")
+}
+
+func (s *xplaneService) trimPressed(command utilities.CommandRef, phase utilities.CommandPhase, ref interface{}) int {
+	if phase == utilities.Phase_CommandEnd {
+		buttonRef := ref.(string) // Convert ref to string (or your button identifier type)
+		s.Logger.Debugf("Trim command: %v, Phase: %v, Button: %s", command, phase, buttonRef)
+
+		var cmd pkg.Command
+		switch buttonRef {
+		case "up":
+			cmd = pkg.Command{CommandStr: "sim/flight_controls/pitch_trim_up_mech"}
+		case "down":
+			cmd = pkg.Command{CommandStr: "sim/flight_controls/pitch_trim_down_mech"}
+		default:
+			s.Logger.Warningf("Unknown trim button reference: %s", buttonRef)
+			return 0
+		}
+
+		// depends on how quickly you turn the trim wheel, it will execute the command multiple times to trim faster
+		now := time.Now()
+		elapsed := now.Sub(s.lastTrimTime).Milliseconds()
+
+		var multiplier float64
+		if !s.lastTrimTime.IsZero() {
+			if elapsed < 500 {
+				// Smoothly interpolate multiplier between 25 and 1 based on elapsed time
+				multiplier = 23.0 - (22.0 * float64(elapsed) / 500.0)
+				if multiplier < 1.0 {
+					multiplier = 1.0
+				}
+			} else {
+				multiplier = 1.0
+			}
+		} else {
+			multiplier = 1.0
+		}
+
+		// log elapsed time and multiplier for debugging
+		s.Logger.Infof("Trim command: %s, Elapsed time since last trim: %d ms, Multiplier: %.1f", cmd.CommandStr, elapsed, multiplier)
+		for i := 0; i < int(multiplier); i++ {
+			utilities.CommandOnce(utilities.FindCommand(cmd.CommandStr))
+		}
+
+		s.Logger.Debugf("Trim command executed: %s, Multiplier: %.1f", cmd, multiplier)
+		s.lastTrimTime = now
+	}
+	return 0
 }
 
 func (s *xplaneService) apPressed(command utilities.CommandRef, phase utilities.CommandPhase, ref interface{}) int {

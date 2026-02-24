@@ -21,6 +21,12 @@ Mappings can be found by searching `honeycomb` after clicking `Edit` in X-Plane.
 
 ![Search honeycomb after clicking Edit](https://github.com/user-attachments/assets/b0397f82-d074-4b14-aded-793a9c272b66)
 
+## *EXPERIMENTAL Smooth Trim Wheel
+
+Use plugin's trim up/down
+
+![Use plugin's trim up/down](image.png)
+
 ## UI Current State
 
 ![UI current state](https://github.com/user-attachments/assets/e787f605-ece9-4dc1-9dae-4f2d1ac7c4f9)

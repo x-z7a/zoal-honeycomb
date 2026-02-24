@@ -1,10 +1,11 @@
 package xplane
 
 import (
+	"runtime"
+
 	"github.com/xairline/goplane/extra"
 	"github.com/xairline/goplane/xplm/menus"
 	"github.com/xairline/goplane/xplm/processing"
-	"runtime"
 )
 
 func (s *xplaneService) onPluginStateChanged(state extra.PluginState, plugin *extra.XPlanePlugin) {
@@ -41,6 +42,7 @@ func (s *xplaneService) onPluginStart() {
 	}
 	s.setupKnobsCmds()
 	s.setupApCmds()
+	s.setupTrimCmds()
 
 }
 
