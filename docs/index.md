@@ -32,6 +32,7 @@ features:
 ## Links
 
 - Latest release: [GitHub Releases](https://github.com/x-z7a/zoal-honeycomb/releases/latest)
-- Profiles format: [PROFILES.md](https://github.com/x-z7a/zoal-honeycomb/blob/main/PROFILES.md)
+- Create a profile tutorial: [Create Profile](/create-profile)
+- Profiles format: [Profiles Guide](/profiles)
 - License: [GPL-3.0-or-later](https://github.com/x-z7a/zoal-honeycomb/blob/main/LICENSE)
 - Source repository: [x-z7a/zoal-honeycomb](https://github.com/x-z7a/zoal-honeycomb)

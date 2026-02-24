@@ -32,3 +32,12 @@ Based on `profiles/*.yaml` (excluding `default.yaml`).
 - Cirrus SR-22
 - Cirrus SR-22 G1000
 - Cirrus SF-50
+
+## Credits
+
+Last 3 contributors:
+ 
+- [nonstop73](https://forums.x-plane.org/profile/930595-nonstop73/)
+- [Fatherofsam](https://forums.x-plane.org/profile/900987-fatherofsam/)
+- [ELATES](https://forums.x-plane.org/profile/16491-elates/)
+

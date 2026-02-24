@@ -94,14 +94,18 @@ type Leds struct {
 }
 
 type Data struct {
-	AP_STATE    DataProfile `yaml:"ap_state,omitempty" json:"ap_state,omitempty"`
+	// Theses are for planes that have steps
+	//   -  step is somethhing that changes depends on how fast you turn the knob.
+	// 		some planes handles it themselves and you can use their datarefs. Otherwise it will be our default
 	AP_ALT_STEP DataProfile `yaml:"ap_alt_step,omitempty" json:"ap_alt_step,omitempty"`
 	AP_VS_STEP  DataProfile `yaml:"ap_vs_step,omitempty" json:"ap_vs_step,omitempty"`
 	AP_IAS_STEP DataProfile `yaml:"ap_ias_step,omitempty" json:"ap_ias_step,omitempty"`
 }
 
 type Conditions struct {
-	BUS_VOLTAGE      ConditionProfile `yaml:"bus_voltage,omitempty" json:"bus_voltage,omitempty"`
+	// This decides whether LEDs are on or off at all. For example, if the bus voltage is too low, all LEDs should be off.
+	BUS_VOLTAGE ConditionProfile `yaml:"bus_voltage,omitempty" json:"bus_voltage,omitempty"`
+	// This decides whether the gear LED is on or off at all. For example, if plane doesn't have retractable gear, the gear LED should be off.
 	RETRACTABLE_GEAR ConditionProfile `yaml:"retractable_gear,omitempty" json:"retractable_gear,omitempty"`
 }
 

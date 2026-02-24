@@ -10,7 +10,7 @@ This guide shows how to build a new profile using `profiles/C172 G1000.yaml` as 
 4. Map AP buttons in `buttons`.
 5. Map rotary encoder targets in `knobs`.
 6. Define LED rules in `leds`.
-7. Add shared conditions in `conditions` (optional but recommended).
+7. Add conditions in `conditions`
 8. Tune knob step behavior in `data` (optional).
 9. Reload the profile in plugin and verify behavior in cockpit.
 
@@ -26,6 +26,7 @@ Example:
 
 - ICAO `C172` can use `C172 G1000.yaml` and `C172 Steam.yaml`.
 - `metadata.selectors` decides which variant is chosen.
+- This is useful when you have multiple C172 (from LR and airfoilab for). So you can have a profile for each plane.
 
 ## Top-level YAML keys
 
@@ -36,7 +37,7 @@ The C172 G1000 profile uses all major sections:
 - `knobs`: AP rotary encoder targets.
 - `leds`: Honeycomb LED on/off rules.
 - `conditions`: global guard conditions that decide whether LEDs should be active at all.
-- `data`: tunables/readouts used by runtime logic.
+- `data`: use planes' step value instead of plugin default. (exmaple, when you turn knob fast, HDG might change by 10 instead of 1.)
 
 ## 1) `metadata`
 
@@ -63,6 +64,7 @@ Each AP button supports:
 - `single_click`: commands fired on single press.
 - `double_click`: commands fired when second click occurs within 500ms.
 - Each click list can run one or multiple commands in order.
+- Normally, your plane author provides these cmds for you. You can always use datarefEditor to find them
 
 Schema:
 
@@ -77,7 +79,7 @@ buttons:
 
 Supported `button_name` keys:
 
-- `hdg`, `nav`, `alt`, `apr`, `vs`, `ap`, `ias`, `rev`
+- `hdg`, `nav`, `apr`, `rev` , `alt`, `vs`, `ias`, `ap`,
 
 C172 G1000 button map:
 
@@ -105,7 +107,9 @@ Notes:
 
 ## 3) `knobs`
 
-`knobs` defines what the Bravo encoder edits when a knob mode is selected (HDG, ALT, VS, IAS, CRS).
+`knobs` defines what the Bravo encoder edits when a knob mode is selected (HDG, ALT, VS, IAS, CRS). 
+
+Most planes use dataref and the plugin will change the dataref value accordingly. Some planes only use cmd, so you will need to provide one for increment and one for decrement.
 
 Schema:
 
@@ -247,45 +251,7 @@ C172 G1000 values:
 
 ## Minimal starter template
 
-Use this when creating a new profile from scratch:
-
-```yaml
-metadata:
-  name: "<display name>"
-  description: "<optional description>"
-  selectors:
-    - "<exact aircraft UI name>"
-
-buttons:
-  hdg:
-    single_click:
-      - command_str: "<command>"
-    double_click:
-      - command_str: "<command>"
-
-knobs:
-  ap_hdg:
-    datarefs:
-      - dataref_str: "<dataref>"
-
-leds:
-  hdg:
-    datarefs:
-      - dataref_str: "<dataref>"
-        operator: "=="
-        threshold: 1
-
-conditions:
-  bus_voltage:
-    datarefs:
-      - dataref_str: "sim/cockpit2/electrical/bus_volts"
-        operator: ">"
-        threshold: 0.01
-
-data:
-  ap_alt_step:
-    value: 100
-```
+You can simply copy from `default.yaml`
 
 ## Validation checklist
 
@@ -295,3 +261,7 @@ data:
 4. Every LED/condition dataref item has `operator` and `threshold`.
 5. Array datarefs use `index` when needed (for example second door).
 6. Profile reload succeeds without plugin log errors.
+
+### Validation Tool
+
+The UI, once it's implemented, should give you some validation feedback. As of now, any online yaml validator will do the bare minimum for you. However, it can't validate your dataref/cmd.
