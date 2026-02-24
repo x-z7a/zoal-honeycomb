@@ -6,7 +6,10 @@ Based on `profiles/*.yaml` (excluding `default.yaml`).
 - Toliss A321
 - Toliss A339
 - Metro III AC Freighter
+- Beechcraft Baron 58
+- Beechcraft Duchess 76
 - Beechcraft King Air 350
+- Beechcraft King Air C90B
 - Level Up 737-600 NG
 - Level Up 737-700 NG
 - Level Up 737-800 NG
@@ -22,6 +25,7 @@ Based on `profiles/*.yaml` (excluding `default.yaml`).
 - Douglas DC-3
 - FlyJSim Q400
 - Phenom 300
+- Robin DR-401
 - Rotate MD-11
 - vFlyteAir Arrow III E1000
 - vFlyteAir Arrow III
