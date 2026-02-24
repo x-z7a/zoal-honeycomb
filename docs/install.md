@@ -27,6 +27,10 @@ Use plugin's trim up/down
 
 ![Use plugin's trim up/down](image.png)
 
+Watch the demo video:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/vriTIxtnZcE" title="YouTube video" frameborder="0" allowfullscreen></iframe>
+
 ## UI Current State
 
 ![UI current state](https://github.com/user-attachments/assets/e787f605-ece9-4dc1-9dae-4f2d1ac7c4f9)
