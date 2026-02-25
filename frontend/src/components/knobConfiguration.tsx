@@ -30,6 +30,7 @@ interface KnobConfigurationProps {
   knobs?: pkg.Knobs;
   keys: string[];
   editable?: boolean;
+  collapsible?: boolean;
   onKnobsChange?: (nextData: Record<string, KnobEntry | undefined>) => void;
 }
 
@@ -96,6 +97,7 @@ function hasConfiguredCommand(entry?: KnobEntry): boolean {
 }
 
 export default function KnobConfiguration(props: KnobConfigurationProps) {
+  const isCollapsible = props.collapsible !== false;
   const knobRecord = (props.knobs as Record<string, KnobEntry | undefined> | undefined) || {};
   const sections: KnobSection[] = props.keys.map((key) => ({
     key,
@@ -198,10 +200,259 @@ export default function KnobConfiguration(props: KnobConfigurationProps) {
     });
   };
 
+  const sectionContent = (
+    <>
+      {sections.map((section) => {
+        const mode = getKnobMode(section.entry);
+        const rows = section.entry?.datarefs || [];
+        const commands = section.entry?.commands || [];
+        const showCommandsEmpty = !hasConfiguredCommand(section.entry);
+
+        return (
+          <Accordion
+            key={section.key}
+            disableGutters
+            defaultExpanded
+            elevation={0}
+            sx={{
+              mb: 1.4,
+              borderRadius: 2,
+              border: "1px solid rgba(151, 173, 196, 0.22)",
+              backgroundColor: "rgba(16, 25, 36, 0.82)",
+              overflow: "hidden",
+              "&::before": {display: "none"},
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{color: "rgba(200, 227, 251, 0.86)"}}/>}
+              sx={{px: 1.75, py: 0.45}}
+            >
+              <Box sx={{display: "flex", alignItems: "center", gap: 1, width: "100%", flexWrap: "wrap"}}>
+                <Typography
+                  variant="subtitle1"
+                  component="div"
+                  sx={{textAlign: 'left', fontWeight: 700, color: "rgba(233, 244, 255, 0.93)"}}
+                >
+                  {formatKnobKey(section.key)}
+                </Typography>
+                <Chip
+                  label={STEP_HINT[section.key] || "Knob adjustment profile"}
+                  size="small"
+                  sx={{
+                    color: "#c6ecff",
+                    border: "1px solid rgba(114, 171, 216, 0.45)",
+                    backgroundColor: "rgba(38, 86, 128, 0.28)"
+                  }}
+                />
+                <Chip
+                  label={`Mode: ${mode === "command" ? "command" : "dataref"}`}
+                  size="small"
+                  sx={{
+                    color: "#e6f5ff",
+                    border: "1px solid rgba(172, 220, 255, 0.5)",
+                    backgroundColor: "rgba(32, 101, 148, 0.28)"
+                  }}
+                />
+              </Box>
+            </AccordionSummary>
+
+            <AccordionDetails sx={{px: 1.2, pb: 1.2, pt: 0.2}}>
+              <Stack spacing={1.2}>
+                {props.editable && (
+                  <Stack direction="row" spacing={1} alignItems="center" sx={{flexWrap: "wrap"}}>
+                    <TextField
+                      select
+                      size="small"
+                      label="Knob Input"
+                      value={mode}
+                      onChange={(event) => setMode(section.key, event.target.value as KnobMode)}
+                      sx={{width: 172}}
+                    >
+                      <MenuItem value="dataref">Dataref</MenuItem>
+                      <MenuItem value="command">Command</MenuItem>
+                    </TextField>
+                    <Typography variant="caption" sx={{textAlign: "left", color: "rgba(190, 214, 237, 0.82)"}}>
+                      Use one mode only. Dataref mode writes values directly, command mode triggers commands.
+                    </Typography>
+                  </Stack>
+                )}
+
+                {mode === "command" ? (
+                  <>
+                    {showCommandsEmpty && !props.editable ? (
+                      <Typography sx={{px: 1, py: 1, color: "rgba(216, 231, 245, 0.82)", textAlign: "left"}}>
+                        No commands configured.
+                      </Typography>
+                    ) : (
+                      <Stack spacing={1}>
+                        <TextField
+                          size="small"
+                          label="Increase Command"
+                          value={commands[0]?.command_str || ""}
+                          onChange={(event) => updateCommand(section.key, 0, event.target.value)}
+                          fullWidth
+                          disabled={!props.editable}
+                        />
+                        <TextField
+                          size="small"
+                          label="Decrease Command"
+                          value={commands[1]?.command_str || ""}
+                          onChange={(event) => updateCommand(section.key, 1, event.target.value)}
+                          fullWidth
+                          disabled={!props.editable}
+                        />
+                      </Stack>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {props.editable && (
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Button
+                          size="small"
+                          startIcon={<AddIcon/>}
+                          variant="outlined"
+                          onClick={() => addRow(section.key)}
+                        >
+                          Add Dataref
+                        </Button>
+                      </Stack>
+                    )}
+
+                    {rows.length === 0 ? (
+                      <Typography sx={{px: 1, py: 1, color: "rgba(216, 231, 245, 0.82)", textAlign: "left"}}>
+                        No datarefs configured.
+                      </Typography>
+                    ) : (
+                      <TableContainer
+                        sx={{
+                          borderRadius: 1.5,
+                          border: "1px solid rgba(143, 173, 201, 0.22)",
+                          backgroundColor: "rgba(6, 14, 23, 0.65)"
+                        }}
+                      >
+                        <Table size="small" aria-label={`${section.key} knob datarefs`}>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Dataref</TableCell>
+                              <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Index</TableCell>
+                              <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Live</TableCell>
+                              {props.editable && (
+                                <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700, width: 30}}/>
+                              )}
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {rows.map((dataref, idx) => (
+                              <TableRow
+                                key={`${section.key}-${dataref.dataref_str || idx}-${idx}`}
+                                sx={{
+                                  "&:last-child td, &:last-child th": {border: 0},
+                                  "& td": {borderColor: "rgba(102, 134, 164, 0.24)"}
+                                }}
+                              >
+                                <TableCell align="left" sx={{width: "68%", color: "rgba(230, 240, 250, 0.94)"}}>
+                                  {props.editable ? (
+                                    <TextField
+                                      size="small"
+                                      value={dataref.dataref_str || ""}
+                                      onChange={(event) => updateDataref(section.key, idx, "dataref_str", event.target.value)}
+                                      fullWidth
+                                    />
+                                  ) : (
+                                    dataref.dataref_str
+                                  )}
+                                </TableCell>
+                                <TableCell align="left" sx={{width: "12%", color: "rgba(230, 240, 250, 0.92)"}}>
+                                  {props.editable ? (
+                                    <TextField
+                                      size="small"
+                                      type="number"
+                                      value={typeof dataref.index === "number" ? dataref.index : ""}
+                                      onChange={(event) => updateDataref(section.key, idx, "index", event.target.value)}
+                                      sx={{width: 86}}
+                                    />
+                                  ) : (
+                                    dataref.index ?? 0
+                                  )}
+                                </TableCell>
+                                <TableCell align="left" sx={{width: "16%"}}>
+                                  <DatarefValue dataref={dataref.dataref_str || ""} index={dataref.index || 0}/>
+                                </TableCell>
+                                {props.editable && (
+                                  <TableCell align="right" sx={{width: "4%"}}>
+                                    <IconButton
+                                      size="small"
+                                      color="error"
+                                      onClick={() => removeRow(section.key, idx)}
+                                    >
+                                      <DeleteOutlineIcon fontSize="small"/>
+                                    </IconButton>
+                                  </TableCell>
+                                )}
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    )}
+                  </>
+                )}
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+        );
+      })}
+    </>
+  );
+
+  const header = (
+    <Box sx={{display: "flex", alignItems: "center", gap: 1.2}}>
+      <Typography
+        variant="h6"
+        component="div"
+        sx={{textAlign: 'left', fontWeight: 700, color: "rgba(235, 246, 255, 0.96)"}}
+      >
+        {props.title}
+      </Typography>
+      <Chip
+        label={`${configuredCount}/${sections.length}`}
+        size="small"
+        sx={{
+          color: "#dcf2ff",
+          border: "1px solid rgba(162, 220, 255, 0.35)",
+          backgroundColor: "rgba(31, 70, 98, 0.38)"
+        }}
+      />
+    </Box>
+  );
+
+  if (!isCollapsible) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          minHeight: 0,
+          overflowY: "auto",
+          "&::-webkit-scrollbar": {width: 8},
+          "&::-webkit-scrollbar-track": {background: "rgba(11, 20, 30, 0.45)"},
+          "&::-webkit-scrollbar-thumb": {
+            background: "rgba(124, 167, 203, 0.48)",
+            borderRadius: "999px"
+          }
+        }}
+      >
+        {sectionContent}
+      </Box>
+    );
+  }
+
   return (
     <Card
       variant="outlined"
       sx={{
+        width: "100%",
         borderRadius: 3,
         borderColor: "rgba(120, 159, 192, 0.35)",
         background: "linear-gradient(150deg, rgba(10, 17, 28, 0.92), rgba(16, 24, 34, 0.9))",
@@ -221,24 +472,7 @@ export default function KnobConfiguration(props: KnobConfigurationProps) {
           expandIcon={<ExpandMoreIcon sx={{color: "rgba(193, 227, 255, 0.85)"}}/>}
           sx={{px: 2.2, py: 0.75}}
         >
-          <Box sx={{display: "flex", alignItems: "center", gap: 1.2}}>
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{textAlign: 'left', fontWeight: 700, color: "rgba(235, 246, 255, 0.96)"}}
-            >
-              {props.title}
-            </Typography>
-            <Chip
-              label={`${configuredCount}/${sections.length}`}
-              size="small"
-              sx={{
-                color: "#dcf2ff",
-                border: "1px solid rgba(162, 220, 255, 0.35)",
-                backgroundColor: "rgba(31, 70, 98, 0.38)"
-              }}
-            />
-          </Box>
+          {header}
         </AccordionSummary>
 
         <AccordionDetails
@@ -255,207 +489,7 @@ export default function KnobConfiguration(props: KnobConfigurationProps) {
             }
           }}
         >
-          {sections.map((section) => {
-            const mode = getKnobMode(section.entry);
-            const rows = section.entry?.datarefs || [];
-            const commands = section.entry?.commands || [];
-            const showCommandsEmpty = !hasConfiguredCommand(section.entry);
-
-            return (
-              <Accordion
-                key={section.key}
-                disableGutters
-                defaultExpanded
-                elevation={0}
-                sx={{
-                  mb: 1.4,
-                  borderRadius: 2,
-                  border: "1px solid rgba(151, 173, 196, 0.22)",
-                  backgroundColor: "rgba(16, 25, 36, 0.82)",
-                  overflow: "hidden",
-                  "&::before": {display: "none"},
-                }}
-              >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon sx={{color: "rgba(200, 227, 251, 0.86)"}}/>}
-                  sx={{px: 1.75, py: 0.45}}
-                >
-                  <Box sx={{display: "flex", alignItems: "center", gap: 1, width: "100%", flexWrap: "wrap"}}>
-                    <Typography
-                      variant="subtitle1"
-                      component="div"
-                      sx={{textAlign: 'left', fontWeight: 700, color: "rgba(233, 244, 255, 0.93)"}}
-                    >
-                      {formatKnobKey(section.key)}
-                    </Typography>
-                    <Chip
-                      label={STEP_HINT[section.key] || "Knob adjustment profile"}
-                      size="small"
-                      sx={{
-                        color: "#c6ecff",
-                        border: "1px solid rgba(114, 171, 216, 0.45)",
-                        backgroundColor: "rgba(38, 86, 128, 0.28)"
-                      }}
-                    />
-                    <Chip
-                      label={`Mode: ${mode === "command" ? "command" : "dataref"}`}
-                      size="small"
-                      sx={{
-                        color: "#e6f5ff",
-                        border: "1px solid rgba(172, 220, 255, 0.5)",
-                        backgroundColor: "rgba(32, 101, 148, 0.28)"
-                      }}
-                    />
-                  </Box>
-                </AccordionSummary>
-
-                <AccordionDetails sx={{px: 1.2, pb: 1.2, pt: 0.2}}>
-                  <Stack spacing={1.2}>
-                    {props.editable && (
-                      <Stack direction="row" spacing={1} alignItems="center" sx={{flexWrap: "wrap"}}>
-                        <TextField
-                          select
-                          size="small"
-                          label="Knob Input"
-                          value={mode}
-                          onChange={(event) => setMode(section.key, event.target.value as KnobMode)}
-                          sx={{width: 172}}
-                        >
-                          <MenuItem value="dataref">Dataref</MenuItem>
-                          <MenuItem value="command">Command</MenuItem>
-                        </TextField>
-                        <Typography variant="caption" sx={{textAlign: "left", color: "rgba(190, 214, 237, 0.82)"}}>
-                          Use one mode only. Dataref mode writes values directly, command mode triggers commands.
-                        </Typography>
-                      </Stack>
-                    )}
-
-                    {mode === "command" ? (
-                      <>
-                        {showCommandsEmpty && !props.editable ? (
-                          <Typography sx={{px: 1, py: 1, color: "rgba(216, 231, 245, 0.82)", textAlign: "left"}}>
-                            No commands configured.
-                          </Typography>
-                        ) : (
-                          <Stack spacing={1}>
-                            <TextField
-                              size="small"
-                              label="Increase Command"
-                              value={commands[0]?.command_str || ""}
-                              onChange={(event) => updateCommand(section.key, 0, event.target.value)}
-                              fullWidth
-                              disabled={!props.editable}
-                            />
-                            <TextField
-                              size="small"
-                              label="Decrease Command"
-                              value={commands[1]?.command_str || ""}
-                              onChange={(event) => updateCommand(section.key, 1, event.target.value)}
-                              fullWidth
-                              disabled={!props.editable}
-                            />
-                          </Stack>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        {props.editable && (
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <Button
-                              size="small"
-                              startIcon={<AddIcon/>}
-                              variant="outlined"
-                              onClick={() => addRow(section.key)}
-                            >
-                              Add Dataref
-                            </Button>
-                          </Stack>
-                        )}
-
-                        {rows.length === 0 ? (
-                          <Typography sx={{px: 1, py: 1, color: "rgba(216, 231, 245, 0.82)", textAlign: "left"}}>
-                            No datarefs configured.
-                          </Typography>
-                        ) : (
-                          <TableContainer
-                            sx={{
-                              borderRadius: 1.5,
-                              border: "1px solid rgba(143, 173, 201, 0.22)",
-                              backgroundColor: "rgba(6, 14, 23, 0.65)"
-                            }}
-                          >
-                            <Table size="small" aria-label={`${section.key} knob datarefs`}>
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Dataref</TableCell>
-                                  <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Index</TableCell>
-                                  <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Live</TableCell>
-                                  {props.editable && (
-                                    <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700, width: 30}}/>
-                                  )}
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {rows.map((dataref, idx) => (
-                                  <TableRow
-                                    key={`${section.key}-${dataref.dataref_str || idx}-${idx}`}
-                                    sx={{
-                                      "&:last-child td, &:last-child th": {border: 0},
-                                      "& td": {borderColor: "rgba(102, 134, 164, 0.24)"}
-                                    }}
-                                  >
-                                    <TableCell align="left" sx={{width: "68%", color: "rgba(230, 240, 250, 0.94)"}}>
-                                      {props.editable ? (
-                                        <TextField
-                                          size="small"
-                                          value={dataref.dataref_str || ""}
-                                          onChange={(event) => updateDataref(section.key, idx, "dataref_str", event.target.value)}
-                                          fullWidth
-                                        />
-                                      ) : (
-                                        dataref.dataref_str
-                                      )}
-                                    </TableCell>
-                                    <TableCell align="left" sx={{width: "12%", color: "rgba(230, 240, 250, 0.92)"}}>
-                                      {props.editable ? (
-                                        <TextField
-                                          size="small"
-                                          type="number"
-                                          value={typeof dataref.index === "number" ? dataref.index : ""}
-                                          onChange={(event) => updateDataref(section.key, idx, "index", event.target.value)}
-                                          sx={{width: 86}}
-                                        />
-                                      ) : (
-                                        dataref.index ?? 0
-                                      )}
-                                    </TableCell>
-                                    <TableCell align="left" sx={{width: "16%"}}>
-                                      <DatarefValue dataref={dataref.dataref_str || ""} index={dataref.index || 0}/>
-                                    </TableCell>
-                                    {props.editable && (
-                                      <TableCell align="right" sx={{width: "4%"}}>
-                                        <IconButton
-                                          size="small"
-                                          color="error"
-                                          onClick={() => removeRow(section.key, idx)}
-                                        >
-                                          <DeleteOutlineIcon fontSize="small"/>
-                                        </IconButton>
-                                      </TableCell>
-                                    )}
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        )}
-                      </>
-                    )}
-                  </Stack>
-                </AccordionDetails>
-              </Accordion>
-            );
-          })}
+          {sectionContent}
         </AccordionDetails>
       </Accordion>
     </Card>

@@ -17,6 +17,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Tab,
+  Tabs,
   Stack,
   Typography
 } from "@mui/material";
@@ -26,6 +28,14 @@ import Metadata from "./components/metadata";
 import LightConfiguration from './components/lightConfiguration';
 import Xplane from "./components/xplane";
 import KnobConfiguration from "./components/knobConfiguration";
+
+const EDITOR_TABS = [
+  "Autopilot Lights",
+  "Annunciators Top",
+  "Annunciators Bottom",
+  "Auto Pilot Knobs",
+  "Landing Gear"
+];
 
 interface PlaneInfo {
   icao: string;
@@ -103,6 +113,7 @@ function App() {
   const [hasUserSelectedProfile, setHasUserSelectedProfile] = useState(false);
   const [planeInfo, setPlaneInfo] = useState<PlaneInfo>({ icao: "", name: "", connected: false });
   const [profilesStatus, setProfilesStatus] = useState<main.ProfilesStatus | null>(null);
+  const [editorTab, setEditorTab] = useState(0);
 
   const refreshProfiles = useCallback(async () => {
     const [status, profiles, files] = await Promise.all([
@@ -353,41 +364,101 @@ function App() {
             </Box>
 
             <Metadata metadata={editableProfile?.metadata} filePath={selectedProfilePath} />
-            <LightConfiguration
-              editable
-              sectionData={editableProfile?.leds}
-              onSectionDataChange={(next) => updateProfileField("leds", next)}
-              title={"Autopilot Lights"}
-              keys={["alt", "hdg", "apr", "rev", "nav", "vs", "ap", "ias"]}
-            />
-            <LightConfiguration
-              editable
-              title={"Annunciators Row (Top)"}
-              sectionData={editableProfile?.leds}
-              onSectionDataChange={(next) => updateProfileField("leds", next)}
-              keys={["master_warn", "fire", "oil_low_pressure", "fuel_low_pressure", "anti_ice", "eng_starter", "apu"]}
-            />
-            <LightConfiguration
-              editable
-              title={"Annunciators Row (Bottom)"}
-              sectionData={editableProfile?.leds}
-              onSectionDataChange={(next) => updateProfileField("leds", next)}
-              keys={["master_caution", "vacuum", "hydro_low_pressure", "aux_fuel_pump", "parking_brake", "volt_low", "doors"]}
-            />
-            <KnobConfiguration
-              editable
-              title={"Auto Pilot Knobs"}
-              knobs={editableProfile?.knobs}
-              onKnobsChange={(next) => updateProfileField("knobs", next)}
-              keys={["ap_alt", "ap_hdg", "ap_vs", "ap_crs", "ap_ias"]}
-            />
-            <LightConfiguration
-              editable
-              title={"Landing Gear Configuration"}
-              sectionData={editableProfile?.leds}
-              onSectionDataChange={(next) => updateProfileField("leds", next)}
-              keys={["gear"]}
-            />
+            <Box
+              sx={{
+                borderRadius: 3,
+                border: "1px solid rgba(120, 159, 192, 0.35)",
+                background: "linear-gradient(150deg, rgba(10, 17, 28, 0.92), rgba(16, 24, 34, 0.9))",
+                boxShadow: "0 14px 28px rgba(0,0,0,0.3)",
+                overflow: "hidden",
+                flex: 1,
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column"
+              }}
+            >
+              <Tabs
+                value={editorTab}
+                onChange={(_, next) => setEditorTab(next)}
+                variant="fullWidth"
+                sx={{
+                  px: 1.2,
+                  minHeight: 46,
+                  borderBottom: "1px solid rgba(139, 170, 197, 0.24)",
+                  backgroundColor: "rgba(8, 18, 30, 0.8)",
+                  "& .MuiTabs-indicator": {
+                    backgroundColor: "rgba(135, 206, 250, 0.95)",
+                    height: 3
+                  },
+                  "& .MuiTab-root": {
+                    minHeight: 46,
+                    py: 1,
+                    textTransform: "none",
+                    fontWeight: 700,
+                    color: "rgba(194, 221, 244, 0.76)"
+                  },
+                  "& .MuiTab-root.Mui-selected": {
+                    color: "rgba(230, 246, 255, 0.98)"
+                  }
+                }}
+              >
+                {EDITOR_TABS.map((label) => (
+                  <Tab key={label} label={label} disableRipple />
+                ))}
+              </Tabs>
+              <Box sx={{p: 1.3, flex: 1, minHeight: 0, display: "flex"}}>
+                {editorTab === 0 && (
+                  <LightConfiguration
+                    editable
+                    collapsible={false}
+                    sectionData={editableProfile?.leds}
+                    onSectionDataChange={(next) => updateProfileField("leds", next)}
+                    title={"Autopilot Lights"}
+                    keys={["alt", "hdg", "apr", "rev", "nav", "vs", "ap", "ias"]}
+                  />
+                )}
+                {editorTab === 1 && (
+                  <LightConfiguration
+                    editable
+                    collapsible={false}
+                    title={"Annunciators Row (Top)"}
+                    sectionData={editableProfile?.leds}
+                    onSectionDataChange={(next) => updateProfileField("leds", next)}
+                    keys={["master_warn", "fire", "oil_low_pressure", "fuel_low_pressure", "anti_ice", "eng_starter", "apu"]}
+                  />
+                )}
+                {editorTab === 2 && (
+                  <LightConfiguration
+                    editable
+                    collapsible={false}
+                    title={"Annunciators Row (Bottom)"}
+                    sectionData={editableProfile?.leds}
+                    onSectionDataChange={(next) => updateProfileField("leds", next)}
+                    keys={["master_caution", "vacuum", "hydro_low_pressure", "aux_fuel_pump", "parking_brake", "volt_low", "doors"]}
+                  />
+                )}
+                {editorTab === 3 && (
+                  <KnobConfiguration
+                    editable
+                    collapsible={false}
+                    title={"Auto Pilot Knobs"}
+                    knobs={editableProfile?.knobs}
+                    onKnobsChange={(next) => updateProfileField("knobs", next)}
+                    keys={["ap_alt", "ap_hdg", "ap_vs", "ap_crs", "ap_ias"]}
+                  />
+                )}
+                {editorTab === 4 && (
+                  <LightConfiguration
+                    editable
+                    collapsible={false}
+                    title={"Landing Gear Configuration"}
+                    sectionData={editableProfile?.leds}
+                    onSectionDataChange={(next) => updateProfileField("leds", next)}
+                    keys={["gear"]}
+                  />
+                )}
+              </Box>
+            </Box>
           </Stack>
         </Box>
       </Box>
