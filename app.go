@@ -22,8 +22,6 @@ import (
 const (
 	profilesDirEnvVar  = "ZOAL_PROFILES_DIR"
 	profilesFolderName = "profiles"
-	configDirName      = "zoal-honeycomb"
-	configFileName     = "config.json"
 	selectionErrorMsg  = "no profiles folder selected. Please select a folder containing YAML profiles"
 	missingProfilesMsg = "profiles folder not found. Please select your external profiles folder"
 	invalidProfilesMsg = "selected folder does not contain valid YAML profiles"
@@ -32,7 +30,6 @@ const (
 var (
 	executablePathFn = os.Executable
 	getwdFn          = os.Getwd
-	userConfigDirFn  = os.UserConfigDir
 
 	errProfilesSelectionCancelled = errors.New("profiles folder selection cancelled")
 )
@@ -51,10 +48,6 @@ type ProfilesStatus struct {
 	ProfilesCount  int    `json:"profilesCount"`
 	NeedsSelection bool   `json:"needsSelection"`
 	LoadError      string `json:"loadError"`
-}
-
-type appConfig struct {
-	ProfilesDir string `json:"profiles_dir"`
 }
 
 // App struct
@@ -191,9 +184,6 @@ func (a *App) resolveProfilesDir() string {
 	if envDir := strings.TrimSpace(os.Getenv(profilesDirEnvVar)); envDir != "" {
 		candidates = append(candidates, envDir)
 	}
-	if persistedDir := loadPersistedProfilesDir(); persistedDir != "" {
-		candidates = append(candidates, persistedDir)
-	}
 	if exePath, err := executablePathFn(); err == nil {
 		if siblingDir := siblingProfilesDirFromExecutable(exePath); siblingDir != "" {
 			candidates = append(candidates, siblingDir)
@@ -242,10 +232,6 @@ func (a *App) selectProfilesFolder(ctx context.Context) error {
 		return err
 	}
 
-	if err := savePersistedProfilesDir(selectedDirectory); err != nil {
-		a.setProfilesError(fmt.Sprintf("profiles loaded, but failed to persist folder: %v", err), false)
-	}
-
 	return nil
 }
 
@@ -256,9 +242,6 @@ func (a *App) defaultProfilesDirectoryForDialog() string {
 
 	if dirExists(current) {
 		return current
-	}
-	if persistedDir := loadPersistedProfilesDir(); dirExists(persistedDir) {
-		return persistedDir
 	}
 
 	return ""
@@ -397,56 +380,6 @@ func siblingProfilesDirFromExecutable(executablePath string) string {
 	}
 
 	return filepath.Join(filepath.Dir(filepath.Clean(executablePath)), profilesFolderName)
-}
-
-func configFilePath() (string, error) {
-	configRoot, err := userConfigDirFn()
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Join(configRoot, configDirName, configFileName), nil
-}
-
-func loadPersistedProfilesDir() string {
-	configPath, err := configFilePath()
-	if err != nil {
-		return ""
-	}
-
-	content, err := os.ReadFile(configPath)
-	if err != nil {
-		return ""
-	}
-
-	var cfg appConfig
-	if err := json.Unmarshal(content, &cfg); err != nil {
-		return ""
-	}
-
-	return normalizeDir(cfg.ProfilesDir)
-}
-
-func savePersistedProfilesDir(profilesDir string) error {
-	configPath, err := configFilePath()
-	if err != nil {
-		return err
-	}
-
-	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
-		return err
-	}
-
-	cfg := appConfig{
-		ProfilesDir: normalizeDir(profilesDir),
-	}
-
-	content, err := json.MarshalIndent(cfg, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(configPath, content, 0o644)
 }
 
 func (a *App) GetXplane() []string {

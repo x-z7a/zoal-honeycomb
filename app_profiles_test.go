@@ -49,12 +49,8 @@ func TestResolveProfilesDirUsesEnvVarFirst(t *testing.T) {
 	defer restoreFns()
 
 	envProfiles := createProfilesDir(t, "env")
-	persistedProfiles := createProfilesDir(t, "persisted")
-	configRoot := t.TempDir()
-	writePersistedProfilesConfig(t, configRoot, persistedProfiles)
 
 	t.Setenv(profilesDirEnvVar, envProfiles)
-	userConfigDirFn = func() (string, error) { return configRoot, nil }
 	executablePathFn = func() (string, error) { return filepath.Join(t.TempDir(), "bravo"), nil }
 	getwdFn = func() (string, error) { return t.TempDir(), nil }
 
@@ -65,33 +61,11 @@ func TestResolveProfilesDirUsesEnvVarFirst(t *testing.T) {
 	}
 }
 
-func TestResolveProfilesDirUsesPersistedConfigWhenEnvMissing(t *testing.T) {
-	restoreFns := stubPathFns(t)
-	defer restoreFns()
-
-	t.Setenv(profilesDirEnvVar, "")
-
-	configRoot := t.TempDir()
-	persistedProfiles := createProfilesDir(t, "persisted")
-	writePersistedProfilesConfig(t, configRoot, persistedProfiles)
-
-	userConfigDirFn = func() (string, error) { return configRoot, nil }
-	executablePathFn = func() (string, error) { return filepath.Join(t.TempDir(), "missing", "bravo"), nil }
-	getwdFn = func() (string, error) { return filepath.Join(t.TempDir(), "missing-cwd"), nil }
-
-	app := NewApp()
-	got := app.resolveProfilesDir()
-	if got != normalizeDir(persistedProfiles) {
-		t.Fatalf("expected persisted profiles dir %q, got %q", normalizeDir(persistedProfiles), got)
-	}
-}
-
 func TestResolveProfilesDirUsesSiblingProfilesNextToApp(t *testing.T) {
 	restoreFns := stubPathFns(t)
 	defer restoreFns()
 
 	t.Setenv(profilesDirEnvVar, "")
-	userConfigDirFn = func() (string, error) { return t.TempDir(), nil }
 
 	root := t.TempDir()
 	appRoot := filepath.Join(root, "release")
@@ -120,10 +94,6 @@ func TestResolveProfilesDirFallsBackToCwdProfiles(t *testing.T) {
 
 	t.Setenv(profilesDirEnvVar, filepath.Join(t.TempDir(), "invalid-env"))
 
-	configRoot := t.TempDir()
-	writePersistedProfilesConfig(t, configRoot, filepath.Join(t.TempDir(), "invalid-persisted"))
-	userConfigDirFn = func() (string, error) { return configRoot, nil }
-
 	executablePathFn = func() (string, error) {
 		return filepath.Join(t.TempDir(), "release", "bravo.app", "Contents", "MacOS", "bravo"), nil
 	}
@@ -144,12 +114,10 @@ func stubPathFns(t *testing.T) func() {
 
 	originalExecutableFn := executablePathFn
 	originalGetwdFn := getwdFn
-	originalUserConfigDirFn := userConfigDirFn
 
 	return func() {
 		executablePathFn = originalExecutableFn
 		getwdFn = originalGetwdFn
-		userConfigDirFn = originalUserConfigDirFn
 	}
 }
 
@@ -166,19 +134,6 @@ func createProfilesDirAtPath(t *testing.T, profilesDir string, profileName strin
 	}
 	writeProfileYAML(t, profilesDir, profileName+".yaml", profileName)
 	return profilesDir
-}
-
-func writePersistedProfilesConfig(t *testing.T, configRoot string, profilesDir string) {
-	t.Helper()
-
-	configPath := filepath.Join(configRoot, configDirName, configFileName)
-	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
-		t.Fatalf("failed to create config parent dir: %v", err)
-	}
-	content := []byte("{\"profiles_dir\":\"" + filepath.ToSlash(profilesDir) + "\"}")
-	if err := os.WriteFile(configPath, content, 0o644); err != nil {
-		t.Fatalf("failed to write config file: %v", err)
-	}
 }
 
 func writeProfileYAML(t *testing.T, profilesDir string, filename string, profileName string) {

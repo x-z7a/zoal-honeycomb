@@ -5,9 +5,9 @@ import {
   GetProfiles,
   GetProfilesStatus,
   GetXplane,
-  SaveProfileByIndex,
-  SelectProfilesFolder
+  SaveProfileByIndex
 } from "../wailsjs/go/main/App";
+import { Quit } from "../wailsjs/runtime/runtime";
 import {
   Alert,
   Box,
@@ -103,8 +103,6 @@ function App() {
   const [hasUserSelectedProfile, setHasUserSelectedProfile] = useState(false);
   const [planeInfo, setPlaneInfo] = useState<PlaneInfo>({ icao: "", name: "", connected: false });
   const [profilesStatus, setProfilesStatus] = useState<main.ProfilesStatus | null>(null);
-  const [isSelectingProfilesFolder, setIsSelectingProfilesFolder] = useState(false);
-  const [profilesActionError, setProfilesActionError] = useState("");
 
   const refreshProfiles = useCallback(async () => {
     const [status, profiles, files] = await Promise.all([
@@ -168,7 +166,7 @@ function App() {
   const selectedProfilePath = selectedProfileIndex >= 0 ? profileFiles[selectedProfileIndex] || "" : "";
   const needsProfilesSelection = profilesStatus?.needsSelection || false;
   const profilesLoadError = profilesStatus?.loadError || "";
-  const showProfilesModal = needsProfilesSelection || !!profilesLoadError || !!profilesActionError;
+  const showProfilesModal = needsProfilesSelection || !!profilesLoadError;
 
   const isDirty = useMemo(() => {
     if (!editableProfile || !selectedProfile) {
@@ -216,21 +214,8 @@ function App() {
     }
   }, [profilesData, profileFiles, planeInfo, hasUserSelectedProfile, isDirty, selectedProfileIndex]);
 
-  const handleSelectProfilesFolder = async () => {
-    setIsSelectingProfilesFolder(true);
-    setProfilesActionError("");
-    try {
-      await SelectProfilesFolder();
-      await refreshProfiles();
-    } catch (error: any) {
-      setProfilesActionError(error?.message || "Failed to select profiles folder.");
-      try {
-        await refreshProfiles();
-      } catch {
-      }
-    } finally {
-      setIsSelectingProfilesFolder(false);
-    }
+  const handleExitApp = () => {
+    Quit();
   };
 
   const handleProfileSelect = (index: number) => {
@@ -283,11 +268,15 @@ function App() {
   return (
     <div id="app">
       <Dialog open={showProfilesModal} disableEscapeKeyDown fullWidth maxWidth="sm">
-        <DialogTitle>Select Plugin Folder</DialogTitle>
+        <DialogTitle>Return App To Plugin Folder</DialogTitle>
         <DialogContent>
           <Stack spacing={1.25} sx={{ pt: 0.5 }}>
             <Typography variant="body2">
-              Honeycomb plugin folder is not selected. Please select the folder where you keep your Honeycomb plugin. Example: .../X-Plane 12/Resources/plugins/zoal-honeycomb. This is required to load and save your aircraft profiles.
+              Put <code>bravo.app</code> back into your <code>zoal-honeycomb</code> plugin folder so it is next to
+              <code> profiles/</code>, then relaunch.
+            </Typography>
+            <Typography variant="body2">
+              Expected location example: <code>.../X-Plane 12/Resources/plugins/zoal-honeycomb</code>.
             </Typography>
             {profilesStatus?.profilesDir && (
               <Typography variant="caption">Current folder: {profilesStatus.profilesDir}</Typography>
@@ -295,18 +284,15 @@ function App() {
             {profilesLoadError && (
               <Alert severity="error">Load error: {profilesLoadError}</Alert>
             )}
-            {profilesActionError && (
-              <Alert severity="error">Action error: {profilesActionError}</Alert>
-            )}
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button
             variant="contained"
-            disabled={isSelectingProfilesFolder}
-            onClick={handleSelectProfilesFolder}
+            color="error"
+            onClick={handleExitApp}
           >
-            {isSelectingProfilesFolder ? "Selecting..." : "Select Plugins Folder"}
+            Exit App
           </Button>
         </DialogActions>
       </Dialog>
@@ -339,14 +325,14 @@ function App() {
                 <Stack direction="row" spacing={1}>
                   <Button
                     variant="contained"
-                    disabled={needsProfilesSelection || !isDirty || isSaving || selectedProfileIndex < 0}
+                    disabled={showProfilesModal || !isDirty || isSaving || selectedProfileIndex < 0}
                     onClick={handleSave}
                   >
                     Save YAML
                   </Button>
                   <Button
                     variant="outlined"
-                    disabled={needsProfilesSelection || !isDirty || isSaving || selectedProfileIndex < 0}
+                    disabled={showProfilesModal || !isDirty || isSaving || selectedProfileIndex < 0}
                     onClick={handleRevert}
                   >
                     Revert
