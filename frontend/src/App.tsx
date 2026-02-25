@@ -1,8 +1,26 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './App.css';
-import {GetProfileFiles, GetProfiles, GetXplane, SaveProfileByIndex} from "../wailsjs/go/main/App";
-import {Alert, Box, Button, CircularProgress, Stack, Typography} from "@mui/material";
-import {pkg} from "../wailsjs/go/models";
+import {
+  GetProfileFiles,
+  GetProfiles,
+  GetProfilesStatus,
+  GetXplane,
+  SaveProfileByIndex,
+  SelectProfilesFolder
+} from "../wailsjs/go/main/App";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  Typography
+} from "@mui/material";
+import { main, pkg } from "../wailsjs/go/models";
 import Profiles from "./components/profiles";
 import Metadata from "./components/metadata";
 import LightConfiguration from './components/lightConfiguration';
@@ -83,14 +101,45 @@ function App() {
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [hasUserSelectedProfile, setHasUserSelectedProfile] = useState(false);
-  const [planeInfo, setPlaneInfo] = useState<PlaneInfo>({icao: "", name: "", connected: false});
+  const [planeInfo, setPlaneInfo] = useState<PlaneInfo>({ icao: "", name: "", connected: false });
+  const [profilesStatus, setProfilesStatus] = useState<main.ProfilesStatus | null>(null);
+  const [isSelectingProfilesFolder, setIsSelectingProfilesFolder] = useState(false);
+  const [profilesActionError, setProfilesActionError] = useState("");
+
+  const refreshProfiles = useCallback(async () => {
+    const [status, profiles, files] = await Promise.all([
+      GetProfilesStatus(),
+      GetProfiles(),
+      GetProfileFiles()
+    ]);
+    setProfilesStatus(status);
+    setProfilesData(profiles);
+    setProfileFiles(files);
+  }, []);
 
   useEffect(() => {
-    Promise.all([GetProfiles(), GetProfileFiles()]).then(([profiles, files]) => {
-      setProfilesData(profiles);
-      setProfileFiles(files);
+    refreshProfiles().catch((error: any) => {
+      setProfilesStatus({
+        profilesDir: "",
+        profilesCount: 0,
+        needsSelection: true,
+        loadError: error?.message || "Failed to load profile status."
+      } as main.ProfilesStatus);
+      setProfilesData([]);
+      setProfileFiles([]);
     });
-  }, []);
+  }, [refreshProfiles]);
+
+  useEffect(() => {
+    if (profilesData.length > 0 && !profilesStatus?.needsSelection) {
+      return;
+    }
+    const interval = setInterval(() => {
+      refreshProfiles().catch(() => {
+      });
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [profilesData.length, profilesStatus?.needsSelection, refreshProfiles]);
 
   useEffect(() => {
     const refresh = () => {
@@ -106,7 +155,7 @@ function App() {
           });
         })
         .catch(() => {
-          setPlaneInfo({icao: "", name: "", connected: false});
+          setPlaneInfo({ icao: "", name: "", connected: false });
         });
     };
 
@@ -117,6 +166,9 @@ function App() {
 
   const selectedProfile = selectedProfileIndex >= 0 ? profilesData[selectedProfileIndex] : null;
   const selectedProfilePath = selectedProfileIndex >= 0 ? profileFiles[selectedProfileIndex] || "" : "";
+  const needsProfilesSelection = profilesStatus?.needsSelection || false;
+  const profilesLoadError = profilesStatus?.loadError || "";
+  const showProfilesModal = needsProfilesSelection || !!profilesLoadError || !!profilesActionError;
 
   const isDirty = useMemo(() => {
     if (!editableProfile || !selectedProfile) {
@@ -128,6 +180,7 @@ function App() {
   useEffect(() => {
     if (profilesData.length === 0) {
       setEditableProfile(null);
+      setSelectedProfileIndex(-1);
       return;
     }
 
@@ -162,6 +215,23 @@ function App() {
       setSelectedProfileIndex(0);
     }
   }, [profilesData, profileFiles, planeInfo, hasUserSelectedProfile, isDirty, selectedProfileIndex]);
+
+  const handleSelectProfilesFolder = async () => {
+    setIsSelectingProfilesFolder(true);
+    setProfilesActionError("");
+    try {
+      await SelectProfilesFolder();
+      await refreshProfiles();
+    } catch (error: any) {
+      setProfilesActionError(error?.message || "Failed to select profiles folder.");
+      try {
+        await refreshProfiles();
+      } catch {
+      }
+    } finally {
+      setIsSelectingProfilesFolder(false);
+    }
+  };
 
   const handleProfileSelect = (index: number) => {
     setHasUserSelectedProfile(true);
@@ -212,7 +282,36 @@ function App() {
 
   return (
     <div id="app">
-      <Box className="appBackdrop"/>
+      <Dialog open={showProfilesModal} disableEscapeKeyDown fullWidth maxWidth="sm">
+        <DialogTitle>Select Plugin Folder</DialogTitle>
+        <DialogContent>
+          <Stack spacing={1.25} sx={{ pt: 0.5 }}>
+            <Typography variant="body2">
+              Honeycomb plugin folder is not selected. Please select the folder where you keep your Honeycomb plugin. Example: .../X-Plane 12/Resources/plugins/zoal-honeycomb. This is required to load and save your aircraft profiles.
+            </Typography>
+            {profilesStatus?.profilesDir && (
+              <Typography variant="caption">Current folder: {profilesStatus.profilesDir}</Typography>
+            )}
+            {profilesLoadError && (
+              <Alert severity="error">Load error: {profilesLoadError}</Alert>
+            )}
+            {profilesActionError && (
+              <Alert severity="error">Action error: {profilesActionError}</Alert>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            variant="contained"
+            disabled={isSelectingProfilesFolder}
+            onClick={handleSelectProfilesFolder}
+          >
+            {isSelectingProfilesFolder ? "Selecting..." : "Select Plugins Folder"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Box className="appBackdrop" />
       <Box className="appLayout">
         <Box className="sidebarPane">
           <Profiles
@@ -221,7 +320,7 @@ function App() {
             onSelectProfile={handleProfileSelect}
           />
           <Box className="xplanePane">
-            <Xplane/>
+            <Xplane />
           </Box>
         </Box>
 
@@ -240,34 +339,34 @@ function App() {
                 <Stack direction="row" spacing={1}>
                   <Button
                     variant="contained"
-                    disabled={!isDirty || isSaving || selectedProfileIndex < 0}
+                    disabled={needsProfilesSelection || !isDirty || isSaving || selectedProfileIndex < 0}
                     onClick={handleSave}
                   >
                     Save YAML
                   </Button>
                   <Button
                     variant="outlined"
-                    disabled={!isDirty || isSaving || selectedProfileIndex < 0}
+                    disabled={needsProfilesSelection || !isDirty || isSaving || selectedProfileIndex < 0}
                     onClick={handleRevert}
                   >
                     Revert
                   </Button>
                 </Stack>
-                <Typography variant="caption" sx={{color: "rgba(196, 221, 245, 0.8)"}}>
+                <Typography variant="caption" sx={{ color: "rgba(196, 221, 245, 0.8)" }}>
                   {isDirty ? "Unsaved changes" : "No pending changes"}
                 </Typography>
               </Stack>
               {isSaving && (
-                <Stack direction="row" spacing={1} alignItems="center" sx={{mt: 1}}>
-                  <CircularProgress size={14}/>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                  <CircularProgress size={14} />
                   <Typography variant="caption">Saving profile...</Typography>
                 </Stack>
               )}
-              {saveMessage && <Alert severity="success" sx={{mt: 1}}>{saveMessage}</Alert>}
-              {saveError && <Alert severity="error" sx={{mt: 1}}>{saveError}</Alert>}
+              {saveMessage && <Alert severity="success" sx={{ mt: 1 }}>{saveMessage}</Alert>}
+              {saveError && <Alert severity="error" sx={{ mt: 1 }}>{saveError}</Alert>}
             </Box>
 
-            <Metadata metadata={editableProfile?.metadata} filePath={selectedProfilePath}/>
+            <Metadata metadata={editableProfile?.metadata} filePath={selectedProfilePath} />
             <LightConfiguration
               editable
               sectionData={editableProfile?.leds}

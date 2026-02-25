@@ -14,6 +14,10 @@ export function GetProfiles() {
   return window['go']['main']['App']['GetProfiles']();
 }
 
+export function GetProfilesStatus() {
+  return window['go']['main']['App']['GetProfilesStatus']();
+}
+
 export function GetXplane() {
   return window['go']['main']['App']['GetXplane']();
 }
@@ -24,4 +28,8 @@ export function GetXplaneDataref(arg1) {
 
 export function SaveProfileByIndex(arg1, arg2) {
   return window['go']['main']['App']['SaveProfileByIndex'](arg1, arg2);
+}
+
+export function SelectProfilesFolder() {
+  return window['go']['main']['App']['SelectProfilesFolder']();
 }

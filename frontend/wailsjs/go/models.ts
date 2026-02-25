@@ -1,3 +1,26 @@
+export namespace main {
+	
+	export class ProfilesStatus {
+	    profilesDir: string;
+	    profilesCount: number;
+	    needsSelection: boolean;
+	    loadError: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProfilesStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.profilesDir = source["profilesDir"];
+	        this.profilesCount = source["profilesCount"];
+	        this.needsSelection = source["needsSelection"];
+	        this.loadError = source["loadError"];
+	    }
+	}
+
+}
+
 export namespace pkg {
 	
 	export class Command {
