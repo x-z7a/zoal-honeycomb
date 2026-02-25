@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/stretchr/testify/assert/yaml"
 	"github.com/xairline/xa-honeycomb/pkg"
 	"io"
 	"net/http"
@@ -12,6 +12,9 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
 type ListResponse struct {
@@ -104,6 +107,26 @@ func (a *App) GetProfileFiles() []string {
 	return a.profileFiles
 }
 
+func (a *App) SaveProfileByIndex(index int, profile pkg.Profile) error {
+	if index < 0 || index >= len(a.profiles) {
+		return errors.New("profile index out of range")
+	}
+
+	fileName := a.profileFiles[index]
+	output, err := yaml.Marshal(profile)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(fileName, output, 0o644)
+	if err != nil {
+		return err
+	}
+
+	a.profiles[index] = profile
+	return nil
+}
+
 func (a *App) GetXplane() []string {
 	//GET http://localhost:8086/api/v1/datarefs
 	datarefIds := []int64{
@@ -129,7 +152,7 @@ func getDatarefId(datarefStr string) int64 {
 	url := fmt.Sprintf("http://localhost:8086/api/v1/datarefs?filter[name]=%s", datarefStr)
 
 	// Create a new HTTP client
-	client := &http.Client{}
+	client := &http.Client{Timeout: 2 * time.Second}
 
 	// Create a new GET request
 	req, err := http.NewRequest("GET", url, nil)
@@ -167,15 +190,22 @@ func getDatarefId(datarefStr string) int64 {
 		fmt.Println("Error parsing JSON:", err)
 		return 0
 	}
+	if len(response.Data) == 0 {
+		return 0
+	}
 	return response.Data[0].ID
 }
 
 func getDatarefValue(id int64) string {
+	if id <= 0 {
+		return ""
+	}
+
 	// URL for the GET request
 	url := fmt.Sprintf("http://localhost:8086/api/v1/datarefs/%d/value", id)
 
 	// Create a new HTTP client
-	client := &http.Client{}
+	client := &http.Client{Timeout: 2 * time.Second}
 
 	// Create a new GET request
 	req, err := http.NewRequest("GET", url, nil)

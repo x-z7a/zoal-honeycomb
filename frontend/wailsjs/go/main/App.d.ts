@@ -11,3 +11,5 @@ export function GetProfiles():Promise<Array<pkg.Profile>>;
 export function GetXplane():Promise<Array<string>>;
 
 export function GetXplaneDataref(arg1:string):Promise<string>;
+
+export function SaveProfileByIndex(arg1:number,arg2:pkg.Profile):Promise<void>;

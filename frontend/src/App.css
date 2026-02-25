@@ -1,61 +1,115 @@
 #app {
-    overflow: hidden;
-    height: 100vh;
-    width: 100vw;
-    position: fixed;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  color: #eef6ff;
 }
 
-#logo {
-    display: block;
-    width: 50%;
-    height: 50%;
-    margin: auto;
-    padding: 10% 0 0;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-    background-origin: content-box;
+.appBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(48% 42% at 6% 8%, rgba(51, 150, 196, 0.3), rgba(0, 0, 0, 0)),
+    radial-gradient(45% 40% at 96% 8%, rgba(41, 102, 173, 0.24), rgba(0, 0, 0, 0)),
+    radial-gradient(70% 55% at 50% 100%, rgba(13, 64, 113, 0.24), rgba(0, 0, 0, 0)),
+    linear-gradient(165deg, #061320 0%, #091a2a 48%, #071726 100%);
 }
 
-.result {
-    height: 20px;
-    line-height: 20px;
-    margin: 1.5rem auto;
+.appBackdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25));
+  pointer-events: none;
 }
 
-.input-box .btn {
-    width: 60px;
-    height: 30px;
-    line-height: 30px;
-    border-radius: 3px;
-    border: none;
-    margin: 0 0 0 20px;
-    padding: 0 8px;
-    cursor: pointer;
+.appLayout {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(300px, 26%) minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px;
+  box-sizing: border-box;
 }
 
-.input-box .btn:hover {
-    background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
-    color: #333333;
+.sidebarPane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 18px;
+  border: 1px solid rgba(142, 173, 203, 0.22);
+  background: linear-gradient(180deg, rgba(7, 32, 49, 0.94), rgba(6, 23, 36, 0.9));
+  box-shadow: 0 22px 38px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
 }
 
-.input-box .input {
-    border: none;
-    border-radius: 3px;
-    outline: none;
-    height: 30px;
-    line-height: 30px;
-    padding: 0 10px;
-    background-color: rgba(240, 240, 240, 1);
-    -webkit-font-smoothing: antialiased;
+.sidebarPane > :first-child {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-.input-box .input:hover {
-    border: none;
-    background-color: rgba(255, 255, 255, 1);
+.xplanePane {
+  padding: 12px;
+  border-top: 1px solid rgba(163, 188, 213, 0.17);
+  background: linear-gradient(180deg, rgba(8, 22, 36, 0.7), rgba(8, 16, 27, 0.92));
 }
 
-.input-box .input:focus {
-    border: none;
-    background-color: rgba(255, 255, 255, 1);
+.editorPane {
+  min-width: 0;
+  min-height: 0;
+  border-radius: 18px;
+  border: 1px solid rgba(143, 177, 210, 0.22);
+  background: linear-gradient(180deg, rgba(7, 19, 30, 0.88), rgba(9, 17, 28, 0.94));
+  box-shadow: 0 22px 36px rgba(0, 0, 0, 0.28);
+  overflow: auto;
+}
+
+.editorStack {
+  min-height: 100%;
+  padding: 16px;
+  text-align: left;
+}
+
+.editorPane::-webkit-scrollbar {
+  width: 9px;
+}
+
+.editorPane::-webkit-scrollbar-track {
+  background: rgba(7, 15, 24, 0.44);
+}
+
+.editorPane::-webkit-scrollbar-thumb {
+  background: rgba(110, 154, 194, 0.45);
+  border-radius: 999px;
+}
+
+@media (max-width: 1080px) {
+  #app {
+    overflow: auto;
+  }
+
+  .appLayout {
+    min-height: 100vh;
+    height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .sidebarPane {
+    min-height: 420px;
+  }
+
+  .editorPane {
+    min-height: 55vh;
+  }
 }

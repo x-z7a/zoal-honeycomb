@@ -2,6 +2,7 @@ export namespace pkg {
 	
 	export class Command {
 	    command_str?: string;
+	    Command: any;
 	
 	    static createFrom(source: any = {}) {
 	        return new Command(source);
@@ -10,6 +11,7 @@ export namespace pkg {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.command_str = source["command_str"];
+	        this.Command = source["Command"];
 	    }
 	}
 	export class ButtonProfile {
@@ -30,7 +32,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -74,7 +76,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -91,9 +93,12 @@ export namespace pkg {
 	
 	export class DatarefCondition {
 	    dataref_str?: string;
+	    Dataref: any;
 	    index?: number;
 	    operator?: string;
 	    threshold?: number;
+	    Expr?: vm.Program;
+	    Env: Record<string, any>;
 	
 	    static createFrom(source: any = {}) {
 	        return new DatarefCondition(source);
@@ -102,10 +107,31 @@ export namespace pkg {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.dataref_str = source["dataref_str"];
+	        this.Dataref = source["Dataref"];
 	        this.index = source["index"];
 	        this.operator = source["operator"];
 	        this.threshold = source["threshold"];
+	        this.Expr = this.convertValues(source["Expr"], vm.Program);
+	        this.Env = source["Env"];
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class ConditionProfile {
 	    datarefs?: DatarefCondition[];
@@ -125,7 +151,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -157,7 +183,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -173,6 +199,7 @@ export namespace pkg {
 	}
 	export class Dataref {
 	    dataref_str?: string;
+	    Dataref: any;
 	    index?: number;
 	
 	    static createFrom(source: any = {}) {
@@ -182,6 +209,7 @@ export namespace pkg {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.dataref_str = source["dataref_str"];
+	        this.Dataref = source["Dataref"];
 	        this.index = source["index"];
 	    }
 	}
@@ -203,7 +231,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -218,7 +246,6 @@ export namespace pkg {
 		}
 	}
 	export class Data {
-	    ap_state?: DataProfile;
 	    ap_alt_step?: DataProfile;
 	    ap_vs_step?: DataProfile;
 	    ap_ias_step?: DataProfile;
@@ -229,7 +256,6 @@ export namespace pkg {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.ap_state = this.convertValues(source["ap_state"], DataProfile);
 	        this.ap_alt_step = this.convertValues(source["ap_alt_step"], DataProfile);
 	        this.ap_vs_step = this.convertValues(source["ap_vs_step"], DataProfile);
 	        this.ap_ias_step = this.convertValues(source["ap_ias_step"], DataProfile);
@@ -239,7 +265,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -273,7 +299,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -311,7 +337,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -343,7 +369,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -417,7 +443,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -473,7 +499,7 @@ export namespace pkg {
 		    if (!a) {
 		        return a;
 		    }
-		    if (a.slice) {
+		    if (a.slice && a.map) {
 		        return (a as any[]).map(elem => this.convertValues(elem, classs));
 		    } else if ("object" === typeof a) {
 		        if (asMap) {
@@ -486,6 +512,27 @@ export namespace pkg {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace vm {
+	
+	export class Program {
+	    Bytecode: number[];
+	    Arguments: number[];
+	    Constants: any[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Program(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Bytecode = source["Bytecode"];
+	        this.Arguments = source["Arguments"];
+	        this.Constants = source["Constants"];
+	    }
 	}
 
 }

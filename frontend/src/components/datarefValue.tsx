@@ -9,26 +9,61 @@ interface ListProps {
 }
 
 export default function DatarefValue(props: ListProps) {
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState<string | number>("--");
 
   useEffect(() => {
-    // run the function to get the xplane data evey 5 seconds
-    const interval = setInterval(() => {
-      GetXplaneDataref(props.dataref).then((res) => {
-        const obj = JSON.parse(res);
-        console.log(props, obj.data);
-        if (obj?.data?.length > 0) {
-          setValue(obj.data[props.index]);
-        } else {
-          setValue(obj.data as any);
-        }
+    const refresh = () => {
+      GetXplaneDataref(props.dataref)
+        .then((res) => {
+          if (!res) {
+            setValue("--");
+            return;
+          }
 
-      });
+          let obj: { data?: number | number[] };
+          try {
+            obj = JSON.parse(res);
+          } catch {
+            setValue("--");
+            return;
+          }
+
+          if (Array.isArray(obj.data)) {
+            const next = obj.data[props.index];
+            setValue(next ?? "--");
+            return;
+          }
+
+          if (typeof obj.data === "number") {
+            setValue(obj.data);
+            return;
+          }
+
+          setValue("--");
+        })
+        .catch(() => {
+          setValue("--");
+        });
+    };
+
+    refresh();
+    const interval = setInterval(() => {
+      refresh();
     }, 1000);
-  }, []);
+
+    return () => clearInterval(interval);
+  }, [props.dataref, props.index]);
 
   return (
-    <Typography variant="h6" sx={{fontSize: 16, color: 'aqua'}}>
+    <Typography
+      variant="body2"
+      sx={{
+        fontSize: 13,
+        fontWeight: 700,
+        letterSpacing: "0.02em",
+        color: value === "--" ? "rgba(201, 219, 236, 0.72)" : "#8cf5f0"
+      }}
+    >
       {value}
     </Typography>
 

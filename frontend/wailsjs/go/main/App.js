@@ -21,3 +21,7 @@ export function GetXplane() {
 export function GetXplaneDataref(arg1) {
   return window['go']['main']['App']['GetXplaneDataref'](arg1);
 }
+
+export function SaveProfileByIndex(arg1, arg2) {
+  return window['go']['main']['App']['SaveProfileByIndex'](arg1, arg2);
+}
