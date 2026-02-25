@@ -2,15 +2,16 @@ package xplane
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"strings"
+
 	"github.com/expr-lang/expr"
 	"github.com/xairline/goplane/xplm/dataAccess"
 	"github.com/xairline/goplane/xplm/menus"
 	"github.com/xairline/goplane/xplm/utilities"
 	"github.com/xairline/xa-honeycomb/pkg"
 	"gopkg.in/yaml.v3"
-	"os"
-	"path"
-	"strings"
 )
 
 func (s *xplaneService) tryLoadProfile() error {
@@ -187,16 +188,17 @@ func (s *xplaneService) loadConditionProfile(fieldName string, fieldValue *pkg.C
 			}
 
 			var code string
-			switch datarefType {
-			case dataAccess.TypeFloat:
+			if datarefType&dataAccess.TypeFloat > 0 {
 				code = fmt.Sprintf("GetFloatData(myDataref) %s %f", dataref.Operator, dataref.Threshold)
-			case dataAccess.TypeInt:
+			} else if datarefType&dataAccess.TypeInt > 0 {
 				code = fmt.Sprintf("GetIntData(myDataref) %s %d", dataref.Operator, int(dataref.Threshold))
-			case dataAccess.TypeFloatArray:
+			} else if datarefType&dataAccess.TypeFloatArray > 0 {
 				code = fmt.Sprintf("GetFloatArrayData(myDataref)[%d] %s %f", dataref.Index, dataref.Operator, dataref.Threshold)
-			case dataAccess.TypeIntArray:
+			} else if datarefType&dataAccess.TypeIntArray > 0 {
 				code = fmt.Sprintf("GetIntArrayData(myDataref)[%d] %s %d", dataref.Index, dataref.Operator, int(dataref.Threshold))
-			default:
+			} else if datarefType&dataAccess.TypeDouble > 0 {
+				code = fmt.Sprintf("GetDoubleData(myDataref) %s %f", dataref.Operator, dataref.Threshold)
+			} else {
 				return fmt.Errorf("Dataref type not supported: %v", datarefType)
 			}
 
@@ -206,6 +208,7 @@ func (s *xplaneService) loadConditionProfile(fieldName string, fieldValue *pkg.C
 				"GetIntData":        dataAccess.GetIntData,
 				"GetFloatArrayData": dataAccess.GetFloatArrayData,
 				"GetIntArrayData":   dataAccess.GetIntArrayData,
+				"GetDoubleData":     dataAccess.GetDoubleData,
 				"myDataref":         myDataref,
 			}
 			program, err := expr.Compile(code, expr.Env(env))

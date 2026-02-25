@@ -4,7 +4,6 @@ metadata:
   selectors:
     - BE9L
 buttons:
-
   rev:
     single_click:
       - command_str: "sim/autopilot/back_course"
@@ -128,15 +127,15 @@ leds:
         operator: ">"
         threshold: 0.01
 
-#  fire:
-#    condition: any
-#    datarefs:
-#      - dataref_str: "laminar/c90/lighting/annun/engine_fire_L"
-#        operator: ">"
-#        threshold: 0.01
-#      - dataref_str: "laminar/c90/lighting/annun/engine_fire_R"
-#        operator: ">"
-#        threshold: 0.01
+  fire:
+    condition: any
+    datarefs:
+      - dataref_str: "laminar/c90/lighting/annun/engine_fire_L"
+        operator: ">"
+        threshold: 0.01
+      - dataref_str: "laminar/c90/lighting/annun/engine_fire_R"
+        operator: ">"
+        threshold: 0.01
 
   oil_low_pressure:
     datarefs:
@@ -187,7 +186,7 @@ leds:
         operator: "<="
         threshold: 1
 
-#  hydro_low_pressure:
+  #  hydro_low_pressure:
 
   aux_fuel_pump:
     condition: any

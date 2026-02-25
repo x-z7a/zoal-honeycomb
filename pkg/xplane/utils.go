@@ -1,11 +1,12 @@
 package xplane
 
 import (
+	"reflect"
+
 	"github.com/expr-lang/expr"
 	"github.com/xairline/goplane/xplm/dataAccess"
 	"github.com/xairline/xa-honeycomb/pkg"
 	"github.com/xairline/xa-honeycomb/pkg/honeycomb"
-	"reflect"
 )
 
 func (s *xplaneService) assignOnAndOffFuncs(name string) (func(), func()) {
@@ -156,16 +157,17 @@ func (s *xplaneService) dataValue(bp *pkg.DataProfile) (float64, bool) {
 			return 0.0, false
 		}
 		datarefType := dataAccess.GetDataRefTypes(myDataref.Dataref.(dataAccess.DataRef))
-		switch datarefType {
-		case dataAccess.TypeFloat:
+		if datarefType&dataAccess.TypeFloat > 0 {
 			return float64(dataAccess.GetFloatData(myDataref.Dataref.(dataAccess.DataRef))), true
-		case dataAccess.TypeInt:
+		} else if datarefType&dataAccess.TypeInt > 0 {
 			return float64(dataAccess.GetIntData(myDataref.Dataref.(dataAccess.DataRef))), true
-		case dataAccess.TypeFloatArray:
+		} else if datarefType&dataAccess.TypeFloatArray > 0 {
 			return float64(dataAccess.GetFloatArrayData(myDataref.Dataref.(dataAccess.DataRef))[0]), true
-		case dataAccess.TypeIntArray:
+		} else if datarefType&dataAccess.TypeIntArray > 0 {
 			return float64(dataAccess.GetIntArrayData(myDataref.Dataref.(dataAccess.DataRef))[0]), true
-		default:
+		} else if datarefType&dataAccess.TypeDouble > 0 {
+			return dataAccess.GetDoubleData(myDataref.Dataref.(dataAccess.DataRef)), true
+		} else {
 			s.Logger.Errorf("Dataref type not supported: %v", datarefType)
 			return 0.0, false
 		}
