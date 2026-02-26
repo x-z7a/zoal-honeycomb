@@ -28,8 +28,10 @@ import Metadata from "./components/metadata";
 import LightConfiguration from './components/lightConfiguration';
 import Xplane from "./components/xplane";
 import KnobConfiguration from "./components/knobConfiguration";
+import ButtonConfiguration from "./components/buttonConfiguration";
 
 const EDITOR_TABS = [
+  "Autopilot Buttons",
   "Autopilot Lights",
   "Annunciators Top",
   "Annunciators Bottom",
@@ -408,6 +410,14 @@ function App() {
               </Tabs>
               <Box sx={{p: 1.3, flex: 1, minHeight: 0, display: "flex"}}>
                 {editorTab === 0 && (
+                  <ButtonConfiguration
+                    editable
+                    buttons={editableProfile?.buttons}
+                    onButtonsChange={(next) => updateProfileField("buttons", next)}
+                    keys={["hdg", "nav", "alt", "apr", "vs", "ap", "ias", "rev"]}
+                  />
+                )}
+                {editorTab === 1 && (
                   <LightConfiguration
                     editable
                     collapsible={false}
@@ -417,7 +427,7 @@ function App() {
                     keys={["alt", "hdg", "apr", "rev", "nav", "vs", "ap", "ias"]}
                   />
                 )}
-                {editorTab === 1 && (
+                {editorTab === 2 && (
                   <LightConfiguration
                     editable
                     collapsible={false}
@@ -427,7 +437,7 @@ function App() {
                     keys={["master_warn", "fire", "oil_low_pressure", "fuel_low_pressure", "anti_ice", "eng_starter", "apu"]}
                   />
                 )}
-                {editorTab === 2 && (
+                {editorTab === 3 && (
                   <LightConfiguration
                     editable
                     collapsible={false}
@@ -437,7 +447,7 @@ function App() {
                     keys={["master_caution", "vacuum", "hydro_low_pressure", "aux_fuel_pump", "parking_brake", "volt_low", "doors"]}
                   />
                 )}
-                {editorTab === 3 && (
+                {editorTab === 4 && (
                   <KnobConfiguration
                     editable
                     collapsible={false}
@@ -447,7 +457,7 @@ function App() {
                     keys={["ap_alt", "ap_hdg", "ap_vs", "ap_crs", "ap_ias"]}
                   />
                 )}
-                {editorTab === 4 && (
+                {editorTab === 5 && (
                   <LightConfiguration
                     editable
                     collapsible={false}
