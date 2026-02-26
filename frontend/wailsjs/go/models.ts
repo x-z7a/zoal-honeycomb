@@ -25,7 +25,6 @@ export namespace pkg {
 	
 	export class Command {
 	    command_str?: string;
-	    Command: any;
 	
 	    static createFrom(source: any = {}) {
 	        return new Command(source);
@@ -34,7 +33,6 @@ export namespace pkg {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.command_str = source["command_str"];
-	        this.Command = source["Command"];
 	    }
 	}
 	export class ButtonProfile {
@@ -116,12 +114,9 @@ export namespace pkg {
 	
 	export class DatarefCondition {
 	    dataref_str?: string;
-	    Dataref: any;
 	    index?: number;
 	    operator?: string;
 	    threshold?: number;
-	    Expr?: vm.Program;
-	    Env: Record<string, any>;
 	
 	    static createFrom(source: any = {}) {
 	        return new DatarefCondition(source);
@@ -130,31 +125,10 @@ export namespace pkg {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.dataref_str = source["dataref_str"];
-	        this.Dataref = source["Dataref"];
 	        this.index = source["index"];
 	        this.operator = source["operator"];
 	        this.threshold = source["threshold"];
-	        this.Expr = this.convertValues(source["Expr"], vm.Program);
-	        this.Env = source["Env"];
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 	export class ConditionProfile {
 	    datarefs?: DatarefCondition[];
@@ -222,7 +196,6 @@ export namespace pkg {
 	}
 	export class Dataref {
 	    dataref_str?: string;
-	    Dataref: any;
 	    index?: number;
 	
 	    static createFrom(source: any = {}) {
@@ -232,7 +205,6 @@ export namespace pkg {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.dataref_str = source["dataref_str"];
-	        this.Dataref = source["Dataref"];
 	        this.index = source["index"];
 	    }
 	}

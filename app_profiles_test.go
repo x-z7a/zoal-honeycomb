@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -106,6 +107,47 @@ func TestResolveProfilesDirFallsBackToCwdProfiles(t *testing.T) {
 	got := app.resolveProfilesDir()
 	if got != normalizeDir(cwdProfiles) {
 		t.Fatalf("expected cwd fallback profiles dir %q, got %q", normalizeDir(cwdProfiles), got)
+	}
+}
+
+func TestSaveProfileByIndexDoesNotMarshalRuntimeFunctionFields(t *testing.T) {
+	profilesDir := t.TempDir()
+	content := []byte(strings.TrimSpace(`
+metadata:
+  name: A319
+leds:
+  hdg:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/heading_mode"
+        operator: "=="
+        threshold: 1
+`) + "\n")
+	if err := os.WriteFile(filepath.Join(profilesDir, "A319.yaml"), content, 0o644); err != nil {
+		t.Fatalf("failed to write profile yaml: %v", err)
+	}
+
+	app := NewApp()
+	if err := app.loadProfilesFromDir(profilesDir); err != nil {
+		t.Fatalf("loadProfilesFromDir returned error: %v", err)
+	}
+
+	profiles := app.GetProfiles()
+	if len(profiles) != 1 {
+		t.Fatalf("expected 1 profile, got %d", len(profiles))
+	}
+
+	if err := app.SaveProfileByIndex(0, profiles[0]); err != nil {
+		t.Fatalf("SaveProfileByIndex returned error: %v", err)
+	}
+
+	saved, err := os.ReadFile(filepath.Join(profilesDir, "A319.yaml"))
+	if err != nil {
+		t.Fatalf("failed to read saved profile yaml: %v", err)
+	}
+
+	savedText := string(saved)
+	if strings.Contains(savedText, "On:") || strings.Contains(savedText, "Off:") {
+		t.Fatalf("saved yaml should not contain runtime function fields, got:\n%s", savedText)
 	}
 }
 

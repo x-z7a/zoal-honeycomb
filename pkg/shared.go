@@ -4,23 +4,23 @@ import "github.com/expr-lang/expr/vm"
 
 type Command struct {
 	CommandStr string `yaml:"command_str,omitempty" json:"command_str,omitempty"`
-	Command    interface{}
+	Command    interface{} `yaml:"-" json:"-"`
 }
 
 type Dataref struct {
 	DatarefStr string `yaml:"dataref_str,omitempty" json:"dataref_str,omitempty"`
-	Dataref    interface{}
-	Index      int `yaml:"index,omitempty" json:"index,omitempty"`
+	Dataref    interface{} `yaml:"-" json:"-"`
+	Index      int         `yaml:"index,omitempty" json:"index,omitempty"`
 }
 
 type DatarefCondition struct {
 	DatarefStr string `yaml:"dataref_str,omitempty" json:"dataref_str,omitempty"`
-	Dataref    interface{}
-	Index      int     `yaml:"index,omitempty" json:"index,omitempty"`
-	Operator   string  `yaml:"operator,omitempty" json:"operator,omitempty"`
-	Threshold  float32 `yaml:"threshold,omitempty" json:"threshold,omitempty"`
-	Expr       *vm.Program
-	Env        map[string]interface{}
+	Dataref    interface{}            `yaml:"-" json:"-"`
+	Index      int                    `yaml:"index,omitempty" json:"index,omitempty"`
+	Operator   string                 `yaml:"operator,omitempty" json:"operator,omitempty"`
+	Threshold  float32                `yaml:"threshold,omitempty" json:"threshold,omitempty"`
+	Expr       *vm.Program            `yaml:"-" json:"-"`
+	Env        map[string]interface{} `yaml:"-" json:"-"`
 }
 
 type Metadata struct {
@@ -40,8 +40,8 @@ type DatarefProfile struct {
 
 type LEDProfile struct {
 	ConditionProfile `yaml:",inline"`
-	On               func() `json:"-"`
-	Off              func() `json:"-"`
+	On               func() `yaml:"-" json:"-"`
+	Off              func() `yaml:"-" json:"-"`
 }
 
 type DataProfile struct {
