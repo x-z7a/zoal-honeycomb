@@ -17,10 +17,12 @@ hero:
       link: https://zoal.app/
 
 features:
+  - title: Built-in Profile Editor UI
+    details: Edit buttons, knobs, LEDs, bus voltage, and gear behavior directly in the bravo app and save back to YAML.
   - title: Single + Double Click AP Actions
     details: Map AP buttons to separate single-click and double-click commands, useful for push/pull-style behavior on a single button.
   - title: YAML Profiles
-    details: Aircraft mappings are profile-driven and stored as YAML files under profiles/.
+    details: Profiles are still stored as YAML under profiles/, with direct editing available for advanced workflows.
   - title: Auto Reconnect
     details: Plugin reconnect behavior is built in.
   - title: Active Aircraft Coverage

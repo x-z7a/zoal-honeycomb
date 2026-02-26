@@ -1,19 +1,34 @@
 # Create a New Profile
 
-The canonical profile format and authoring guide is available in this docs site:
+Recommended flow is hybrid:
 
-- [Profiles Guide](/profiles)
-
-Use that guide as the source of truth. It includes:
-
-- Full key-by-key YAML reference
-- `profiles/C172 G1000.yaml` walkthrough
-- Value explanations (`command_str`, `dataref_str`, `operator`, `threshold`, `condition`)
-- Validation checklist and starter template
+1. Create a new YAML file from an existing similar aircraft profile.
+2. Set `metadata` (especially `selectors`) in YAML.
+3. Use the UI editor for buttons/knobs/lights/conditions.
+4. Save from UI and test in X-Plane.
 
 ## Quick start
 
-1. Copy a similar file in `profiles/`.
-2. Rename it for your aircraft ICAO/variant.
-3. Update `metadata.selectors` to match X-Plane aircraft UI name exactly.
-4. Follow the [Profiles Guide](/profiles) to fill `buttons`, `knobs`, `leds`, `conditions`, and `data`.
+1. Copy a close existing profile in `profiles/`.
+2. Rename to match your ICAO/variant naming strategy.
+3. Update:
+   - `metadata.name`
+   - `metadata.description`
+   - `metadata.selectors` (exact aircraft UI name)
+4. Open `bravo` and select your new profile.
+5. Configure tabs in UI:
+   - `Autopilot Buttons`
+   - `Autopilot Lights`
+   - `Annunciators Top` / `Bottom`
+   - `Auto Pilot Knobs`
+   - `Bus Voltage`
+   - `Landing Gear`
+6. Click **Save YAML** and verify in cockpit.
+
+## When to edit YAML directly
+
+- You need bulk find/replace across many profiles.
+- You need to script generation of variants.
+- You are fixing metadata/file naming before UI usage.
+
+Full guide: [Profiles Guide](/profiles)
