@@ -3,18 +3,18 @@ package pkg
 import "github.com/expr-lang/expr/vm"
 
 type Command struct {
-	CommandStr string `yaml:"command_str,omitempty" json:"command_str,omitempty"`
+	CommandStr string      `yaml:"command_str,omitempty" json:"command_str,omitempty"`
 	Command    interface{} `yaml:"-" json:"-"`
 }
 
 type Dataref struct {
-	DatarefStr string `yaml:"dataref_str,omitempty" json:"dataref_str,omitempty"`
+	DatarefStr string      `yaml:"dataref_str,omitempty" json:"dataref_str,omitempty"`
 	Dataref    interface{} `yaml:"-" json:"-"`
 	Index      int         `yaml:"index,omitempty" json:"index,omitempty"`
 }
 
 type DatarefCondition struct {
-	DatarefStr string `yaml:"dataref_str,omitempty" json:"dataref_str,omitempty"`
+	DatarefStr string                 `yaml:"dataref_str,omitempty" json:"dataref_str,omitempty"`
 	Dataref    interface{}            `yaml:"-" json:"-"`
 	Index      int                    `yaml:"index,omitempty" json:"index,omitempty"`
 	Operator   string                 `yaml:"operator,omitempty" json:"operator,omitempty"`

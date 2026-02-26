@@ -21,11 +21,12 @@ import (
 )
 
 const (
-	profilesDirEnvVar  = "ZOAL_PROFILES_DIR"
-	profilesFolderName = "profiles"
-	selectionErrorMsg  = "no profiles folder selected. Please select a folder containing YAML profiles"
-	missingProfilesMsg = "profiles folder not found. Please select your external profiles folder"
-	invalidProfilesMsg = "selected folder does not contain valid YAML profiles"
+	profilesDirEnvVar      = "ZOAL_PROFILES_DIR"
+	profilesFolderName     = "profiles"
+	defaultProfileTemplate = "default.yaml"
+	selectionErrorMsg      = "no profiles folder selected. Please select a folder containing YAML profiles"
+	missingProfilesMsg     = "profiles folder not found. Please select your external profiles folder"
+	invalidProfilesMsg     = "selected folder does not contain valid YAML profiles"
 )
 
 var (
@@ -154,7 +155,12 @@ func (a *App) SaveProfileByIndex(index int, profile pkg.Profile) error {
 	}
 
 	fileName := a.profileFiles[index]
-	output, err := yaml.Marshal(profile)
+	cleanProfile, err := sanitizeProfileForSave(profile)
+	if err != nil {
+		return err
+	}
+
+	output, err := yaml.Marshal(cleanProfile)
 	if err != nil {
 		return err
 	}
@@ -164,8 +170,73 @@ func (a *App) SaveProfileByIndex(index int, profile pkg.Profile) error {
 		return err
 	}
 
-	a.profiles[index] = profile
+	a.profiles[index] = cleanProfile
 	return nil
+}
+
+func (a *App) CreateProfileFromDefault(filename string, profileName string, description string, selectors []string) (string, error) {
+	a.mu.RLock()
+	profilesDir := a.profilesDir
+	a.mu.RUnlock()
+
+	if !dirExists(profilesDir) {
+		return "", errors.New("profiles folder is not available")
+	}
+
+	normalizedFilename, err := normalizeProfileFilename(filename)
+	if err != nil {
+		return "", err
+	}
+
+	name := strings.TrimSpace(profileName)
+	if name == "" {
+		return "", errors.New("profile name is required")
+	}
+
+	cleanedSelectors := normalizeSelectors(selectors)
+	if len(cleanedSelectors) == 0 {
+		return "", errors.New("at least one selector is required")
+	}
+
+	newProfilePath := filepath.Join(profilesDir, normalizedFilename)
+	if _, err := os.Stat(newProfilePath); err == nil {
+		return "", fmt.Errorf("profile %q already exists", normalizedFilename)
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return "", fmt.Errorf("failed to check existing profile %q: %w", normalizedFilename, err)
+	}
+
+	templatePath := filepath.Join(profilesDir, defaultProfileTemplate)
+	templateContent, err := os.ReadFile(templatePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read template %q: %w", templatePath, err)
+	}
+
+	var profile pkg.Profile
+	if err := yaml.Unmarshal(templateContent, &profile); err != nil {
+		return "", fmt.Errorf("failed to parse template %q: %w", templatePath, err)
+	}
+
+	if profile.Metadata == nil {
+		profile.Metadata = &pkg.Metadata{}
+	}
+	profile.Metadata.Name = name
+	profile.Metadata.Description = strings.TrimSpace(description)
+	profile.Metadata.Selectors = cleanedSelectors
+
+	output, err := yaml.Marshal(profile)
+	if err != nil {
+		return "", fmt.Errorf("failed to render profile yaml: %w", err)
+	}
+
+	if err := os.WriteFile(newProfilePath, output, 0o644); err != nil {
+		return "", fmt.Errorf("failed to create profile %q: %w", newProfilePath, err)
+	}
+
+	if err := a.loadProfilesFromDir(profilesDir); err != nil {
+		return "", fmt.Errorf("profile created but reload failed: %w", err)
+	}
+
+	return newProfilePath, nil
 }
 
 func (a *App) ensureProfilesLoaded() {
@@ -360,6 +431,67 @@ func normalizeDir(directory string) string {
 	}
 
 	return filepath.Clean(directory)
+}
+
+func normalizeProfileFilename(filename string) (string, error) {
+	trimmed := strings.TrimSpace(filename)
+	if trimmed == "" {
+		return "", errors.New("profile filename is required")
+	}
+
+	if filepath.Base(trimmed) != trimmed || strings.Contains(trimmed, "/") || strings.Contains(trimmed, "\\") {
+		return "", errors.New("profile filename must not contain path separators")
+	}
+
+	if strings.Contains(trimmed, "..") {
+		return "", errors.New("profile filename must not contain '..'")
+	}
+
+	ext := filepath.Ext(trimmed)
+	base := trimmed
+	if ext != "" {
+		if !strings.EqualFold(ext, ".yaml") {
+			return "", errors.New("profile filename must use .yaml extension")
+		}
+		base = strings.TrimSpace(strings.TrimSuffix(trimmed, ext))
+	}
+
+	if base == "" || base == "." || base == ".." {
+		return "", errors.New("profile filename is invalid")
+	}
+
+	return base + ".yaml", nil
+}
+
+func normalizeSelectors(selectors []string) []string {
+	cleaned := make([]string, 0, len(selectors))
+	seen := map[string]struct{}{}
+	for _, selector := range selectors {
+		trimmed := strings.TrimSpace(selector)
+		if trimmed == "" {
+			continue
+		}
+		if _, ok := seen[trimmed]; ok {
+			continue
+		}
+		seen[trimmed] = struct{}{}
+		cleaned = append(cleaned, trimmed)
+	}
+	return cleaned
+}
+
+func sanitizeProfileForSave(profile pkg.Profile) (pkg.Profile, error) {
+	payload, err := json.Marshal(profile)
+	if err != nil {
+		return pkg.Profile{}, fmt.Errorf("failed to normalize profile payload: %w", err)
+	}
+
+	var cleanProfile pkg.Profile
+	if err := json.Unmarshal(payload, &cleanProfile); err != nil {
+		return pkg.Profile{}, fmt.Errorf("failed to decode normalized profile payload: %w", err)
+	}
+
+	return cleanProfile, nil
 }
 
 func siblingProfilesDirFromExecutable(executablePath string) string {

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './App.css';
 import {
+  CreateProfileFromDefault,
   GetProfileFiles,
   GetProfiles,
   GetProfilesStatus,
@@ -12,14 +13,19 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Step,
+  StepLabel,
+  Stepper,
   Tab,
   Tabs,
   Stack,
+  TextField,
   Typography
 } from "@mui/material";
 import { main, pkg } from "../wailsjs/go/models";
@@ -40,6 +46,8 @@ const EDITOR_TABS = [
   "Landing Gear"
 ];
 
+const ADD_PROFILE_STEPS = ["Template", "File Name", "Metadata", "Selectors", "Create"];
+
 interface PlaneInfo {
   icao: string;
   name: string;
@@ -48,6 +56,10 @@ interface PlaneInfo {
 
 function cloneProfile(profile: pkg.Profile): pkg.Profile {
   return JSON.parse(JSON.stringify(profile));
+}
+
+function sanitizeProfileForApi(profile: pkg.Profile): pkg.Profile {
+  return pkg.Profile.createFrom(JSON.parse(JSON.stringify(profile)));
 }
 
 function decodeDatarefText(raw: string | undefined): string {
@@ -69,6 +81,29 @@ function basenameWithoutExt(filePath: string): string {
   const normalized = filePath.replace(/\\/g, "/");
   const basename = normalized.split("/").pop() || "";
   return basename.endsWith(".yaml") ? basename.slice(0, -5) : basename;
+}
+
+function normalizeFilenameInput(raw: string): string {
+  let value = raw.trim();
+  if (value.toLowerCase().endsWith(".yaml")) {
+    value = value.slice(0, -5);
+  }
+  return value.trim();
+}
+
+function parseSelectorsInput(raw: string): string[] {
+  const parts = raw.split(/\r?\n|,/g);
+  const seen = new Set<string>();
+  const selectors: string[] = [];
+  parts.forEach((part) => {
+    const trimmed = part.trim();
+    if (!trimmed || seen.has(trimmed)) {
+      return;
+    }
+    seen.add(trimmed);
+    selectors.push(trimmed);
+  });
+  return selectors;
 }
 
 function findBestProfileIndex(plane: PlaneInfo, profiles: pkg.Profile[], profileFiles: string[]): number {
@@ -117,6 +152,14 @@ function App() {
   const [planeInfo, setPlaneInfo] = useState<PlaneInfo>({ icao: "", name: "", connected: false });
   const [profilesStatus, setProfilesStatus] = useState<main.ProfilesStatus | null>(null);
   const [editorTab, setEditorTab] = useState(0);
+  const [isAddProfileModalOpen, setIsAddProfileModalOpen] = useState(false);
+  const [addProfileStep, setAddProfileStep] = useState(0);
+  const [newProfileFilename, setNewProfileFilename] = useState("");
+  const [newProfileName, setNewProfileName] = useState("");
+  const [newProfileDescription, setNewProfileDescription] = useState("");
+  const [newProfileSelectorsInput, setNewProfileSelectorsInput] = useState("");
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  const [createProfileError, setCreateProfileError] = useState("");
 
   const refreshProfiles = useCallback(async () => {
     const [status, profiles, files] = await Promise.all([
@@ -124,9 +167,11 @@ function App() {
       GetProfiles(),
       GetProfileFiles()
     ]);
+    const normalizedProfiles = profiles.map((profile) => sanitizeProfileForApi(profile));
     setProfilesStatus(status);
-    setProfilesData(profiles);
+    setProfilesData(normalizedProfiles);
     setProfileFiles(files);
+    return { status, profiles: normalizedProfiles, files };
   }, []);
 
   useEffect(() => {
@@ -181,6 +226,27 @@ function App() {
   const needsProfilesSelection = profilesStatus?.needsSelection || false;
   const profilesLoadError = profilesStatus?.loadError || "";
   const showProfilesModal = needsProfilesSelection || !!profilesLoadError;
+  const normalizedNewProfileFilename = normalizeFilenameInput(newProfileFilename);
+  const newProfileFinalFilename = normalizedNewProfileFilename === "" ? "new-profile.yaml" : `${normalizedNewProfileFilename}.yaml`;
+  const newProfileSelectors = useMemo(
+    () => parseSelectorsInput(newProfileSelectorsInput),
+    [newProfileSelectorsInput]
+  );
+  const canProceedAddProfileStep = useMemo(() => {
+    if (addProfileStep === 0) {
+      return true;
+    }
+    if (addProfileStep === 1) {
+      return normalizedNewProfileFilename.length > 0;
+    }
+    if (addProfileStep === 2) {
+      return newProfileName.trim().length > 0;
+    }
+    if (addProfileStep === 3) {
+      return newProfileSelectors.length > 0;
+    }
+    return true;
+  }, [addProfileStep, normalizedNewProfileFilename, newProfileName, newProfileSelectors.length]);
 
   const isDirty = useMemo(() => {
     if (!editableProfile || !selectedProfile) {
@@ -237,6 +303,80 @@ function App() {
     setSelectedProfileIndex(index);
   };
 
+  const handleOpenAddProfileTutorial = () => {
+    const defaultFilename = planeInfo.icao.trim();
+    const defaultName = planeInfo.name.trim();
+    setNewProfileFilename(defaultFilename);
+    setNewProfileName(defaultName);
+    setNewProfileDescription(defaultName ? `Profile for ${defaultName}` : "");
+    setNewProfileSelectorsInput(defaultName);
+    setCreateProfileError("");
+    setAddProfileStep(0);
+    setIsAddProfileModalOpen(true);
+  };
+
+  const handleCloseAddProfileTutorial = () => {
+    if (isCreatingProfile) {
+      return;
+    }
+    setIsAddProfileModalOpen(false);
+    setAddProfileStep(0);
+    setCreateProfileError("");
+  };
+
+  const handleNextAddProfileStep = () => {
+    if (!canProceedAddProfileStep || addProfileStep >= ADD_PROFILE_STEPS.length - 1) {
+      return;
+    }
+    setAddProfileStep((current) => current + 1);
+  };
+
+  const handleBackAddProfileStep = () => {
+    if (addProfileStep <= 0) {
+      return;
+    }
+    setAddProfileStep((current) => current - 1);
+  };
+
+  const handleCreateProfileFromTemplate = async () => {
+    if (!canProceedAddProfileStep || addProfileStep !== ADD_PROFILE_STEPS.length - 1) {
+      return;
+    }
+
+    setIsCreatingProfile(true);
+    setCreateProfileError("");
+    try {
+      const createdPath = await CreateProfileFromDefault(
+        newProfileFinalFilename,
+        newProfileName.trim(),
+        newProfileDescription.trim(),
+        newProfileSelectors
+      );
+
+      const refreshed = await refreshProfiles();
+      const normalizedCreatedPath = createdPath.replace(/\\/g, "/");
+      const createdBasename = basenameWithoutExt(normalizedCreatedPath);
+      const createdIndexByPath = refreshed.files.findIndex((file) => file.replace(/\\/g, "/") === normalizedCreatedPath);
+      const createdIndex = createdIndexByPath >= 0
+        ? createdIndexByPath
+        : refreshed.files.findIndex((file) => basenameWithoutExt(file) === createdBasename);
+
+      if (createdIndex >= 0) {
+        setHasUserSelectedProfile(true);
+        setSelectedProfileIndex(createdIndex);
+      }
+
+      setSaveMessage(`Created profile ${newProfileFinalFilename}.`);
+      setSaveError("");
+      setIsAddProfileModalOpen(false);
+      setAddProfileStep(0);
+    } catch (error: any) {
+      setCreateProfileError(error?.message || "Failed to create profile from default.yaml.");
+    } finally {
+      setIsCreatingProfile(false);
+    }
+  };
+
   const updateProfileField = (field: keyof pkg.Profile, value: any) => {
     setEditableProfile((previous) => {
       if (!previous) {
@@ -263,13 +403,15 @@ function App() {
       return;
     }
 
+    const profileToSave = sanitizeProfileForApi(editableProfile);
+
     setIsSaving(true);
     setSaveMessage("");
     setSaveError("");
     try {
-      await SaveProfileByIndex(selectedProfileIndex, editableProfile);
+      await SaveProfileByIndex(selectedProfileIndex, profileToSave);
       setProfilesData((previous) =>
-        previous.map((profile, index) => (index === selectedProfileIndex ? cloneProfile(editableProfile) : profile))
+        previous.map((profile, index) => (index === selectedProfileIndex ? cloneProfile(profileToSave) : profile))
       );
       setSaveMessage("Profile saved to YAML.");
     } catch (error: any) {
@@ -311,6 +453,148 @@ function App() {
         </DialogActions>
       </Dialog>
 
+      <Dialog
+        open={isAddProfileModalOpen}
+        onClose={handleCloseAddProfileTutorial}
+        fullWidth
+        maxWidth="md"
+      >
+        <DialogTitle>Create New Profile</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{pt: 1}}>
+            <Stepper activeStep={addProfileStep} alternativeLabel>
+              {ADD_PROFILE_STEPS.map((step) => (
+                <Step key={step}>
+                  <StepLabel>{step}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+
+            {addProfileStep === 0 && (
+              <Stack spacing={1.2}>
+                <Alert severity="info">
+                  This wizard creates a new profile by copying <code>default.yaml</code> and then updating metadata.
+                </Alert>
+                <Typography variant="body2">
+                  Template source: <code>{`${profilesStatus?.profilesDir || "--"}/default.yaml`}</code>
+                </Typography>
+                <Typography variant="body2">
+                  You can fine-tune all tabs after creation, then click <strong>Save YAML</strong>.
+                </Typography>
+              </Stack>
+            )}
+
+            {addProfileStep === 1 && (
+              <Stack spacing={1.2}>
+                <TextField
+                  label="Profile file name"
+                  value={newProfileFilename}
+                  onChange={(event) => setNewProfileFilename(event.target.value)}
+                  placeholder="A320 or A320.yaml"
+                  fullWidth
+                  autoFocus
+                />
+                <Typography variant="caption">
+                  Final file: <code>{newProfileFinalFilename}</code>
+                </Typography>
+              </Stack>
+            )}
+
+            {addProfileStep === 2 && (
+              <Stack spacing={1.2}>
+                <TextField
+                  label="Profile display name"
+                  value={newProfileName}
+                  onChange={(event) => setNewProfileName(event.target.value)}
+                  placeholder="Toliss A320"
+                  fullWidth
+                  autoFocus
+                />
+                <TextField
+                  label="Description"
+                  value={newProfileDescription}
+                  onChange={(event) => setNewProfileDescription(event.target.value)}
+                  placeholder="Profile for Toliss A320"
+                  fullWidth
+                />
+              </Stack>
+            )}
+
+            {addProfileStep === 3 && (
+              <Stack spacing={1.2}>
+                <TextField
+                  label="Selectors (one per line or comma-separated)"
+                  value={newProfileSelectorsInput}
+                  onChange={(event) => setNewProfileSelectorsInput(event.target.value)}
+                  placeholder={"ToLiss Airbus A320 Neo\nToLiss Airbus A320 Std"}
+                  multiline
+                  minRows={4}
+                  fullWidth
+                  autoFocus
+                />
+                <Typography variant="caption">
+                  Matching uses exact aircraft UI names from X-Plane.
+                </Typography>
+                {newProfileSelectors.length > 0 && (
+                  <Stack direction="row" spacing={1} sx={{flexWrap: "wrap", rowGap: 1}}>
+                    {newProfileSelectors.map((selector) => (
+                      <Chip key={selector} label={selector} size="small" />
+                    ))}
+                  </Stack>
+                )}
+              </Stack>
+            )}
+
+            {addProfileStep === 4 && (
+              <Stack spacing={1.2}>
+                <Typography variant="body2">
+                  New file: <code>{newProfileFinalFilename}</code>
+                </Typography>
+                <Typography variant="body2">
+                  Name: <strong>{newProfileName.trim() || "--"}</strong>
+                </Typography>
+                <Typography variant="body2">
+                  Description: {newProfileDescription.trim() || "--"}
+                </Typography>
+                <Typography variant="body2">Selectors:</Typography>
+                <Stack direction="row" spacing={1} sx={{flexWrap: "wrap", rowGap: 1}}>
+                  {newProfileSelectors.map((selector) => (
+                    <Chip key={selector} label={selector} size="small" />
+                  ))}
+                </Stack>
+              </Stack>
+            )}
+
+            {createProfileError && <Alert severity="error">{createProfileError}</Alert>}
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{px: 3, pb: 2}}>
+          <Button onClick={handleCloseAddProfileTutorial} disabled={isCreatingProfile}>
+            Cancel
+          </Button>
+          <Button onClick={handleBackAddProfileStep} disabled={addProfileStep === 0 || isCreatingProfile}>
+            Back
+          </Button>
+          {addProfileStep < ADD_PROFILE_STEPS.length - 1 ? (
+            <Button
+              variant="contained"
+              onClick={handleNextAddProfileStep}
+              disabled={!canProceedAddProfileStep || isCreatingProfile}
+            >
+              Next
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={handleCreateProfileFromTemplate}
+              disabled={!canProceedAddProfileStep || isCreatingProfile}
+            >
+              {isCreatingProfile ? "Creating..." : "Create Profile"}
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+
       <Box className="appBackdrop" />
       <Box className="appLayout">
         <Box className="sidebarPane">
@@ -318,6 +602,8 @@ function App() {
             profiles={profilesData}
             selectedProfileIndex={selectedProfileIndex}
             onSelectProfile={handleProfileSelect}
+            onOpenAddProfile={handleOpenAddProfileTutorial}
+            addProfileDisabled={showProfilesModal || isCreatingProfile}
           />
           <Box className="xplanePane">
             <Xplane />

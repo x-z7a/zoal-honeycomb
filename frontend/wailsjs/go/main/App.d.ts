@@ -3,6 +3,8 @@
 import {pkg} from '../models';
 import {main} from '../models';
 
+export function CreateProfileFromDefault(arg1:string,arg2:string,arg3:string,arg4:Array<string>):Promise<string>;
+
 export function GetProfile(arg1:string):Promise<pkg.Profile>;
 
 export function GetProfileFiles():Promise<Array<string>>;

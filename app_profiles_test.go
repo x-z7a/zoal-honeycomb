@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/xairline/xa-honeycomb/pkg"
+	"gopkg.in/yaml.v3"
 )
 
 func TestNewAppNeverReturnsNil(t *testing.T) {
@@ -135,6 +138,12 @@ leds:
 	if len(profiles) != 1 {
 		t.Fatalf("expected 1 profile, got %d", len(profiles))
 	}
+	if profiles[0].Leds == nil {
+		t.Fatalf("expected leds section to be populated")
+	}
+	// Runtime-only function fields must never leak into saved YAML.
+	profiles[0].Leds.HDG.On = func() {}
+	profiles[0].Leds.HDG.Off = func() {}
 
 	if err := app.SaveProfileByIndex(0, profiles[0]); err != nil {
 		t.Fatalf("SaveProfileByIndex returned error: %v", err)
@@ -148,6 +157,90 @@ leds:
 	savedText := string(saved)
 	if strings.Contains(savedText, "On:") || strings.Contains(savedText, "Off:") {
 		t.Fatalf("saved yaml should not contain runtime function fields, got:\n%s", savedText)
+	}
+}
+
+func TestCreateProfileFromDefaultCreatesProfileFromTemplate(t *testing.T) {
+	profilesDir := t.TempDir()
+	defaultContent := []byte(strings.TrimSpace(`
+metadata:
+  name: Default Profile
+  description: Template profile
+  selectors:
+    - default selector
+buttons:
+  hdg:
+    single_click:
+      - command_str: "sim/autopilot/heading"
+`) + "\n")
+	if err := os.WriteFile(filepath.Join(profilesDir, "default.yaml"), defaultContent, 0o644); err != nil {
+		t.Fatalf("failed to write default template: %v", err)
+	}
+
+	app := NewApp()
+	if err := app.loadProfilesFromDir(profilesDir); err != nil {
+		t.Fatalf("loadProfilesFromDir returned error: %v", err)
+	}
+
+	createdPath, err := app.CreateProfileFromDefault(
+		"A320",
+		"My A320",
+		"Custom A320 profile",
+		[]string{"A320 Neo", "A320 Neo", "", "A320 CEO"},
+	)
+	if err != nil {
+		t.Fatalf("CreateProfileFromDefault returned error: %v", err)
+	}
+
+	if filepath.Base(createdPath) != "A320.yaml" {
+		t.Fatalf("expected created file A320.yaml, got %q", filepath.Base(createdPath))
+	}
+
+	savedContent, err := os.ReadFile(createdPath)
+	if err != nil {
+		t.Fatalf("failed to read created profile: %v", err)
+	}
+
+	var savedProfile pkg.Profile
+	if err := yaml.Unmarshal(savedContent, &savedProfile); err != nil {
+		t.Fatalf("failed to parse created profile: %v", err)
+	}
+
+	if savedProfile.Metadata == nil {
+		t.Fatalf("expected metadata to be populated")
+	}
+	if savedProfile.Metadata.Name != "My A320" {
+		t.Fatalf("expected metadata.name to be %q, got %q", "My A320", savedProfile.Metadata.Name)
+	}
+	if savedProfile.Metadata.Description != "Custom A320 profile" {
+		t.Fatalf("expected metadata.description to be %q, got %q", "Custom A320 profile", savedProfile.Metadata.Description)
+	}
+	if len(savedProfile.Metadata.Selectors) != 2 {
+		t.Fatalf("expected 2 unique selectors, got %d", len(savedProfile.Metadata.Selectors))
+	}
+	if savedProfile.Metadata.Selectors[0] != "A320 Neo" || savedProfile.Metadata.Selectors[1] != "A320 CEO" {
+		t.Fatalf("unexpected selectors order/content: %#v", savedProfile.Metadata.Selectors)
+	}
+	if savedProfile.Buttons == nil {
+		t.Fatalf("expected template sections to be copied from default.yaml")
+	}
+}
+
+func TestCreateProfileFromDefaultErrorsWhenTemplateMissing(t *testing.T) {
+	profilesDir := t.TempDir()
+	writeProfileYAML(t, profilesDir, "A319.yaml", "A319")
+
+	app := NewApp()
+	if err := app.loadProfilesFromDir(profilesDir); err != nil {
+		t.Fatalf("loadProfilesFromDir returned error: %v", err)
+	}
+
+	_, err := app.CreateProfileFromDefault("A320", "My A320", "", []string{"A320"})
+	if err == nil {
+		t.Fatalf("expected error when default.yaml template is missing")
+	}
+	if !strings.Contains(err.Error(), "default.yaml") {
+		t.Fatalf("expected error to mention default.yaml, got: %v", err)
 	}
 }
 

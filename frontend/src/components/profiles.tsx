@@ -22,6 +22,8 @@ interface TabPanelProps {
   profiles: pkg.Profile[];
   selectedProfileIndex: number;
   onSelectProfile: (index: number) => void;
+  onOpenAddProfile: () => void;
+  addProfileDisabled?: boolean;
 }
 
 export default function Profiles(props: TabPanelProps) {
@@ -49,9 +51,10 @@ export default function Profiles(props: TabPanelProps) {
           <Typography variant="h5" sx={{fontWeight: 700, letterSpacing: "-0.03em", color: "rgba(237, 246, 255, 0.96)"}}>
             Profiles
           </Typography>
-          <Tooltip title="Add profile (coming soon)">
+          <Tooltip title={props.addProfileDisabled ? "Profiles folder required first" : "Create a new profile from default.yaml"}>
             <IconButton
-              onClick={() => alert("TODO: Add new profile")}
+              onClick={props.onOpenAddProfile}
+              disabled={props.addProfileDisabled}
               size="small"
               sx={{
                 backgroundColor: "rgba(255,255,255,0.1)",
