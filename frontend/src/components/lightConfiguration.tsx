@@ -27,7 +27,7 @@ import DatarefValue from './datarefValue';
 
 interface LightConfigurationProps {
   title: string;
-  sectionData?: pkg.Leds | pkg.Knobs;
+  sectionData?: pkg.Leds | pkg.Knobs | pkg.Conditions;
   keys: string[];
   editable?: boolean;
   collapsible?: boolean;

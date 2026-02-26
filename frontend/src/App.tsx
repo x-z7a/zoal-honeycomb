@@ -36,6 +36,7 @@ const EDITOR_TABS = [
   "Annunciators Top",
   "Annunciators Bottom",
   "Auto Pilot Knobs",
+  "Bus Voltage",
   "Landing Gear"
 ];
 
@@ -458,6 +459,16 @@ function App() {
                   />
                 )}
                 {editorTab === 5 && (
+                  <LightConfiguration
+                    editable
+                    collapsible={false}
+                    title={"Bus Voltage Condition"}
+                    sectionData={editableProfile?.conditions}
+                    onSectionDataChange={(next) => updateProfileField("conditions", next)}
+                    keys={["bus_voltage"]}
+                  />
+                )}
+                {editorTab === 6 && (
                   <LightConfiguration
                     editable
                     collapsible={false}
