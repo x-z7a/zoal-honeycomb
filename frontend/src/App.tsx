@@ -35,6 +35,7 @@ import LightConfiguration from './components/lightConfiguration';
 import Xplane from "./components/xplane";
 import KnobConfiguration from "./components/knobConfiguration";
 import ButtonConfiguration from "./components/buttonConfiguration";
+import DataConfiguration from "./components/dataConfiguration";
 
 const EDITOR_TABS = [
   "Autopilot Buttons",
@@ -42,6 +43,7 @@ const EDITOR_TABS = [
   "Annunciators Top",
   "Annunciators Bottom",
   "Auto Pilot Knobs",
+  "AP Rotary Steps",
   "Bus Voltage",
   "Landing Gear"
 ];
@@ -745,6 +747,16 @@ function App() {
                   />
                 )}
                 {editorTab === 5 && (
+                  <DataConfiguration
+                    editable
+                    collapsible={false}
+                    title={"AP Rotary Step Controls"}
+                    data={editableProfile?.data}
+                    onDataChange={(next) => updateProfileField("data", next)}
+                    keys={["ap_alt_step", "ap_vs_step", "ap_ias_step"]}
+                  />
+                )}
+                {editorTab === 6 && (
                   <LightConfiguration
                     editable
                     collapsible={false}
@@ -754,7 +766,7 @@ function App() {
                     keys={["bus_voltage"]}
                   />
                 )}
-                {editorTab === 6 && (
+                {editorTab === 7 && (
                   <LightConfiguration
                     editable
                     collapsible={false}

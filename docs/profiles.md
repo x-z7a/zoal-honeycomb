@@ -76,6 +76,21 @@ Each knob can use:
 - Dataref mode (`datarefs`)
 - Command mode (`commands`)
 
+### AP Rotary Steps
+
+Maps AP rotary step sizing under `data`.
+
+Use this tab to configure:
+
+- `ap_alt_step`
+- `ap_vs_step`
+- `ap_ias_step`
+
+Each step can use:
+
+- Fixed value (`value`)
+- Dataref source (`datarefs[0]`)
+
 ### Bus Voltage
 
 Controls whether the aircraft is considered powered on (`conditions.bus_voltage`).
