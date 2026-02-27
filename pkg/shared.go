@@ -18,7 +18,7 @@ type DatarefCondition struct {
 	Dataref    interface{}            `yaml:"-" json:"-"`
 	Index      int                    `yaml:"index,omitempty" json:"index,omitempty"`
 	Operator   string                 `yaml:"operator,omitempty" json:"operator,omitempty"`
-	Threshold  float32                `yaml:"threshold,omitempty" json:"threshold,omitempty"`
+	Threshold  *float32               `yaml:"threshold,omitempty" json:"threshold,omitempty"`
 	Expr       *vm.Program            `yaml:"-" json:"-"`
 	Env        map[string]interface{} `yaml:"-" json:"-"`
 }

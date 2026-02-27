@@ -160,6 +160,62 @@ leds:
 	}
 }
 
+func TestSaveProfileByIndexPersistsZeroThreshold(t *testing.T) {
+	profilesDir := t.TempDir()
+	content := []byte(strings.TrimSpace(`
+metadata:
+  name: A319
+leds:
+  gear:
+    datarefs:
+      - dataref_str: "sim/flightmodel2/gear/deploy_ratio"
+        operator: "!="
+`) + "\n")
+	if err := os.WriteFile(filepath.Join(profilesDir, "A319.yaml"), content, 0o644); err != nil {
+		t.Fatalf("failed to write profile yaml: %v", err)
+	}
+
+	app := NewApp()
+	if err := app.loadProfilesFromDir(profilesDir); err != nil {
+		t.Fatalf("loadProfilesFromDir returned error: %v", err)
+	}
+
+	profiles := app.GetProfiles()
+	if len(profiles) != 1 {
+		t.Fatalf("expected 1 profile, got %d", len(profiles))
+	}
+	if profiles[0].Leds == nil || len(profiles[0].Leds.GEAR.Datarefs) == 0 {
+		t.Fatalf("expected gear led datarefs to be populated")
+	}
+
+	zero := float32(0)
+	profiles[0].Leds.GEAR.Datarefs[0].Threshold = &zero
+
+	if err := app.SaveProfileByIndex(0, profiles[0]); err != nil {
+		t.Fatalf("SaveProfileByIndex returned error: %v", err)
+	}
+
+	saved, err := os.ReadFile(filepath.Join(profilesDir, "A319.yaml"))
+	if err != nil {
+		t.Fatalf("failed to read saved profile yaml: %v", err)
+	}
+
+	var savedProfile pkg.Profile
+	if err := yaml.Unmarshal(saved, &savedProfile); err != nil {
+		t.Fatalf("failed to parse saved profile yaml: %v", err)
+	}
+
+	if savedProfile.Leds == nil || len(savedProfile.Leds.GEAR.Datarefs) == 0 {
+		t.Fatalf("expected saved gear datarefs to be populated")
+	}
+	if savedProfile.Leds.GEAR.Datarefs[0].Threshold == nil {
+		t.Fatalf("expected threshold to be saved explicitly when set to zero")
+	}
+	if *savedProfile.Leds.GEAR.Datarefs[0].Threshold != 0 {
+		t.Fatalf("expected threshold 0, got %v", *savedProfile.Leds.GEAR.Datarefs[0].Threshold)
+	}
+}
+
 func TestCreateProfileFromDefaultCreatesProfileFromTemplate(t *testing.T) {
 	profilesDir := t.TempDir()
 	defaultContent := []byte(strings.TrimSpace(`

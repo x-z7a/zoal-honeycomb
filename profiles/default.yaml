@@ -107,6 +107,7 @@ leds:
         datarefs:
             - dataref_str: sim/flightmodel2/gear/deploy_ratio
               operator: '!='
+              threshold: 0
     master_warn:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/master_warning

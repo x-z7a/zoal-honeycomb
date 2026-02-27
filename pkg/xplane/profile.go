@@ -187,17 +187,22 @@ func (s *xplaneService) loadConditionProfile(fieldName string, fieldValue *pkg.C
 				return fmt.Errorf("Unsupported operator found: %s", dataref.Operator)
 			}
 
+			threshold := float32(0)
+			if dataref.Threshold != nil {
+				threshold = *dataref.Threshold
+			}
+
 			var code string
 			if datarefType&dataAccess.TypeFloat > 0 {
-				code = fmt.Sprintf("GetFloatData(myDataref) %s %f", dataref.Operator, dataref.Threshold)
+				code = fmt.Sprintf("GetFloatData(myDataref) %s %f", dataref.Operator, threshold)
 			} else if datarefType&dataAccess.TypeInt > 0 {
-				code = fmt.Sprintf("GetIntData(myDataref) %s %d", dataref.Operator, int(dataref.Threshold))
+				code = fmt.Sprintf("GetIntData(myDataref) %s %d", dataref.Operator, int(threshold))
 			} else if datarefType&dataAccess.TypeFloatArray > 0 {
-				code = fmt.Sprintf("GetFloatArrayData(myDataref)[%d] %s %f", dataref.Index, dataref.Operator, dataref.Threshold)
+				code = fmt.Sprintf("GetFloatArrayData(myDataref)[%d] %s %f", dataref.Index, dataref.Operator, threshold)
 			} else if datarefType&dataAccess.TypeIntArray > 0 {
-				code = fmt.Sprintf("GetIntArrayData(myDataref)[%d] %s %d", dataref.Index, dataref.Operator, int(dataref.Threshold))
+				code = fmt.Sprintf("GetIntArrayData(myDataref)[%d] %s %d", dataref.Index, dataref.Operator, int(threshold))
 			} else if datarefType&dataAccess.TypeDouble > 0 {
-				code = fmt.Sprintf("GetDoubleData(myDataref) %s %f", dataref.Operator, dataref.Threshold)
+				code = fmt.Sprintf("GetDoubleData(myDataref) %s %f", dataref.Operator, threshold)
 			} else {
 				return fmt.Errorf("Dataref type not supported: %v", datarefType)
 			}
