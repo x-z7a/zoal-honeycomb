@@ -1,7 +1,7 @@
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-import {pkg} from "../../wailsjs/go/models";
+import { pkg } from "../../wailsjs/go/models";
 import {
   AccordionDetails,
   AccordionSummary,
@@ -45,15 +45,15 @@ function formatButtonKey(key: string): string {
   return key
     .split("_")
     .filter(Boolean)
-    .map((piece) => piece.charAt(0).toUpperCase() + piece.slice(1))
+    .map((piece) => piece.toUpperCase())
     .join(" ");
 }
 
 function cloneEntry(entry?: ButtonEntry): ButtonEntry {
   return {
     ...(entry || {}),
-    single_click: (entry?.single_click || []).map((command) => ({...command})),
-    double_click: (entry?.double_click || []).map((command) => ({...command}))
+    single_click: (entry?.single_click || []).map((command) => ({ ...command })),
+    double_click: (entry?.double_click || []).map((command) => ({ ...command }))
   };
 }
 
@@ -68,7 +68,7 @@ export default function ButtonConfiguration(props: ButtonConfigurationProps) {
     if (!props.editable || !props.onButtonsChange) {
       return;
     }
-    const nextRecord = {...buttonRecord};
+    const nextRecord = { ...buttonRecord };
     const nextEntry = updater(cloneEntry(nextRecord[key]));
     nextRecord[key] = nextEntry;
     props.onButtonsChange(nextRecord);
@@ -77,7 +77,7 @@ export default function ButtonConfiguration(props: ButtonConfigurationProps) {
   const addCommand = (key: string, mode: ClickMode) => {
     updateEntry(key, (entry) => ({
       ...entry,
-      [mode]: [...(entry[mode] || []), {command_str: ""}]
+      [mode]: [...(entry[mode] || []), { command_str: "" }]
     }));
   };
 
@@ -114,15 +114,15 @@ export default function ButtonConfiguration(props: ButtonConfigurationProps) {
         backgroundColor: "rgba(8, 19, 30, 0.62)"
       }}
     >
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{mb: 1}}>
-        <Typography variant="subtitle2" sx={{fontWeight: 700, color: "rgba(224, 242, 255, 0.92)"}}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "rgba(224, 242, 255, 0.92)" }}>
           {label}
         </Typography>
         {props.editable && (
           <Button
             size="small"
             variant="outlined"
-            startIcon={<AddIcon/>}
+            startIcon={<AddIcon />}
             onClick={() => addCommand(sectionKey, mode)}
           >
             Add Command
@@ -131,7 +131,7 @@ export default function ButtonConfiguration(props: ButtonConfigurationProps) {
       </Stack>
 
       {commands.length === 0 ? (
-        <Typography variant="body2" sx={{color: "rgba(198, 220, 241, 0.8)", textAlign: "left"}}>
+        <Typography variant="body2" sx={{ color: "rgba(198, 220, 241, 0.8)", textAlign: "left" }}>
           No commands configured.
         </Typography>
       ) : (
@@ -152,7 +152,7 @@ export default function ButtonConfiguration(props: ButtonConfigurationProps) {
                   color="error"
                   onClick={() => removeCommand(sectionKey, mode, index)}
                 >
-                  <DeleteOutlineIcon fontSize="small"/>
+                  <DeleteOutlineIcon fontSize="small" />
                 </IconButton>
               )}
             </Stack>
@@ -169,8 +169,8 @@ export default function ButtonConfiguration(props: ButtonConfigurationProps) {
         height: "100%",
         minHeight: 0,
         overflowY: "auto",
-        "&::-webkit-scrollbar": {width: 8},
-        "&::-webkit-scrollbar-track": {background: "rgba(11, 20, 30, 0.45)"},
+        "&::-webkit-scrollbar": { width: 8 },
+        "&::-webkit-scrollbar-track": { background: "rgba(11, 20, 30, 0.45)" },
         "&::-webkit-scrollbar-thumb": {
           background: "rgba(124, 167, 203, 0.48)",
           borderRadius: "999px"
@@ -193,18 +193,18 @@ export default function ButtonConfiguration(props: ButtonConfigurationProps) {
               border: "1px solid rgba(151, 173, 196, 0.22)",
               backgroundColor: "rgba(16, 25, 36, 0.82)",
               overflow: "hidden",
-              "&::before": {display: "none"},
+              "&::before": { display: "none" },
             }}
           >
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon sx={{color: "rgba(200, 227, 251, 0.86)"}}/>}
-              sx={{px: 1.75, py: 0.45}}
+              expandIcon={<ExpandMoreIcon sx={{ color: "rgba(200, 227, 251, 0.86)" }} />}
+              sx={{ px: 1.75, py: 0.45 }}
             >
-              <Box sx={{display: "flex", alignItems: "center", gap: 1, width: "100%"}}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
                 <Typography
                   variant="subtitle1"
                   component="div"
-                  sx={{textAlign: 'left', fontWeight: 700, color: "rgba(233, 244, 255, 0.93)"}}
+                  sx={{ textAlign: 'left', fontWeight: 700, color: "rgba(233, 244, 255, 0.93)" }}
                 >
                   {formatButtonKey(section.key)}
                 </Typography>
@@ -220,7 +220,7 @@ export default function ButtonConfiguration(props: ButtonConfigurationProps) {
               </Box>
             </AccordionSummary>
 
-            <AccordionDetails sx={{px: 1.2, pb: 1.2, pt: 0.2}}>
+            <AccordionDetails sx={{ px: 1.2, pb: 1.2, pt: 0.2 }}>
               <Stack spacing={1.1}>
                 {renderCommandGroup(section.key, "single_click", "Single Click", singleCommands)}
                 {renderCommandGroup(section.key, "double_click", "Double Click", doubleCommands)}

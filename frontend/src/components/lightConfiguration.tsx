@@ -1,7 +1,7 @@
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-import {pkg} from "../../wailsjs/go/models";
+import { pkg } from "../../wailsjs/go/models";
 import {
   AccordionDetails,
   AccordionSummary,
@@ -67,7 +67,7 @@ function formatLightKey(key: string): string {
   return key
     .split("_")
     .filter(Boolean)
-    .map((piece) => piece.charAt(0).toUpperCase() + piece.slice(1))
+    .map((piece) => piece.toUpperCase())
     .join(" ");
 }
 
@@ -75,7 +75,7 @@ function cloneEntry(entry?: SectionEntry): SectionEntry {
   return {
     ...(entry || {}),
     condition: entry?.condition || "",
-    datarefs: (entry?.datarefs || []).map((row) => ({...row}))
+    datarefs: (entry?.datarefs || []).map((row) => ({ ...row }))
   };
 }
 
@@ -107,7 +107,7 @@ export default function LightConfiguration(props: LightConfigurationProps) {
     if (!props.editable || !props.onSectionDataChange) {
       return;
     }
-    const nextRecord = {...sectionRecord};
+    const nextRecord = { ...sectionRecord };
     const aliases = LIGHT_KEY_ALIASES[key] || [];
     let sourceEntry = nextRecord[key];
     if (!sourceEntry) {
@@ -154,7 +154,7 @@ export default function LightConfiguration(props: LightConfigurationProps) {
       if (!rows[rowIndex]) {
         return entry;
       }
-      const nextRow = {...rows[rowIndex]};
+      const nextRow = { ...rows[rowIndex] };
       if (field === "threshold") {
         const parsed = Number(value);
         nextRow.threshold = value === "" || Number.isNaN(parsed) ? undefined : parsed;
@@ -199,18 +199,18 @@ export default function LightConfiguration(props: LightConfigurationProps) {
               border: "1px solid rgba(151, 173, 196, 0.22)",
               backgroundColor: "rgba(16, 25, 36, 0.82)",
               overflow: "hidden",
-              "&::before": {display: "none"},
+              "&::before": { display: "none" },
             }}
           >
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon sx={{color: "rgba(200, 227, 251, 0.86)"}}/>}
-              sx={{px: 1.75, py: 0.45}}
+              expandIcon={<ExpandMoreIcon sx={{ color: "rgba(200, 227, 251, 0.86)" }} />}
+              sx={{ px: 1.75, py: 0.45 }}
             >
-              <Box sx={{display: "flex", alignItems: "center", gap: 1, width: "100%"}}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
                 <Typography
                   variant="subtitle1"
                   component="div"
-                  sx={{textAlign: 'left', fontWeight: 700, color: "rgba(233, 244, 255, 0.93)"}}
+                  sx={{ textAlign: 'left', fontWeight: 700, color: "rgba(233, 244, 255, 0.93)" }}
                 >
                   {formatLightKey(section.key)}
                 </Typography>
@@ -226,16 +226,16 @@ export default function LightConfiguration(props: LightConfigurationProps) {
               </Box>
             </AccordionSummary>
 
-            <AccordionDetails sx={{px: 1.2, pb: 1.2, pt: 0.2}}>
+            <AccordionDetails sx={{ px: 1.2, pb: 1.2, pt: 0.2 }}>
               {props.editable && (
-                <Stack direction="row" spacing={1} alignItems="center" sx={{mb: 1.2}}>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.2 }}>
                   <TextField
                     select
                     size="small"
                     label="Condition"
                     value={section.entry?.condition || ""}
                     onChange={(event) => updateCondition(section.key, event.target.value)}
-                    sx={{width: 150}}
+                    sx={{ width: 150 }}
                   >
                     <MenuItem value="">default (all)</MenuItem>
                     <MenuItem value="any">any</MenuItem>
@@ -243,7 +243,7 @@ export default function LightConfiguration(props: LightConfigurationProps) {
                   </TextField>
                   <Button
                     size="small"
-                    startIcon={<AddIcon/>}
+                    startIcon={<AddIcon />}
                     variant="outlined"
                     onClick={() => addRow(section.key)}
                   >
@@ -253,7 +253,7 @@ export default function LightConfiguration(props: LightConfigurationProps) {
               )}
 
               {rows.length === 0 ? (
-                <Typography sx={{px: 1, py: 1, color: "rgba(216, 231, 245, 0.82)", textAlign: "left"}}>
+                <Typography sx={{ px: 1, py: 1, color: "rgba(216, 231, 245, 0.82)", textAlign: "left" }}>
                   No datarefs configured.
                 </Typography>
               ) : (
@@ -267,13 +267,13 @@ export default function LightConfiguration(props: LightConfigurationProps) {
                   <Table size="small" aria-label={`${section.key} datarefs`}>
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Dataref</TableCell>
-                        <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Op</TableCell>
-                        <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Threshold</TableCell>
-                        <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Index</TableCell>
-                        <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700}}>Live</TableCell>
+                        <TableCell sx={{ color: "rgba(194, 221, 244, 0.86)", fontWeight: 700 }}>Dataref</TableCell>
+                        <TableCell sx={{ color: "rgba(194, 221, 244, 0.86)", fontWeight: 700 }}>Op</TableCell>
+                        <TableCell sx={{ color: "rgba(194, 221, 244, 0.86)", fontWeight: 700 }}>Threshold</TableCell>
+                        <TableCell sx={{ color: "rgba(194, 221, 244, 0.86)", fontWeight: 700 }}>Index</TableCell>
+                        <TableCell sx={{ color: "rgba(194, 221, 244, 0.86)", fontWeight: 700 }}>Live</TableCell>
                         {props.editable && (
-                          <TableCell sx={{color: "rgba(194, 221, 244, 0.86)", fontWeight: 700, width: 30}}/>
+                          <TableCell sx={{ color: "rgba(194, 221, 244, 0.86)", fontWeight: 700, width: 30 }} />
                         )}
                       </TableRow>
                     </TableHead>
@@ -283,11 +283,11 @@ export default function LightConfiguration(props: LightConfigurationProps) {
                         <TableRow
                           key={`${section.key}-${dataref.dataref_str || idx}-${idx}`}
                           sx={{
-                            "&:last-child td, &:last-child th": {border: 0},
-                            "& td": {borderColor: "rgba(102, 134, 164, 0.24)"}
+                            "&:last-child td, &:last-child th": { border: 0 },
+                            "& td": { borderColor: "rgba(102, 134, 164, 0.24)" }
                           }}
                         >
-                          <TableCell align="left" sx={{width: "52%", color: "rgba(230, 240, 250, 0.94)"}}>
+                          <TableCell align="left" sx={{ width: "52%", color: "rgba(230, 240, 250, 0.94)" }}>
                             {props.editable ? (
                               <TextField
                                 size="small"
@@ -299,14 +299,14 @@ export default function LightConfiguration(props: LightConfigurationProps) {
                               dataref.dataref_str
                             )}
                           </TableCell>
-                          <TableCell align="left" sx={{width: "10%", color: "rgba(230, 240, 250, 0.92)"}}>
+                          <TableCell align="left" sx={{ width: "10%", color: "rgba(230, 240, 250, 0.92)" }}>
                             {props.editable ? (
                               <TextField
                                 select
                                 size="small"
                                 value={dataref.operator || ""}
                                 onChange={(event) => updateRow(section.key, idx, "operator", event.target.value)}
-                                sx={{width: 86}}
+                                sx={{ width: 86 }}
                               >
                                 {OPERATOR_OPTIONS.map((option) => (
                                   <MenuItem key={option || "none"} value={option}>
@@ -318,43 +318,43 @@ export default function LightConfiguration(props: LightConfigurationProps) {
                               dataref.operator || "--"
                             )}
                           </TableCell>
-                          <TableCell align="left" sx={{width: "12%", color: "rgba(230, 240, 250, 0.92)"}}>
+                          <TableCell align="left" sx={{ width: "12%", color: "rgba(230, 240, 250, 0.92)" }}>
                             {props.editable ? (
                               <TextField
                                 size="small"
                                 type="number"
                                 value={typeof dataref.threshold === "number" ? dataref.threshold : ""}
                                 onChange={(event) => updateRow(section.key, idx, "threshold", event.target.value)}
-                                sx={{width: 104}}
+                                sx={{ width: 104 }}
                               />
                             ) : (
                               typeof dataref.threshold === "number" ? dataref.threshold : "--"
                             )}
                           </TableCell>
-                          <TableCell align="left" sx={{width: "8%", color: "rgba(230, 240, 250, 0.92)"}}>
+                          <TableCell align="left" sx={{ width: "8%", color: "rgba(230, 240, 250, 0.92)" }}>
                             {props.editable ? (
                               <TextField
                                 size="small"
                                 type="number"
                                 value={typeof dataref.index === "number" ? dataref.index : ""}
                                 onChange={(event) => updateRow(section.key, idx, "index", event.target.value)}
-                                sx={{width: 86}}
+                                sx={{ width: 86 }}
                               />
                             ) : (
                               dataref.index ?? 0
                             )}
                           </TableCell>
-                          <TableCell align="left" sx={{width: "14%"}}>
-                            <DatarefValue dataref={dataref.dataref_str || ""} index={dataref.index || 0}/>
+                          <TableCell align="left" sx={{ width: "14%" }}>
+                            <DatarefValue dataref={dataref.dataref_str || ""} index={dataref.index || 0} />
                           </TableCell>
                           {props.editable && (
-                            <TableCell align="right" sx={{width: "4%"}}>
+                            <TableCell align="right" sx={{ width: "4%" }}>
                               <IconButton
                                 size="small"
                                 color="error"
                                 onClick={() => removeRow(section.key, idx)}
                               >
-                                <DeleteOutlineIcon fontSize="small"/>
+                                <DeleteOutlineIcon fontSize="small" />
                               </IconButton>
                             </TableCell>
                           )}
@@ -372,11 +372,11 @@ export default function LightConfiguration(props: LightConfigurationProps) {
   );
 
   const header = (
-    <Box sx={{display: "flex", alignItems: "center", gap: 1.2}}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
       <Typography
         variant="h6"
         component="div"
-        sx={{textAlign: 'left', fontWeight: 700, color: "rgba(235, 246, 255, 0.96)"}}
+        sx={{ textAlign: 'left', fontWeight: 700, color: "rgba(235, 246, 255, 0.96)" }}
       >
         {props.title}
       </Typography>
@@ -400,8 +400,8 @@ export default function LightConfiguration(props: LightConfigurationProps) {
           height: "100%",
           minHeight: 0,
           overflowY: "auto",
-          "&::-webkit-scrollbar": {width: 8},
-          "&::-webkit-scrollbar-track": {background: "rgba(11, 20, 30, 0.45)"},
+          "&::-webkit-scrollbar": { width: 8 },
+          "&::-webkit-scrollbar-track": { background: "rgba(11, 20, 30, 0.45)" },
           "&::-webkit-scrollbar-thumb": {
             background: "rgba(124, 167, 203, 0.48)",
             borderRadius: "999px"
@@ -430,12 +430,12 @@ export default function LightConfiguration(props: LightConfigurationProps) {
         elevation={0}
         sx={{
           background: "transparent",
-          "&::before": {display: "none"}
+          "&::before": { display: "none" }
         }}
       >
         <AccordionSummary
-          expandIcon={<ExpandMoreIcon sx={{color: "rgba(193, 227, 255, 0.85)"}}/>}
-          sx={{px: 2.2, py: 0.75}}
+          expandIcon={<ExpandMoreIcon sx={{ color: "rgba(193, 227, 255, 0.85)" }} />}
+          sx={{ px: 2.2, py: 0.75 }}
         >
           {header}
         </AccordionSummary>
@@ -446,8 +446,8 @@ export default function LightConfiguration(props: LightConfigurationProps) {
             pb: 1.8,
             maxHeight: "44vh",
             overflowY: "auto",
-            "&::-webkit-scrollbar": {width: 8},
-            "&::-webkit-scrollbar-track": {background: "rgba(11, 20, 30, 0.45)"},
+            "&::-webkit-scrollbar": { width: 8 },
+            "&::-webkit-scrollbar-track": { background: "rgba(11, 20, 30, 0.45)" },
             "&::-webkit-scrollbar-thumb": {
               background: "rgba(124, 167, 203, 0.48)",
               borderRadius: "999px"
