@@ -1,0 +1,27 @@
+name,datarefs,operators,thresholds,conditions,description
+BUS_VOLTAGE,1-sim/elec/powerType,~=,0,any,this make sure no lights on when there is no power in the plane
+HDG,sim/cockpit2/autopilot/heading_mode,==,1,any,description
+NAV,sim/cockpit2/autopilot/nav_status,==,1,any,description
+APR,sim/cockpit2/autopilot/approach_status,==,1,any,description
+REV,sim/cockpit/warnings/annunciators/reverse,>,0,any,description
+ALT,sim/cockpit2/autopilot/altitude_hold_status,==,1,any,description
+VS,sim/cockpit2/autopilot/vvi_status,==,1,any,description
+IAS,sim/cockpit2/autopilot/autothrottle_on,==,1,any,description
+AP,sim/cockpit2/autopilot/servos_on,>,0.01,any,description
+AP_STATE,sim/cockpit/autopilot/autopilot_state,~=,0,any,description
+GEAR,sim/flightmodel2/gear/deploy_ratio,~=,0,any,description
+RETRACTABLE_GEAR,sim/aircraft/gear/acf_gear_retract,~=,0,any,description
+MASTER_WARN,inst/loopwarning,>,0.01,any,description
+FIRE,sim/cockpit/warnings/annunciators/engine_fires,>,0.01,any,description
+OIL_LOW_P,sim/cockpit2/engine/indicators/oil_pressure_psi,<,14,any,description
+FUEL_LOW_P,sim/flightmodel/engine/ENGN_fuel_press_psi,<,20,any,description
+ANTI_ICE,sim/cockpit/switches/anti_ice_inlet_heat_per_engine;sim/cockpit/switches/anti_ice_surf_heat,==,1,any,description
+ENG_STARTER,sim/cockpit2/engine/actuators/starter_hit,>,0.01,any,description
+APU,sim/cockpit2/electrical/APU_running,>,0.01,any,description
+MASTER_CAUTION,1-sim/mcaution/masterButton,>,0.01,any,description
+VACUUM,sim/cockpit/misc/vacuum;sim/cockpit/misc/vacuum2,<,3,any,description
+HYDRO_LOW_P,sim/cockpit2/hydraulics/indicators/hydraulic_pressure_1,<,3200,all,description
+AUX_FUEL_PUMP,sim/cockpit2/fuel/transfer_pump_right;sim/cockpit2/fuel/transfer_pump_left,>,0.01,any,description
+PARKING_BRAKE,sim/cockpit2/controls/parking_brake_ratio,==,1,any,description
+VOLT_LOW,1-sim/elec/powerType,==,5,any,description
+DOORS,anim/door/FL;anim/door/FR;anim/door/ML;anim/door/MR;anim/door/BL;anim/door/BR;1-sim/anim/doors/cargoBack/anim;1-sim/anim/doors/cargoSide/anim;anim/doorC,>,0.9,any,description

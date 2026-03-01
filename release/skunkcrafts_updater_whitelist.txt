@@ -1,0 +1,52 @@
+bravo.app/Contents/CodeResources|2092464062
+bravo.app/Contents/_CodeSignature/CodeResources|452506758
+bravo.app/Contents/MacOS/bravo|217603518
+bravo.app/Contents/Resources/iconfile.icns|1875187815
+bravo.app/Contents/Info.plist|3630886835
+bravo.exe|3158132686
+mac.xpl|3227687449
+profiles/DC3.yaml|3173248828
+profiles/BE76.yaml|49792338
+profiles/C172 G1000 Buttons.pdf|3897331361
+profiles/DR40.yaml|210888224
+profiles/SF50.yaml|2521692318
+profiles/E55P.yaml|2664197154
+profiles/A321.yaml|850403159
+profiles/B739_level_up.yaml|2054681173
+profiles/B350.yaml|222781565
+profiles/S22 G1000.yaml|3949625264
+profiles/DH8D.yaml|527866100
+profiles/P28R-VflyteAir-Arrow-III-G5-E1000 btns.pdf|3167042403
+profiles/S22T.yaml|3269990695
+profiles/B737_level_up.yaml|2882711544
+profiles/B753.csv|2159834388
+profiles/MD11.yaml|3098568052
+profiles/DA42NG_Aerobask.yaml|3795055832
+profiles/B752.csv|2159834388
+profiles/B738_zibo.yaml|663952680
+profiles/C750 CitX Buttons.pdf|3338478895
+profiles/C208.yaml|683064975
+profiles/C750 LR.yaml|3940795436
+profiles/B772.yaml|2441286553
+profiles/SR22.yaml|1266009652
+profiles/P28R_VFA_Arrow_III_G5.yaml|2521786136
+profiles/B763.csv|3816343577
+profiles/C172 G1000.yaml|3195391533
+profiles/DA42NG Buttons.pdf|4273623582
+profiles/B736_level_up.yaml|1048755848
+profiles/SR-22 Buttons.pdf|840015651
+profiles/B764.csv|3816343577
+profiles/AMF.yaml|4234511352
+profiles/P28R_VFA_Arrow_III_E1000.yaml|92283080
+profiles/B738_level_up.yaml|475399163
+profiles/C172_airfoilabs.yaml|4119169605
+profiles/BE58.yaml|1585596127
+profiles/BE9L.yaml|3241289828
+profiles/A20N.csv|3984577327
+profiles/C172 Steam.yaml|3557238103
+profiles/A319.yaml|3122004966
+profiles/B738.csv|2439467900
+profiles/A339.yaml|347039685
+profiles/default.yaml|2305601049
+profiles/A346.csv|551220924
+win.xpl|2957033177

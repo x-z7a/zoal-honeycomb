@@ -1,0 +1,23 @@
+name,datarefs,operators,thresholds,conditions,description
+VOLT_LOW,sim/cockpit2/electrical/battery_amps,<,-80,any,description
+BUS_VOLTAGE,AirbusFBW/DCBusVoltages,>,0.01,any,this led ligths up when master electric switch is on
+HDG,AirbusFBW/APLateralMode,==,101,any,description
+NAV,AirbusFBW/APLateralMode,==,2,any,description
+APR,AirbusFBW/APPRilluminated,>=,1,any,description
+REV,AirbusFBW/ENGRevArray,>=,1,any,description
+ALT,AirbusFBW/ALTmanaged,==,0,any,description
+VS,AirbusFBW/APVerticalMode,==,107,any,description
+IAS,AirbusFBW/SPDmanaged,>=,1,any,description
+AP,AirbusFBW/AP1Engage;AirbusFBW/AP2Engage,>,0.01,any,description
+MASTER_WARN,AirbusFBW/MasterWarn,>,0.01,any,description
+FIRE,AirbusFBW/OHPLightsATA26;AirbusFBW/OHPLightsATA70,>,0.01,any,description
+OIL_LOW_P,AirbusFBW/ENGOilPressArray,<,0.075,any,description
+FUEL_LOW_P,AirbusFBW/ENGFuelFlowArray,<,0.075,any,description
+ANTI_ICE,AirbusFBW/WAISwitch;AirbusFBW/ENG1AISwitch;AirbusFBW/ENG2AISwitch;AirbusFBW/ENG3AISwitch;AirbusFBW/ENG4AISwitch,>,0.01,any,description
+ENG_STARTER,AirbusFBW/StartValveArray,>,0.01,any,description
+APU,AirbusFBW/APUAvail,>,0.01,any,description
+MASTER_CAUTION,AirbusFBW/MasterCaut,>,0.01,any,description
+VACUUM,sim/cockpit/misc/vacuum;sim/cockpit/misc/vacuum2,<,1,any,description
+HYDRO_LOW_P,AirbusFBW/HydSysPressArray,<,2500,all,description
+PARKING_BRAKE,AirbusFBW/ParkBrake,==,1,any,description
+DOORS,AirbusFBW/PaxDoorArray;AirbusFBW/CargoDoorArray;AirbusFBW/BulkDoor,>,0.9,any,description

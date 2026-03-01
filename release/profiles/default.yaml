@@ -1,0 +1,195 @@
+metadata:
+    name: Default
+    description: Template profile for Honeycomb Bravo
+buttons:
+    hdg:
+        single_click:
+            - command_str: sim/autopilot/heading
+        double_click:
+            - command_str: sim/autopilot/heading_sync_pilot
+    nav:
+        single_click:
+            - command_str: sim/autopilot/NAV
+        double_click:
+            - command_str: sim/autopilot/gpss
+    alt:
+        single_click:
+            - command_str: sim/autopilot/altitude_hold
+        double_click:
+            - command_str: sim/autopilot/altitude_hold
+    apr:
+        single_click:
+            - command_str: sim/autopilot/approach
+        double_click:
+            - command_str: sim/autopilot/approach
+    vs:
+        single_click:
+            - command_str: sim/autopilot/vertical_speed
+        double_click:
+            - command_str: sim/autopilot/vertical_speed
+    ap:
+        single_click:
+            - command_str: sim/autopilot/servos_toggle
+        double_click:
+            - command_str: sim/autopilot/servos_toggle
+    ias:
+        single_click:
+            - command_str: sim/autopilot/speed_hold
+        double_click:
+            - command_str: sim/autopilot/speed_hold
+    rev:
+        single_click:
+            - command_str: sim/autopilot/back_course
+        double_click:
+            - command_str: sim/autopilot/back_course
+knobs:
+    ap_hdg:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/heading_dial_deg_mag_pilot
+    ap_vs:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/vvi_dial_fpm
+    ap_alt:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/altitude_dial_ft
+    ap_ias:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/airspeed_dial_kts_mach
+    ap_crs:
+        datarefs:
+            - dataref_str: sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot
+leds:
+    hdg:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/heading_mode
+              operator: ==
+              threshold: 1
+    nav:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/nav_status
+              operator: ==
+              threshold: 1
+            - dataref_str: sim/cockpit2/autopilot/gpss_status
+              operator: ==
+              threshold: 1
+        condition: any
+    alt:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/altitude_hold_status
+              operator: ==
+              threshold: 1
+    apr:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/approach_status
+              operator: ==
+              threshold: 1
+    vs:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/vvi_status
+              operator: ==
+              threshold: 1
+    ap:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/servos_on
+              operator: '>'
+              threshold: 0.01
+    ias:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/altitude_mode
+              operator: ==
+              threshold: 5
+    rev:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/backcourse_status
+              operator: ==
+              threshold: 1
+    gear:
+        datarefs:
+            - dataref_str: sim/flightmodel2/gear/deploy_ratio
+              operator: '!='
+              threshold: 0
+    master_warn:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/master_warning
+              operator: '>'
+              threshold: 0.01
+    master_caution:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/master_caution
+              operator: '>'
+              threshold: 0.01
+    fire:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/engine_fires
+              operator: '>'
+              threshold: 0.01
+    oil_low_pressure:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/oil_pressure_low
+              operator: ==
+              threshold: 1
+    fuel_low_pressure:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/fuel_pressure_low
+              operator: ==
+              threshold: 1
+    anti_ice:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/pitot_heat
+              operator: '>'
+              threshold: 0.01
+    eng_starter:
+        datarefs:
+            - dataref_str: sim/cockpit2/engine/actuators/starter_hit
+              operator: '>'
+              threshold: 0.01
+    apu:
+        datarefs:
+            - dataref_str: sim/cockpit2/electrical/APU_running
+              operator: '>'
+              threshold: 0.01
+            - dataref_str: sim/cockpit/electrical/gpu_on
+              operator: ==
+              threshold: 1
+        condition: any
+    vacuum:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/low_vacuum
+              operator: ==
+              threshold: 1
+    hydro_low_pressure:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/hydraulic_pressure
+              operator: ==
+              threshold: 1
+    aux_fuel_pump:
+        datarefs:
+            - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on
+              operator: '>'
+              threshold: 0.01
+            - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on2
+              operator: '>'
+              threshold: 0.01
+        condition: all
+    parking_brake:
+        datarefs:
+            - dataref_str: sim/cockpit2/controls/parking_brake_ratio
+              operator: ==
+              threshold: 1
+    volt_low:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/low_voltage
+              operator: ==
+              threshold: 1
+    doors:
+        datarefs:
+            - dataref_str: sim/flightmodel2/misc/door_open_ratio
+              operator: '>'
+              threshold: 0.9
+data: {}
+conditions:
+    bus_voltage:
+        datarefs:
+            - dataref_str: sim/cockpit2/electrical/bus_volts
+              operator: '>'
+              threshold: 0.01

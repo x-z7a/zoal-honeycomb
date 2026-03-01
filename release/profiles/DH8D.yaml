@@ -1,0 +1,284 @@
+metadata:
+    name: FlyJSim Q400
+    description: Dash 8 400 Q4XP from FlyJsim
+    selectors:
+        - DH8D
+buttons:
+    hdg:
+        single_click:
+            - command_str: sim/autopilot/heading
+        double_click:
+            - command_str: sim/autopilot/heading_sync_pilot
+    nav:
+        single_click:
+            - command_str: sim/autopilot/NAV
+        double_click:
+            - command_str: sim/autopilot/gpss
+    alt:
+        single_click:
+            - command_str: sim/autopilot/altitude_hold
+        double_click:
+            - command_str: sim/autopilot/altitude_hold
+    apr:
+        single_click:
+            - command_str: sim/autopilot/approach
+        double_click:
+            - command_str: sim/autopilot/approach
+    vs:
+        single_click:
+            - command_str: sim/autopilot/vertical_speed
+        double_click:
+            - command_str: sim/autopilot/vertical_speed
+    ap:
+        single_click:
+            - command_str: sim/autopilot/servos_toggle
+        double_click:
+            - command_str: sim/autopilot/servos_toggle
+    ias:
+        single_click:
+            - command_str: sim/autopilot/speed_hold
+        double_click:
+            - command_str: sim/autopilot/speed_hold
+    rev:
+        single_click:
+            - command_str: sim/autopilot/back_course
+        double_click:
+            - command_str: sim/autopilot/back_course
+knobs:
+    ap_hdg:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/heading_dial_deg_mag_pilot
+    ap_vs:
+        datarefs:
+            - dataref_str: sim/cockpit/autopilot/vertical_velocity
+    ap_alt:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/altitude_dial_ft
+    ap_ias:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/airspeed_dial_kts_mach
+    ap_crs:
+        datarefs:
+            - dataref_str: sim/cockpit/radios/nav1_obs_degm
+leds:
+    hdg:
+        datarefs:
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 2
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 4
+        condition: any
+    nav:
+        datarefs:
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 17
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 18
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 19
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 5
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 6
+            - dataref_str: FJS/Q4XP/FMA/roll_arm
+              operator: ==
+              threshold: 1
+        condition: any
+    alt:
+        datarefs:
+            - dataref_str: FJS/Q4XP/FMA/pitch_act
+              operator: ==
+              threshold: 4
+            - dataref_str: FJS/Q4XP/FMA/pitch_act
+              operator: ==
+              threshold: 5
+        condition: any
+    apr:
+        datarefs:
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 8
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 9
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 10
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 11
+            - dataref_str: FJS/Q4XP/FMA/pitch_arm
+              operator: ==
+              threshold: 2
+            - dataref_str: FJS/Q4XP/FMA/pitch_act
+              operator: ==
+              threshold: 7
+            - dataref_str: FJS/Q4XP/FMA/pitch_act
+              operator: ==
+              threshold: 8
+        condition: any
+    vs:
+        datarefs:
+            - dataref_str: FJS/Q4XP/FMA/pitch_act
+              operator: ==
+              threshold: 3
+    ap:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/servos_on
+              operator: '>'
+              threshold: 0.01
+    ias:
+        datarefs:
+            - dataref_str: FJS/Q4XP/FMA/pitch_act
+              operator: ==
+              threshold: 2
+    rev:
+        datarefs:
+            - dataref_str: FJS/Q4XP/FMA/roll_arm
+              operator: ==
+              threshold: 4
+            - dataref_str: FJS/Q4XP/FMA/roll_act
+              operator: ==
+              threshold: 13
+        condition: any
+    gear:
+        datarefs:
+            - dataref_str: sim/flightmodel2/gear/deploy_ratio
+              operator: '!='
+              threshold: 0
+    master_warn:
+        datarefs:
+            - dataref_str: FJS/Q4XP/Annunciators/CautWarn_Lit
+              operator: '!='
+              threshold: 0
+    master_caution:
+        datarefs:
+            - dataref_str: FJS/Q4XP/Annunciators/CautWarn_Lit
+              index: 1
+              operator: '!='
+              threshold: 0
+    fire:
+        datarefs:
+            - dataref_str: FJS/Q4XP/Manips/TwoSwitch_Anim
+              index: 41
+              operator: <
+              threshold: -0.01
+            - dataref_str: FJS/Q4XP/Manips/TwoSwitch_Anim
+              index: 41
+              operator: '>'
+              threshold: 0.01
+        condition: any
+    oil_low_pressure:
+        datarefs:
+            - dataref_str: sim/flightmodel/engine/ENGN_oil_press
+              operator: <
+              threshold: 0.075
+    fuel_low_pressure:
+        datarefs:
+            - dataref_str: sim/cockpit2/engine/indicators/fuel_pressure_psi
+              operator: <
+              threshold: 20
+    anti_ice:
+        datarefs:
+            - dataref_str: FJS/Q4XP/Annunciators/CWP_Annuns_Lit
+              index: 16
+              operator: ==
+              threshold: 1
+            - dataref_str: FJS/Q4XP/Annunciators/CWP_Annuns_Lit
+              index: 17
+              operator: ==
+              threshold: 1
+            - dataref_str: FJS/Q4XP/Annunciators/CWP_Annuns_Lit
+              index: 2
+              operator: ==
+              threshold: 1
+        condition: any
+    eng_starter:
+        datarefs:
+            - dataref_str: sim/cockpit2/engine/actuators/starter_hit
+              operator: '>'
+              threshold: 0.01
+    apu:
+        datarefs:
+            - dataref_str: sim/cockpit2/electrical/APU_running
+              operator: '>'
+              threshold: 0.01
+    vacuum:
+        datarefs:
+            - dataref_str: sim/cockpit/misc/vacuum
+              operator: <
+              threshold: 1
+            - dataref_str: sim/cockpit/misc/vacuum2
+              operator: <
+              threshold: 1
+        condition: any
+    hydro_low_pressure:
+        datarefs:
+            - dataref_str: sim/operation/failures/hydraulic_pressure_ratio
+              operator: <
+              threshold: 3002
+        condition: all
+    aux_fuel_pump:
+        datarefs:
+            - dataref_str: sim/cockpit/engine/fuel_pump_on
+              operator: '>'
+              threshold: 0.01
+            - dataref_str: sim/cockpit/engine/fuel_pump_on
+              index: 1
+              operator: '>'
+              threshold: 0.01
+        condition: any
+    parking_brake:
+        datarefs:
+            - dataref_str: sim/cockpit2/controls/parking_brake_ratio
+              operator: '>'
+              threshold: 0.999
+    volt_low:
+        datarefs:
+            - dataref_str: sim/cockpit2/electrical/bus_load_amps
+              operator: '>'
+              threshold: 4
+    doors:
+        datarefs:
+            - dataref_str: FJS/Q4XP/Manips/CabinMainDoor_Anim
+              operator: '>'
+              threshold: 0.01
+            - dataref_str: FJS/Q4XP/Manips/CargoDoor_Anim
+              operator: '>'
+              threshold: 0.01
+        condition: any
+data:
+    ap_vs_step:
+        datarefs:
+            - dataref_str: sim/aircraft/autopilot/vvi_step_ft
+conditions:
+    bus_voltage:
+        datarefs:
+            - dataref_str: sim/cockpit/electrical/battery_array_on
+              operator: '>'
+              threshold: 0.01
+            - dataref_str: sim/cockpit/electrical/battery_array_on
+              index: 1
+              operator: '>'
+              threshold: 0.01
+            - dataref_str: sim/cockpit/electrical/battery_array_on
+              index: 2
+              operator: '>'
+              threshold: 0.01
+            - dataref_str: sim/cockpit/electrical/battery_array_on
+              index: 3
+              operator: '>'
+              threshold: 0.01
+        condition: any
+    retractable_gear:
+        datarefs:
+            - dataref_str: sim/aircraft/gear/acf_gear_retract
+              operator: '!='
+              threshold: 0
