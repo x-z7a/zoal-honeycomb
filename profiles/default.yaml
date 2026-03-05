@@ -58,6 +58,11 @@ knobs:
     ap_crs:
         datarefs:
             - dataref_str: sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot
+trim_wheels:
+    up_cmd: sim/flight_controls/pitch_trim_up_mech
+    down_cmd: sim/flight_controls/pitch_trim_down_mech
+    sensitivity: 23
+    window_ms: 500
 leds:
     hdg:
         datarefs:

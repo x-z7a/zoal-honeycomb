@@ -468,12 +468,31 @@ export namespace pkg {
 	        this.selectors = source["selectors"];
 	    }
 	}
+	export class TrimWheels {
+	    up_cmd?: string;
+	    down_cmd?: string;
+	    sensitivity?: number;
+	    window_ms?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TrimWheels(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.up_cmd = source["up_cmd"];
+	        this.down_cmd = source["down_cmd"];
+	        this.sensitivity = source["sensitivity"];
+	        this.window_ms = source["window_ms"];
+	    }
+	}
 	export class Profile {
 	    metadata?: Metadata;
 	    buttons?: Buttons;
 	    knobs?: Knobs;
 	    leds?: Leds;
 	    data?: Data;
+	    trim_wheels?: TrimWheels;
 	    conditions?: Conditions;
 	
 	    static createFrom(source: any = {}) {
@@ -487,6 +506,7 @@ export namespace pkg {
 	        this.knobs = this.convertValues(source["knobs"], Knobs);
 	        this.leds = this.convertValues(source["leds"], Leds);
 	        this.data = this.convertValues(source["data"], Data);
+	        this.trim_wheels = this.convertValues(source["trim_wheels"], TrimWheels);
 	        this.conditions = this.convertValues(source["conditions"], Conditions);
 	    }
 	

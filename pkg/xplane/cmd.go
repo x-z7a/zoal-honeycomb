@@ -2,6 +2,7 @@ package xplane
 
 import "C"
 import (
+	"strings"
 	"time"
 
 	"github.com/xairline/goplane/xplm/dataAccess"
@@ -10,6 +11,15 @@ import (
 )
 
 const doubleClickThreshold = 500 * time.Millisecond // Define double-click threshold
+
+const (
+	defaultTrimUpCommand   = "sim/flight_controls/pitch_trim_up_mech"
+	defaultTrimDownCommand = "sim/flight_controls/pitch_trim_down_mech"
+	defaultTrimSensitivity = 23.0
+	defaultTrimWindowMs    = int64(500)
+	minimumTrimSensitivity = 1.0
+	minimumTrimWindowMs    = int64(1)
+)
 
 func (s *xplaneService) changeApValue(command utilities.CommandRef, phase utilities.CommandPhase, ref interface{}) int {
 	// Handle only when command phase is CommandEnd
@@ -185,17 +195,53 @@ func (s *xplaneService) setupTrimCmds() {
 	utilities.RegisterCommandHandler(pitchTrimDown, s.trimPressed, true, "down")
 }
 
+func (s *xplaneService) trimWheelConfig() (string, string, float64, int64) {
+	upCommand := defaultTrimUpCommand
+	downCommand := defaultTrimDownCommand
+	sensitivity := defaultTrimSensitivity
+	windowMs := defaultTrimWindowMs
+
+	if s.profile == nil || s.profile.TrimWheels == nil {
+		return upCommand, downCommand, sensitivity, windowMs
+	}
+
+	trimWheels := s.profile.TrimWheels
+	if cmd := strings.TrimSpace(trimWheels.UpCmd); cmd != "" {
+		upCommand = cmd
+	}
+	if cmd := strings.TrimSpace(trimWheels.DownCmd); cmd != "" {
+		downCommand = cmd
+	}
+	if trimWheels.Sensitivity != nil {
+		sensitivity = *trimWheels.Sensitivity
+	}
+	if trimWheels.WindowMs != nil {
+		windowMs = int64(*trimWheels.WindowMs)
+	}
+
+	if sensitivity < minimumTrimSensitivity {
+		sensitivity = minimumTrimSensitivity
+	}
+	if windowMs < minimumTrimWindowMs {
+		windowMs = minimumTrimWindowMs
+	}
+
+	return upCommand, downCommand, sensitivity, windowMs
+}
+
 func (s *xplaneService) trimPressed(command utilities.CommandRef, phase utilities.CommandPhase, ref interface{}) int {
 	if phase == utilities.Phase_CommandEnd {
 		buttonRef := ref.(string) // Convert ref to string (or your button identifier type)
 		s.Logger.Debugf("Trim command: %v, Phase: %v, Button: %s", command, phase, buttonRef)
 
+		upCommand, downCommand, sensitivity, windowMs := s.trimWheelConfig()
+
 		var cmd pkg.Command
 		switch buttonRef {
 		case "up":
-			cmd = pkg.Command{CommandStr: "sim/flight_controls/pitch_trim_up_mech"}
+			cmd = pkg.Command{CommandStr: upCommand}
 		case "down":
-			cmd = pkg.Command{CommandStr: "sim/flight_controls/pitch_trim_down_mech"}
+			cmd = pkg.Command{CommandStr: downCommand}
 		default:
 			s.Logger.Warningf("Unknown trim button reference: %s", buttonRef)
 			return 0
@@ -205,28 +251,25 @@ func (s *xplaneService) trimPressed(command utilities.CommandRef, phase utilitie
 		now := time.Now()
 		elapsed := now.Sub(s.lastTrimTime).Milliseconds()
 
-		var multiplier float64
+		multiplier := minimumTrimSensitivity
 		if !s.lastTrimTime.IsZero() {
-			if elapsed < 500 {
-				// Smoothly interpolate multiplier between 25 and 1 based on elapsed time
-				multiplier = 23.0 - (22.0 * float64(elapsed) / 500.0)
-				if multiplier < 1.0 {
-					multiplier = 1.0
+			if elapsed < windowMs {
+				multiplier = sensitivity - ((sensitivity - minimumTrimSensitivity) * float64(elapsed) / float64(windowMs))
+				if multiplier < minimumTrimSensitivity {
+					multiplier = minimumTrimSensitivity
 				}
 			} else {
-				multiplier = 1.0
+				multiplier = minimumTrimSensitivity
 			}
-		} else {
-			multiplier = 1.0
 		}
 
 		// log elapsed time and multiplier for debugging
-		s.Logger.Infof("Trim command: %s, Elapsed time since last trim: %d ms, Multiplier: %.1f", cmd.CommandStr, elapsed, multiplier)
+		s.Logger.Infof("Trim command: %s, Elapsed: %d ms, Multiplier: %.1f, Sensitivity: %.1f, Window: %d ms", cmd.CommandStr, elapsed, multiplier, sensitivity, windowMs)
 		for i := 0; i < int(multiplier); i++ {
 			utilities.CommandOnce(utilities.FindCommand(cmd.CommandStr))
 		}
 
-		s.Logger.Debugf("Trim command executed: %s, Multiplier: %.1f", cmd, multiplier)
+		s.Logger.Debugf("Trim command executed: %s, Multiplier: %.1f", cmd.CommandStr, multiplier)
 		s.lastTrimTime = now
 	}
 	return 0

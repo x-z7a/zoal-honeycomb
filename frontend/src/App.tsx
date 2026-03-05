@@ -36,6 +36,7 @@ import Xplane from "./components/xplane";
 import KnobConfiguration from "./components/knobConfiguration";
 import ButtonConfiguration from "./components/buttonConfiguration";
 import DataConfiguration from "./components/dataConfiguration";
+import TrimWheelConfiguration from "./components/trimWheelConfiguration";
 
 const EDITOR_TABS = [
   "Autopilot Buttons",
@@ -44,6 +45,7 @@ const EDITOR_TABS = [
   "Annunciators Bottom",
   "Auto Pilot Knobs",
   "AP Rotary Steps",
+  "Trim Wheels",
   "Bus Voltage",
   "Landing Gear"
 ];
@@ -757,6 +759,13 @@ function App() {
                   />
                 )}
                 {editorTab === 6 && (
+                  <TrimWheelConfiguration
+                    editable
+                    trimWheels={editableProfile?.trim_wheels}
+                    onTrimWheelsChange={(next) => updateProfileField("trim_wheels", next)}
+                  />
+                )}
+                {editorTab === 7 && (
                   <LightConfiguration
                     editable
                     collapsible={false}
@@ -766,7 +775,7 @@ function App() {
                     keys={["bus_voltage"]}
                   />
                 )}
-                {editorTab === 7 && (
+                {editorTab === 8 && (
                   <LightConfiguration
                     editable
                     collapsible={false}

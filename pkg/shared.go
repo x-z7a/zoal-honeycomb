@@ -102,6 +102,13 @@ type Data struct {
 	AP_IAS_STEP DataProfile `yaml:"ap_ias_step,omitempty" json:"ap_ias_step,omitempty"`
 }
 
+type TrimWheels struct {
+	UpCmd       string   `yaml:"up_cmd,omitempty" json:"up_cmd,omitempty"`
+	DownCmd     string   `yaml:"down_cmd,omitempty" json:"down_cmd,omitempty"`
+	Sensitivity *float64 `yaml:"sensitivity,omitempty" json:"sensitivity,omitempty"`
+	WindowMs    *int     `yaml:"window_ms,omitempty" json:"window_ms,omitempty"`
+}
+
 type Conditions struct {
 	// This decides whether LEDs are on or off at all. For example, if the bus voltage is too low, all LEDs should be off.
 	BUS_VOLTAGE ConditionProfile `yaml:"bus_voltage,omitempty" json:"bus_voltage,omitempty"`
@@ -126,5 +133,6 @@ type Profile struct {
 	Knobs      *Knobs      `yaml:"knobs,omitempty" json:"knobs,omitempty"`
 	Leds       *Leds       `yaml:"leds,omitempty" json:"leds,omitempty"`
 	Data       *Data       `yaml:"data,omitempty" json:"data,omitempty"`
+	TrimWheels *TrimWheels `yaml:"trim_wheels,omitempty" json:"trim_wheels,omitempty"`
 	Conditions *Conditions `yaml:"conditions,omitempty" json:"conditions,omitempty"`
 }

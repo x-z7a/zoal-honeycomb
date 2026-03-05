@@ -12,7 +12,8 @@ This guide shows how to build a new profile using `profiles/C172 G1000.yaml` as 
 6. Define LED rules in `leds`.
 7. Add shared conditions in `conditions` (optional but recommended).
 8. Tune knob step behavior in `data` (optional).
-9. Reload the profile in plugin and verify behavior in cockpit.
+9. Tune trim wheel commands/acceleration in `trim_wheels` (optional).
+10. Reload the profile in plugin and verify behavior in cockpit.
 
 ## File naming and selection logic
 
@@ -37,6 +38,7 @@ The C172 G1000 profile uses all major sections:
 - `leds`: Honeycomb LED on/off rules.
 - `conditions`: global guard conditions that decide whether LEDs should be active at all.
 - `data`: tunables/readouts used by runtime logic.
+- `trim_wheels`: trim wheel command and acceleration tuning.
 
 ## 1) `metadata`
 
@@ -245,6 +247,33 @@ C172 G1000 values:
 | `data.ap_vs_step.datarefs[0].dataref_str` | `sim/aircraft/autopilot/vvi_step_ft` | Reads VS increment from aircraft config. |
 | `data.ap_alt_step.value` | `20` | Hard-sets ALT increment to 20 units for encoder adjustments. |
 
+## 7) `trim_wheels`
+
+`trim_wheels` controls which X-Plane commands fire from the Bravo trim wheel and how aggressively repeated commands are sent when the wheel is turned quickly.
+
+Schema:
+
+```yaml
+trim_wheels:
+  up_cmd: "<xplane/trim-up-command>"
+  down_cmd: "<xplane/trim-down-command>"
+  sensitivity: <number>
+  window_ms: <integer>
+```
+
+Defaults used when fields are missing:
+
+- `up_cmd`: `sim/flight_controls/pitch_trim_up_mech`
+- `down_cmd`: `sim/flight_controls/pitch_trim_down_mech`
+- `sensitivity`: `23`
+- `window_ms`: `500`
+
+Behavior notes:
+
+- `sensitivity` is the max trim multiplier at very fast wheel turns.
+- `window_ms` is the elapsed-time window where multiplier ramps down toward `1`.
+- If a value is blank/invalid, runtime falls back to the defaults above.
+
 ## Minimal starter template
 
 Use this when creating a new profile from scratch:
@@ -285,6 +314,12 @@ conditions:
 data:
   ap_alt_step:
     value: 100
+
+trim_wheels:
+  up_cmd: sim/flight_controls/pitch_trim_up_mech
+  down_cmd: sim/flight_controls/pitch_trim_down_mech
+  sensitivity: 23
+  window_ms: 500
 ```
 
 ## Validation checklist
