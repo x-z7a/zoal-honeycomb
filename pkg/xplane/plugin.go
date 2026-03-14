@@ -52,8 +52,8 @@ func (s *xplaneService) onPluginStart() {
 	//
 	// setup menu
 	menuId := menus.FindPluginsMenu()
-	menuContainerId := menus.AppendMenuItem(menuId, "XA Honeycomb", 0, false)
-	s.myMenuId = menus.CreateMenu("XA Honeycomb", menuId, menuContainerId, s.menuHandler, nil)
+	menuContainerId := menus.AppendMenuItem(menuId, "ZOAL Honeycomb", 0, false)
+	s.myMenuId = menus.CreateMenu("ZOAL Honeycomb", menuId, menuContainerId, s.menuHandler, nil)
 	menus.AppendMenuItem(s.myMenuId, "Reload Profile", 0, true)
 	menus.AppendMenuSeparator(s.myMenuId)
 	s.myMenuItemIndex = menus.AppendMenuItem(s.myMenuId, "Enable Debug", 1, true)

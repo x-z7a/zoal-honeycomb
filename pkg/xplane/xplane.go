@@ -82,7 +82,7 @@ func NewXplaneService(
 		_, cancelFunc := context.WithCancel(context.Background())
 
 		xplaneSvc := &xplaneService{
-			Plugin:        extra.NewPlugin("xa honeycomb - "+VERSION, "com.github.xairline.zoal-honeycomb", "honeycomb bridge"),
+			Plugin:        extra.NewPlugin("zoal honeycomb - "+VERSION, "com.github.x-z7a.zoal-honeycomb", "honeycomb bridge"),
 			BravoService:  honeycomb.NewBravoService(logger),
 			Logger:        logger,
 			pluginPath:    pluginPath,

@@ -13,7 +13,7 @@ func main() {
 func init() {
 	xplaneLogger := xplane.NewXplaneLogger()
 	logging.MinLevel = logging.Info_Level
-	logging.PluginName = "xa honeycomb - " + xplane.VERSION
+	logging.PluginName = "zoal honeycomb - " + xplane.VERSION
 
 	// entrypoint
 	xplane.NewXplaneService(
