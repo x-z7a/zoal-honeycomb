@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/expr-lang/expr"
+	"github.com/x-z7a/zoal-honeycomb/pkg"
 	"github.com/xairline/goplane/xplm/dataAccess"
 	"github.com/xairline/goplane/xplm/menus"
 	"github.com/xairline/goplane/xplm/utilities"
-	"github.com/xairline/xa-honeycomb/pkg"
 	"gopkg.in/yaml.v3"
 )
 

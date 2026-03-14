@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xairline/xa-honeycomb/pkg"
+	"github.com/x-z7a/zoal-honeycomb/pkg"
 
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 	"gopkg.in/yaml.v3"

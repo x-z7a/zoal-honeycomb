@@ -2,11 +2,12 @@ package honeycomb
 
 import (
 	"context"
-	"github.com/sstallion/go-hid"
-	"github.com/xairline/goplane/xplm/utilities"
-	"github.com/xairline/xa-honeycomb/pkg"
 	"sync"
 	"time"
+
+	"github.com/sstallion/go-hid"
+	"github.com/x-z7a/zoal-honeycomb/pkg"
+	"github.com/xairline/goplane/xplm/utilities"
 )
 
 var Vendor uint16 = 0x294B

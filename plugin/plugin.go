@@ -3,8 +3,8 @@
 package main
 
 import (
+	"github.com/x-z7a/zoal-honeycomb/pkg/xplane"
 	"github.com/xairline/goplane/extra/logging"
-	"github.com/xairline/xa-honeycomb/pkg/xplane"
 )
 
 func main() {

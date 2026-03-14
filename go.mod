@@ -1,4 +1,4 @@
-module github.com/xairline/xa-honeycomb
+module github.com/x-z7a/zoal-honeycomb
 
 go 1.23
 

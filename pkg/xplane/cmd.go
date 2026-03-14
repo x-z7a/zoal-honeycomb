@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/x-z7a/zoal-honeycomb/pkg"
 	"github.com/xairline/goplane/xplm/dataAccess"
 	"github.com/xairline/goplane/xplm/utilities"
-	"github.com/xairline/xa-honeycomb/pkg"
 )
 
 const doubleClickThreshold = 500 * time.Millisecond // Define double-click threshold

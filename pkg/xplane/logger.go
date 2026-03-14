@@ -3,8 +3,8 @@
 package xplane
 
 import (
+	"github.com/x-z7a/zoal-honeycomb/pkg"
 	"github.com/xairline/goplane/extra/logging"
-	"github.com/xairline/xa-honeycomb/pkg"
 )
 
 type XplaneLogger struct {

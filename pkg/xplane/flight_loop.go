@@ -1,11 +1,12 @@
 package xplane
 
 import (
+	"reflect"
+
+	"github.com/x-z7a/zoal-honeycomb/pkg"
+	"github.com/x-z7a/zoal-honeycomb/pkg/honeycomb"
 	"github.com/xairline/goplane/xplm/dataAccess"
 	"github.com/xairline/goplane/xplm/utilities"
-	"github.com/xairline/xa-honeycomb/pkg"
-	"github.com/xairline/xa-honeycomb/pkg/honeycomb"
-	"reflect"
 )
 
 // flightLoop is called periodically. You return 0.1, meaning it runs every ~100ms

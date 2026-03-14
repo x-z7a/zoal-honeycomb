@@ -4,9 +4,9 @@ import (
 	"reflect"
 
 	"github.com/expr-lang/expr"
+	"github.com/x-z7a/zoal-honeycomb/pkg"
+	"github.com/x-z7a/zoal-honeycomb/pkg/honeycomb"
 	"github.com/xairline/goplane/xplm/dataAccess"
-	"github.com/xairline/xa-honeycomb/pkg"
-	"github.com/xairline/xa-honeycomb/pkg/honeycomb"
 )
 
 func (s *xplaneService) assignOnAndOffFuncs(name string) (func(), func()) {

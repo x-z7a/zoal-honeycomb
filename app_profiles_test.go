@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/xairline/xa-honeycomb/pkg"
+	"github.com/x-z7a/zoal-honeycomb/pkg"
 	"gopkg.in/yaml.v3"
 )
 

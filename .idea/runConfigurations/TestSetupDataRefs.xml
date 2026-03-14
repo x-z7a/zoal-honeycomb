@@ -11,7 +11,7 @@
     </envs>
     <root_directory value="$PROJECT_DIR$" />
     <kind value="PACKAGE" />
-    <package value="github.com/xairline/xa-honeycomb/pkg/xplane" />
+    <package value="github.com/x-z7a/zoal-honeycomb/pkg/xplane" />
     <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$" />
     <framework value="gotest" />

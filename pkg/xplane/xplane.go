@@ -11,12 +11,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/x-z7a/zoal-honeycomb/pkg"
+	"github.com/x-z7a/zoal-honeycomb/pkg/honeycomb"
 	"github.com/xairline/goplane/extra"
 	"github.com/xairline/goplane/xplm/menus"
 	"github.com/xairline/goplane/xplm/plugins"
 	"github.com/xairline/goplane/xplm/utilities"
-	"github.com/xairline/xa-honeycomb/pkg"
-	"github.com/xairline/xa-honeycomb/pkg/honeycomb"
 )
 
 var VERSION = "development"

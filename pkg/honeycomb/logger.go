@@ -2,7 +2,8 @@ package honeycomb
 
 import (
 	"fmt"
-	"github.com/xairline/xa-honeycomb/pkg"
+
+	"github.com/x-z7a/zoal-honeycomb/pkg"
 )
 
 type ConsoleLogger struct {
