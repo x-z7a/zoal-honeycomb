@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
 
 	"github.com/xairline/goplane/extra"
 	"github.com/xairline/goplane/xplm/menus"
+	"github.com/xairline/goplane/xplm/plugins"
 	"github.com/xairline/goplane/xplm/processing"
 	"github.com/xairline/goplane/xplm/utilities"
 )
@@ -39,6 +41,12 @@ func (s *xplaneService) onPluginStateChanged(state extra.PluginState, plugin *ex
 func (s *xplaneService) onPluginStart() {
 	s.Logger.Info("Plugin started")
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	// get plugin path
+	plugins.EnableFeature("XPLM_USE_NATIVE_PATHS", true)
+	systemPath := utilities.GetSystemPath()
+	pluginPath := filepath.Join(systemPath, "Resources", "plugins", "xa-honeycomb")
+	s.Logger.Infof("Plugin path: %s", pluginPath)
 
 	processing.RegisterFlightLoopCallback(s.flightLoop, 5.0, nil)
 	//
