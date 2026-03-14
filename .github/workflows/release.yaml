@@ -72,24 +72,24 @@ jobs:
           xcrun stapler staple ${{ github.workspace }}/build/bin/bravo.app
           xcrun stapler validate ${{ github.workspace }}/build/bin/bravo.app
 
-          mkdir -p ${{ github.workspace }}/build/xa-honeycomb
-          ditto ${{ github.workspace }}/build/bin/bravo.app ${{ github.workspace }}/build/xa-honeycomb/bravo.app
-          cp ${{ github.workspace }}/build/bin/bravo ${{ github.workspace }}/build/xa-honeycomb/bravo.exe
+          mkdir -p ${{ github.workspace }}/build/zoal-honeycomb
+          ditto ${{ github.workspace }}/build/bin/bravo.app ${{ github.workspace }}/build/zoal-honeycomb/bravo.app
+          cp ${{ github.workspace }}/build/bin/bravo ${{ github.workspace }}/build/zoal-honeycomb/bravo.exe
 
       - run: |
           go mod tidy
           export VERSION=${GITHUB_REF##*/} 
           VERSION=${GITHUB_REF##*/} make mac win -j 2
-          rm -f ${{ github.workspace }}/build/xa-honeycomb/mac_arm.xpl ${{ github.workspace }}/build/xa-honeycomb/mac_amd.xpl
+          rm -f ${{ github.workspace }}/build/zoal-honeycomb/mac_arm.xpl ${{ github.workspace }}/build/zoal-honeycomb/mac_amd.xpl
 
           codesign --timestamp \
             --options runtime \
-            --sign "${{ secrets.CODESIGN_IDENTITY }}" ${{ github.workspace }}/build/xa-honeycomb/mac.xpl
+            --sign "${{ secrets.CODESIGN_IDENTITY }}" ${{ github.workspace }}/build/zoal-honeycomb/mac.xpl
 
           TAG=${GITHUB_REF##*/}
-          cp ${{ github.workspace }}/skunkcrafts_updater.cfg ${{ github.workspace }}/build/xa-honeycomb/
-          cp -r ${{ github.workspace }}/profiles ${{ github.workspace }}/build/xa-honeycomb/
-          sed -i '' "s/REPLACE_ME/${TAG}/g" ${{ github.workspace }}/build/xa-honeycomb/skunkcrafts_updater.cfg
+          cp ${{ github.workspace }}/skunkcrafts_updater.cfg ${{ github.workspace }}/build/zoal-honeycomb/
+          cp -r ${{ github.workspace }}/profiles ${{ github.workspace }}/build/zoal-honeycomb/
+          sed -i '' "s/REPLACE_ME/${TAG}/g" ${{ github.workspace }}/build/zoal-honeycomb/skunkcrafts_updater.cfg
 
           # sign and notarize mac builds
 
@@ -98,17 +98,17 @@ jobs:
             ditto -c -k \
               --sequesterRsrc \
               --keepParent \
-              xa-honeycomb xa-honeycomb.zip && \
+              zoal-honeycomb zoal-honeycomb.zip && \
             cd $root
 
-          xcrun notarytool submit ${{ github.workspace }}/build/xa-honeycomb.zip \
+          xcrun notarytool submit ${{ github.workspace }}/build/zoal-honeycomb.zip \
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.MAC_DEV_PASSWORD }}" \
             --team-id "${{ secrets.APPLE_TEAMID }}" \
             --wait
 
       - run: |
-          cp -r ${{ github.workspace }}/build/xa-honeycomb/ release/
+          cp -r ${{ github.workspace }}/build/zoal-honeycomb/ release/
           # create crc32 checksum for all values and write to skunkcrafts_updater_whitelist.txt
           # format is <filename>|<crc32 checksum>
           # include subdirectories
@@ -137,5 +137,5 @@ jobs:
         with:
           body_path: ${{ github.workspace }}/README.md
           files: |
-            ${{ github.workspace }}/build/xa-honeycomb.zip
+            ${{ github.workspace }}/build/zoal-honeycomb.zip
           prerelease: ${{ contains(github.ref_name, '-') }}

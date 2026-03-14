@@ -77,12 +77,12 @@ func NewXplaneService(
 		defer xplaneSvcLock.Unlock()
 
 		systemPath := utilities.GetSystemPath()
-		pluginPath := filepath.Join(systemPath, "Resources", "plugins", "xa-honeycomb")
+		pluginPath := filepath.Join(systemPath, "Resources", "plugins", "zoal-honeycomb")
 
 		_, cancelFunc := context.WithCancel(context.Background())
 
 		xplaneSvc := &xplaneService{
-			Plugin:        extra.NewPlugin("xa honeycomb - "+VERSION, "com.github.xairline.xa-honeycomb", "honeycomb bridge"),
+			Plugin:        extra.NewPlugin("xa honeycomb - "+VERSION, "com.github.xairline.zoal-honeycomb", "honeycomb bridge"),
 			BravoService:  honeycomb.NewBravoService(logger),
 			Logger:        logger,
 			pluginPath:    pluginPath,

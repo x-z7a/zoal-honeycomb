@@ -1,6 +1,6 @@
 # Install
 
-1. Download `xa-honeycombo.zip` from the [Release Page](https://github.com/x-z7a/zoal-honeycomb/releases/latest).
+1. Download `zoal-honeycombo.zip` from the [Release Page](https://github.com/x-z7a/zoal-honeycomb/releases/latest).
 2. Drop the folder into X-Plane's plugins folder.
 3. See the mappings below for knobs and AP buttons.
 4. A GUI tool is included to help add/change profiles, but it is currently read-only. On macOS you might need:

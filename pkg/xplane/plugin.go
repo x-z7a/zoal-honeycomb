@@ -45,7 +45,7 @@ func (s *xplaneService) onPluginStart() {
 	// get plugin path
 	plugins.EnableFeature("XPLM_USE_NATIVE_PATHS", true)
 	systemPath := utilities.GetSystemPath()
-	pluginPath := filepath.Join(systemPath, "Resources", "plugins", "xa-honeycomb")
+	pluginPath := filepath.Join(systemPath, "Resources", "plugins", "zoal-honeycomb")
 	s.Logger.Infof("Plugin path: %s", pluginPath)
 
 	processing.RegisterFlightLoopCallback(s.flightLoop, 5.0, nil)
@@ -104,7 +104,7 @@ func fetchLatestGithubReleaseVersion(client *http.Client, endpoint string) (stri
 		return "", err
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "xa-honeycomb-version-check")
+	req.Header.Set("User-Agent", "zoal-honeycomb-version-check")
 
 	resp, err := client.Do(req)
 	if err != nil {
