@@ -47,6 +47,7 @@ func (s *xplaneService) onPluginStart() {
 	systemPath := utilities.GetSystemPath()
 	pluginPath := filepath.Join(systemPath, "Resources", "plugins", "zoal-honeycomb")
 	s.Logger.Infof("Plugin path: %s", pluginPath)
+	s.pluginPath = pluginPath
 
 	processing.RegisterFlightLoopCallback(s.flightLoop, 5.0, nil)
 	//
