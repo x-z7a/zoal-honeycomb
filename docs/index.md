@@ -29,7 +29,6 @@ features:
     details: Includes Toliss, Zibo, LevelUp, FlightFactor, Laminar, and more.
 ---
 
-> Note: Windows is not fully tested. Linux build is currently broken. UI is still WIP.
 
 ## Links
 

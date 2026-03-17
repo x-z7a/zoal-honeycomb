@@ -3,11 +3,6 @@
 1. Download `zoal-honeycombo.zip` from the [Release Page](https://github.com/x-z7a/zoal-honeycomb/releases/latest).
 2. Drop the folder into X-Plane's plugins folder.
 3. See the mappings below for knobs and AP buttons.
-4. A GUI tool is included to help add/change profiles, but it is currently read-only. On macOS you might need:
-
-```bash
-chmod -R 755 bravo.app
-```
 
 ## Bravo Knobs Mapping
 
@@ -21,7 +16,7 @@ Mappings can be found by searching `honeycomb` after clicking `Edit` in X-Plane.
 
 ![Search honeycomb after clicking Edit](https://github.com/user-attachments/assets/b0397f82-d074-4b14-aded-793a9c272b66)
 
-## *EXPERIMENTAL Smooth Trim Wheel
+## Smooth Trim Wheel
 
 Use plugin's trim up/down
 
@@ -31,6 +26,6 @@ Watch the demo video:
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/vriTIxtnZcE" title="YouTube video" frameborder="0" allowfullscreen></iframe>
 
-## UI Current State
+## GUI Configurator
 
-![UI current state](https://github.com/user-attachments/assets/e787f605-ece9-4dc1-9dae-4f2d1ac7c4f9)
+![UI Current State](/images/bravo-app-window.png)
