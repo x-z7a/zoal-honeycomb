@@ -1,8 +1,8 @@
 metadata:
-    name: Beechcraft King Air C90B
-    description: Laminar C90B & EVO GNS & EVO G1000
+    name: Piper Cherokee 140
+    description: Cherokee 140 from vFlyteAir
     selectors:
-        - BE9L
+        - vFlyteAir Cherokee 140
 buttons:
     hdg:
         single_click:
@@ -53,7 +53,7 @@ knobs:
             - dataref_str: sim/cockpit2/autopilot/vvi_dial_fpm
     ap_alt:
         datarefs:
-            - dataref_str: sim/cockpit/autopilot/altitude
+            - dataref_str: sim/cockpit2/autopilot/altitude_dial_ft
     ap_ias:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/airspeed_dial_kts_mach
@@ -69,27 +69,27 @@ leds:
     nav:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/nav_status
-              operator: '>='
-              threshold: 1
+              operator: ==
+              threshold: 2
             - dataref_str: sim/cockpit2/autopilot/gpss_status
-              operator: '>='
+              operator: ==
               threshold: 1
         condition: any
     alt:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/altitude_hold_status
-              operator: '>='
-              threshold: 1
+              operator: ==
+              threshold: 2
     apr:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/approach_status
-              operator: '>='
+              operator: '>'
               threshold: 1
     vs:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/vvi_status
-              operator: '>='
-              threshold: 1
+              operator: ==
+              threshold: 2
     ap:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/servos_on
@@ -103,7 +103,7 @@ leds:
     rev:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/backcourse_status
-              operator: '>='
+              operator: ==
               threshold: 1
     gear:
         datarefs:
@@ -121,30 +121,24 @@ leds:
               threshold: 0.01
     fire:
         datarefs:
-            - dataref_str: laminar/c90/lighting/annun/engine_fire_L
+            - dataref_str: sim/cockpit2/annunciators/engine_fires
               operator: '>'
-              threshold: 0.1
-            - dataref_str: laminar/c90/lighting/annun/engine_fire_R
-              operator: '>'
-              threshold: 0.1
-        condition: any
+              threshold: 0.01
     oil_low_pressure:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/oil_pressure
-              operator: '>='
-              threshold: 1
+            - dataref_str: sim/cockpit2/engine/indicators/oil_pressure_psi
+              operator: <
+              threshold: 60
     fuel_low_pressure:
         datarefs:
-            - dataref_str: sim/cockpit/warnings/annunciators/fuel_pressure
-              operator: '>'
+            - dataref_str: sim/cockpit2/annunciators/fuel_pressure_low
+              operator: ==
               threshold: 1
     anti_ice:
         datarefs:
-            - dataref_str: sim/cockpit/switches/pitot_heat_on
+            - dataref_str: sim/cockpit2/annunciators/pitot_heat
               operator: ==
-            - dataref_str: sim/cockpit/switches/pitot_heat_on2
-              operator: ==
-        condition: any
+              threshold: 0
     eng_starter:
         datarefs:
             - dataref_str: sim/cockpit2/engine/actuators/starter_hit
@@ -152,44 +146,49 @@ leds:
               threshold: 0.01
     apu:
         datarefs:
+            - dataref_str: sim/cockpit2/electrical/APU_running
+              operator: '>'
+              threshold: 0.01
             - dataref_str: sim/cockpit/electrical/gpu_on
-              operator: '>='
+              operator: ==
               threshold: 1
+        condition: any
     vacuum:
         datarefs:
             - dataref_str: sim/cockpit/misc/vacuum
-              operator: <=
-              threshold: 1
-            - dataref_str: sim/cockpit/misc/vacuum2
-              operator: <=
-              threshold: 1
-    hydro_low_pressure: {}
+              operator: <
+              threshold: 3
+    hydro_low_pressure:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/hydraulic_pressure
+              operator: ==
+              threshold: 0
     aux_fuel_pump:
         datarefs:
-            - dataref_str: sim/cockpit/engine/fuel_pump_on
-              operator: ==
-            - dataref_str: sim/cockpit/engine/fuel_pump_on
-              index: 1
-              operator: ==
+            - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on
+              operator: '>'
+              threshold: 0.01
+            - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on2
+              operator: '>'
+              threshold: 0.01
         condition: all
     parking_brake:
         datarefs:
             - dataref_str: sim/cockpit2/controls/parking_brake_ratio
-              operator: '>='
-              threshold: 0.9
-    volt_low:
-        datarefs:
-            - dataref_str: sim/cockpit2/electrical/bus_volts
-              operator: <
-              threshold: 27
+              operator: ==
+              threshold: 1
+    volt_low: {}
     doors:
         datarefs:
             - dataref_str: sim/flightmodel2/misc/door_open_ratio
+              index: 1
               operator: '>'
               threshold: 0.9
+            - dataref_str: VFLYTEAIR/PA28-140/DoorLatch
+              operator: ==
+              threshold: 0
+        condition: any
 data:
-    ap_alt_step:
-        value: 100
     ap_vs_step:
         value: 100
     ap_ias_step:
@@ -200,7 +199,3 @@ conditions:
             - dataref_str: sim/cockpit2/electrical/bus_volts
               operator: '>'
               threshold: 0.01
-    retractable_gear:
-        datarefs:
-            - dataref_str: sim/aircraft/gear/acf_gear_retract
-              operator: '!='

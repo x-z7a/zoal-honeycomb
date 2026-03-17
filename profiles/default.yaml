@@ -58,11 +58,6 @@ knobs:
     ap_crs:
         datarefs:
             - dataref_str: sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot
-trim_wheels:
-    up_cmd: sim/flight_controls/pitch_trim_up_mech
-    down_cmd: sim/flight_controls/pitch_trim_down_mech
-    sensitivity: 23
-    window_ms: 500
 leds:
     hdg:
         datarefs:
@@ -112,7 +107,6 @@ leds:
         datarefs:
             - dataref_str: sim/flightmodel2/gear/deploy_ratio
               operator: '!='
-              threshold: 0
     master_warn:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/master_warning
@@ -160,8 +154,8 @@ leds:
     vacuum:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/low_vacuum
-              operator: ==
-              threshold: 1
+              operator: '>'
+              threshold: 0
     hydro_low_pressure:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/hydraulic_pressure
@@ -183,15 +177,19 @@ leds:
               threshold: 1
     volt_low:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/low_voltage
-              operator: ==
-              threshold: 1
+            - dataref_str: sim/cockpit2/electrical/bus_volts
+              operator: <
+              threshold: 27
     doors:
         datarefs:
             - dataref_str: sim/flightmodel2/misc/door_open_ratio
               operator: '>'
               threshold: 0.9
-data: {}
+data:
+    ap_vs_step:
+        value: 10
+    ap_ias_step:
+        value: 1
 conditions:
     bus_voltage:
         datarefs:

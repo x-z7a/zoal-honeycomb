@@ -92,7 +92,6 @@ leds:
         datarefs:
             - dataref_str: sim/flightmodel2/gear/deploy_ratio
               operator: '!='
-              threshold: 0
     master_warn:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/master_warning
@@ -115,14 +114,13 @@ leds:
               threshold: 1
     fuel_low_pressure:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/fuel_quantity
-              operator: '>='
-              threshold: 1
+            - dataref_str: sim/cockpit/warnings/annunciators/fuel_pressure
+              operator: '!='
     anti_ice:
         datarefs:
-            - dataref_str: sim/cockpit/warnings/annunciators/pitot_heat_off
+            - dataref_str: laminar/b58/annun/pitot_heat_on
               operator: ==
-              threshold: 0
+              threshold: 1
     eng_starter:
         datarefs:
             - dataref_str: sim/cockpit2/engine/actuators/starter_hit
@@ -180,4 +178,3 @@ conditions:
         datarefs:
             - dataref_str: sim/aircraft/gear/acf_gear_retract
               operator: '!='
-              threshold: 0

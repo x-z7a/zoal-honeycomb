@@ -1,65 +1,65 @@
 metadata:
-    name: Beechcraft King Air C90B
-    description: Laminar C90B & EVO GNS & EVO G1000
+    name: Embraer E-Jet E190
+    description: E190 from X-Crafts E-Jets Family
     selectors:
-        - BE9L
+        - E-Jets Family E190
 buttons:
     hdg:
         single_click:
             - command_str: sim/autopilot/heading
         double_click:
-            - command_str: sim/autopilot/heading_sync_pilot
+            - command_str: sim/autopilot/heading_sync
     nav:
         single_click:
-            - command_str: sim/autopilot/NAV
+            - command_str: XCrafts/ERJ/LNAV
         double_click:
-            - command_str: sim/autopilot/gpss
+            - command_str: XCrafts/ERJ/LNAV
     alt:
         single_click:
             - command_str: sim/autopilot/altitude_hold
         double_click:
-            - command_str: sim/autopilot/altitude_hold
+            - command_str: sim/autopilot/altitude_sync
     apr:
         single_click:
-            - command_str: sim/autopilot/approach
+            - command_str: XCrafts/ERJ/APPCH
         double_click:
-            - command_str: sim/autopilot/approach
+            - command_str: sim/autopilot//approach
     vs:
         single_click:
-            - command_str: sim/autopilot/vertical_speed
+            - command_str: XCrafts/ERJ/VS
         double_click:
-            - command_str: sim/autopilot/vertical_speed
+            - command_str: XCrafts/ERJ/VNAV
     ap:
         single_click:
-            - command_str: sim/autopilot/servos_toggle
+            - command_str: XCrafts/APYD_Toggle
         double_click:
-            - command_str: sim/autopilot/servos_toggle
+            - command_str: XCrafts/APYD_Toggle
     ias:
         single_click:
-            - command_str: sim/autopilot/speed_hold
+            - command_str: XCrafts/ERJ/FLCH
         double_click:
-            - command_str: sim/autopilot/speed_hold
+            - command_str: XCrafts/ERJ/VNAV
     rev:
         single_click:
             - command_str: sim/autopilot/back_course
         double_click:
-            - command_str: sim/autopilot/back_course
+            - command_str: sim/autopilot/take-off_go-around
 knobs:
     ap_hdg:
         datarefs:
-            - dataref_str: sim/cockpit2/autopilot/heading_dial_deg_mag_pilot
+            - dataref_str: sim/cockpit/autopilot/heading_mag
     ap_vs:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/vvi_dial_fpm
     ap_alt:
         datarefs:
-            - dataref_str: sim/cockpit/autopilot/altitude
+            - dataref_str: XCrafts/ERJ/autopilot/altitude
     ap_ias:
         datarefs:
-            - dataref_str: sim/cockpit2/autopilot/airspeed_dial_kts_mach
+            - dataref_str: XCrafts/ERJ/autopilot/airspeed_dial_kts_mach
     ap_crs:
         datarefs:
-            - dataref_str: sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot
+            - dataref_str: sim/cockpit2/radios/actuators/hsi_obs_deg_mag_pilot
 leds:
     hdg:
         datarefs:
@@ -83,8 +83,8 @@ leds:
     apr:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/approach_status
-              operator: '>='
-              threshold: 1
+              operator: ==
+              threshold: 2
     vs:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/vvi_status
@@ -100,15 +100,20 @@ leds:
             - dataref_str: sim/cockpit2/autopilot/altitude_mode
               operator: ==
               threshold: 5
+            - dataref_str: sim/cockpit2/autopilot/altitude_mode
+              operator: ==
+              threshold: 9
+        condition: any
     rev:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/backcourse_status
-              operator: '>='
-              threshold: 1
+              operator: ==
+              threshold: 2
     gear:
         datarefs:
             - dataref_str: sim/flightmodel2/gear/deploy_ratio
               operator: '!='
+              threshold: 0
     master_warn:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/master_warning
@@ -121,13 +126,9 @@ leds:
               threshold: 0.01
     fire:
         datarefs:
-            - dataref_str: laminar/c90/lighting/annun/engine_fire_L
+            - dataref_str: sim/cockpit2/annunciators/engine_fires
               operator: '>'
-              threshold: 0.1
-            - dataref_str: laminar/c90/lighting/annun/engine_fire_R
-              operator: '>'
-              threshold: 0.1
-        condition: any
+              threshold: 0.01
     oil_low_pressure:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/oil_pressure
@@ -136,14 +137,16 @@ leds:
     fuel_low_pressure:
         datarefs:
             - dataref_str: sim/cockpit/warnings/annunciators/fuel_pressure
-              operator: '>'
+              operator: '>='
               threshold: 1
     anti_ice:
         datarefs:
             - dataref_str: sim/cockpit/switches/pitot_heat_on
               operator: ==
+              threshold: 0
             - dataref_str: sim/cockpit/switches/pitot_heat_on2
               operator: ==
+              threshold: 0
         condition: any
     eng_starter:
         datarefs:
@@ -152,48 +155,68 @@ leds:
               threshold: 0.01
     apu:
         datarefs:
-            - dataref_str: sim/cockpit/electrical/gpu_on
-              operator: '>='
-              threshold: 1
+            - dataref_str: sim/cockpit2/electrical/APU_running
+              operator: '>'
+              threshold: 0.01
     vacuum:
         datarefs:
             - dataref_str: sim/cockpit/misc/vacuum
-              operator: <=
+              operator: ==
+              threshold: 0
+    hydro_low_pressure:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/hydraulic_pressure
+              operator: '>='
               threshold: 1
-            - dataref_str: sim/cockpit/misc/vacuum2
-              operator: <=
-              threshold: 1
-    hydro_low_pressure: {}
     aux_fuel_pump:
         datarefs:
-            - dataref_str: sim/cockpit/engine/fuel_pump_on
+            - dataref_str: XCrafts/fuel/ac_pump_left_sw
               operator: ==
-            - dataref_str: sim/cockpit/engine/fuel_pump_on
+              threshold: 0
+            - dataref_str: XCrafts/fuel/ac_pump_right_sw
               index: 1
               operator: ==
-        condition: all
+              threshold: 0
+        condition: any
     parking_brake:
         datarefs:
             - dataref_str: sim/cockpit2/controls/parking_brake_ratio
-              operator: '>='
-              threshold: 0.9
+              operator: ==
+              threshold: 1
     volt_low:
         datarefs:
-            - dataref_str: sim/cockpit2/electrical/bus_volts
-              operator: <
-              threshold: 27
+            - dataref_str: sim/cockpit/warnings/annunciators/low_voltage
+              operator: ==
+              threshold: 1
     doors:
         datarefs:
-            - dataref_str: sim/flightmodel2/misc/door_open_ratio
+            - dataref_str: XCrafts/doors/front_main
               operator: '>'
-              threshold: 0.9
+              threshold: 0
+            - dataref_str: XCrafts/doors/back_main
+              operator: '>'
+              threshold: 0
+            - dataref_str: XCrafts/doors/front_cargo
+              operator: '>'
+              threshold: 0
+            - dataref_str: XCrafts/doors/back_cargo
+              operator: '>'
+              threshold: 0
+            - dataref_str: XCrafts/doors/front_service
+              operator: '>'
+              threshold: 0
+            - dataref_str: XCrafts/doors/back_service
+              operator: '>'
+              threshold: 0
+        condition: any
 data:
     ap_alt_step:
         value: 100
     ap_vs_step:
-        value: 100
+        datarefs:
+            - dataref_str: sim/aircraft/autopilot/vvi_step_ft
     ap_ias_step:
-        value: 10
+        value: 1
 conditions:
     bus_voltage:
         datarefs:
@@ -204,3 +227,4 @@ conditions:
         datarefs:
             - dataref_str: sim/aircraft/gear/acf_gear_retract
               operator: '!='
+              threshold: 0

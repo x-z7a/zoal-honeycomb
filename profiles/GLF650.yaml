@@ -1,8 +1,8 @@
 metadata:
-    name: Beechcraft King Air C90B
-    description: Laminar C90B & EVO GNS & EVO G1000
+    name: GLF650 AKD XP12
+    description: Profile for Gulfstream GLF650 by AKD
     selectors:
-        - BE9L
+        - GLF650_AKD
 buttons:
     hdg:
         single_click:
@@ -11,7 +11,7 @@ buttons:
             - command_str: sim/autopilot/heading_sync_pilot
     nav:
         single_click:
-            - command_str: sim/autopilot/NAV
+            - command_str: AKD/autopilot/LNAV_cmd
         double_click:
             - command_str: sim/autopilot/gpss
     alt:
@@ -52,8 +52,9 @@ knobs:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/vvi_dial_fpm
     ap_alt:
-        datarefs:
-            - dataref_str: sim/cockpit/autopilot/altitude
+        commands:
+            - command_str: AKD/autopilot/MCP_alt_up_cmd
+            - command_str: AKD/autopilot/MCP_alt_dn_cmd
     ap_ias:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/airspeed_dial_kts_mach
@@ -83,13 +84,13 @@ leds:
     apr:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/approach_status
-              operator: '>='
-              threshold: 1
+              operator: ==
+              threshold: 2
     vs:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/vvi_status
-              operator: '>='
-              threshold: 1
+              operator: ==
+              threshold: 2
     ap:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/servos_on
@@ -103,7 +104,7 @@ leds:
     rev:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/backcourse_status
-              operator: '>='
+              operator: ==
               threshold: 1
     gear:
         datarefs:
@@ -111,40 +112,38 @@ leds:
               operator: '!='
     master_warn:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/master_warning
-              operator: '>'
-              threshold: 0.01
+            - dataref_str: AKD/CAS/master_warning_lamp_status
+              operator: ==
+              threshold: 1
     master_caution:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/master_caution
-              operator: '>'
-              threshold: 0.01
+            - dataref_str: AKD/CAS/master_caution_lamp_status
+              operator: ==
+              threshold: 1
     fire:
         datarefs:
-            - dataref_str: laminar/c90/lighting/annun/engine_fire_L
+            - dataref_str: sim/cockpit2/annunciators/engine_fires
               operator: '>'
-              threshold: 0.1
-            - dataref_str: laminar/c90/lighting/annun/engine_fire_R
-              operator: '>'
-              threshold: 0.1
-        condition: any
+              threshold: 0.01
     oil_low_pressure:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/oil_pressure
-              operator: '>='
-              threshold: 1
+            - dataref_str: AKD/ENG/ENG_L_oil_press
+              operator: ==
+              threshold: 0
+            - dataref_str: AKD/ENG/ENG_R_oil_press
+              operator: ==
+              threshold: 0
+        condition: any
     fuel_low_pressure:
         datarefs:
             - dataref_str: sim/cockpit/warnings/annunciators/fuel_pressure
-              operator: '>'
-              threshold: 1
+              operator: ==
+              threshold: 3
     anti_ice:
         datarefs:
-            - dataref_str: sim/cockpit/switches/pitot_heat_on
-              operator: ==
-            - dataref_str: sim/cockpit/switches/pitot_heat_on2
-              operator: ==
-        condition: any
+            - dataref_str: sim/cockpit2/annunciators/pitot_heat
+              operator: '>'
+              threshold: 0.01
     eng_starter:
         datarefs:
             - dataref_str: sim/cockpit2/engine/actuators/starter_hit
@@ -152,31 +151,46 @@ leds:
               threshold: 0.01
     apu:
         datarefs:
-            - dataref_str: sim/cockpit/electrical/gpu_on
-              operator: '>='
-              threshold: 1
+            - dataref_str: sim/cockpit2/electrical/APU_running
+              operator: '>'
+              threshold: 0.01
+        condition: any
     vacuum:
         datarefs:
             - dataref_str: sim/cockpit/misc/vacuum
-              operator: <=
-              threshold: 1
-            - dataref_str: sim/cockpit/misc/vacuum2
-              operator: <=
-              threshold: 1
-    hydro_low_pressure: {}
+              operator: <
+              threshold: 6
+    hydro_low_pressure:
+        datarefs:
+            - dataref_str: AKD/hyd/hydraulic_pressure_1
+              operator: <
+              threshold: 3000
+            - dataref_str: AKD/hyd/hydraulic_pressure_2
+              operator: <
+              threshold: 3000
     aux_fuel_pump:
         datarefs:
             - dataref_str: sim/cockpit/engine/fuel_pump_on
               operator: ==
+              threshold: 0
             - dataref_str: sim/cockpit/engine/fuel_pump_on
               index: 1
               operator: ==
+              threshold: 0
+            - dataref_str: sim/cockpit/engine/fuel_pump_on
+              index: 2
+              operator: ==
+              threshold: 0
+            - dataref_str: sim/cockpit/engine/fuel_pump_on
+              index: 3
+              operator: ==
+              threshold: 0
         condition: all
     parking_brake:
         datarefs:
             - dataref_str: sim/cockpit2/controls/parking_brake_ratio
-              operator: '>='
-              threshold: 0.9
+              operator: ==
+              threshold: 1
     volt_low:
         datarefs:
             - dataref_str: sim/cockpit2/electrical/bus_volts
@@ -184,23 +198,23 @@ leds:
               threshold: 27
     doors:
         datarefs:
-            - dataref_str: sim/flightmodel2/misc/door_open_ratio
-              operator: '>'
-              threshold: 0.9
+            - dataref_str: AKD/doors/toggle_main_door_switch
+              operator: ==
+              threshold: 1
+            - dataref_str: AKD/doors/toggle_cargo_door_switch
+              operator: ==
+              threshold: 1
+        condition: any
 data:
     ap_alt_step:
         value: 100
     ap_vs_step:
-        value: 100
+        value: 50
     ap_ias_step:
-        value: 10
+        value: 1
 conditions:
     bus_voltage:
         datarefs:
             - dataref_str: sim/cockpit2/electrical/bus_volts
               operator: '>'
               threshold: 0.01
-    retractable_gear:
-        datarefs:
-            - dataref_str: sim/aircraft/gear/acf_gear_retract
-              operator: '!='
