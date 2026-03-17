@@ -1,37 +1,51 @@
 # Supported Planes
 
-Based on `profiles/*.yaml` (excluding `default.yaml`).
+This page is based on the YAML profiles in `profiles/` and excludes `default.yaml`.
 
-- Toliss A319
-- Toliss A321
-- Toliss A339
-- Metro III AC Freighter
-- Beechcraft Baron 58
-- Beechcraft Duchess 76
-- Beechcraft King Air 350
-- Beechcraft King Air C90B
-- Level Up 737-600 NG
-- Level Up 737-700 NG
-- Level Up 737-800 NG
-- Zibo 738
-- Level Up 737-900 NG
-- Flight Factor B772
-- Laminar C172 Skyhawk (G1000)
-- Laminar C172 Skyhawk
-- C172 NG ANALOG
-- Cessna 208 Caravan
-- Cessna Citation X
-- Diamond DA42NG
-- Douglas DC-3
-- FlyJSim Q400
-- Phenom 300
-- Robin DR-401
-- Rotate MD-11
-- vFlyteAir Arrow III E1000
-- vFlyteAir Arrow III
-- Cirrus SR-22
-- Cirrus SR-22 G1000
-- Cirrus SF-50
+There are currently `38` profile files. The `Matches` column shows the exact
+`metadata.selectors` values used by runtime profile selection, so a single
+profile can cover multiple aircraft variants.
+
+| Profile file | Display name | Matches (`metadata.selectors`) |
+| --- | --- | --- |
+| `A319.yaml` | Toliss A319 | `ToLiSs A319 Hi Def`<br>`ToLiSs A319 Std Def` |
+| `A321.yaml` | Toliss A321 | `ToLiss Airbus A321 Hi Def`<br>`ToLiss Airbus A321 Std Def` |
+| `A339.yaml` | Toliss A339 | `ToLiss Airbus A330-941 Hi Def`<br>`ToLiss Airbus A330-941 Std Def` |
+| `AMF.yaml` | Metro III AC Freighter | `Metro III AC Freighter` |
+| `B350.yaml` | Beechcraft King Air 350 | `B350` |
+| `B736_level_up.yaml` | Level Up 737-600 NG | `Boeing 737-600NG` |
+| `B737_level_up.yaml` | Level Up 737-700 NG | `Boeing 737-700NG` |
+| `B738_level_up.yaml` | Level Up 737-800 NG | `Boeing 737-800NG` |
+| `B738_zibo.yaml` | Zibo 738 | `Boeing 737-800X`<br>`Boeing 737-800X (4k)` |
+| `B739_level_up.yaml` | Level Up 737-900 NG | `Boeing 737-900NG`<br>`Boeing 737-900ER` |
+| `B772.yaml` | Flight Factor B772 | `Boeing 777-200ER` |
+| `BE58.yaml` | Beechcraft Baron 58 | `Baron_58` |
+| `BE76.yaml` | Beechcraft Duchess 76 | `BE76` |
+| `BE9L.yaml` | Beechcraft King Air C90B | `BE9L` |
+| `C172 G1000.yaml` | Laminar C172 Skyhawk (G1000) | `Cessna Skyhawk (G1000)` |
+| `C172 Steam.yaml` | Laminar C172 Skyhawk | `Cessna Skyhawk` |
+| `C172_airfoilabs.yaml` | C172 NG ANALOG | `C172 NG ANALOG`<br>`C172 NG DIGITAL` |
+| `C208.yaml` | Cessna 208 Caravan | `Cessna 208 Caravan`<br>`Cessna 208 Caravan Amphibian`<br>`Cessna 208 Grand Caravan`<br>`Cessna 208 Grand Caravan Amphibian` |
+| `C750.yaml` | Cessna Citation X | `Cessna Citation X` |
+| `DA42NG_Aerobask.yaml` | Diamond DA42NG | `Diamond DA42 by Aerobask` |
+| `DC3.yaml` | Douglas DC-3 | `Douglas C-47 Classic`<br>`Douglas C-47 GNS530`<br>`Douglas C-47 Passenger`<br>`Douglas CX-47 Float`<br>`Douglas DC-3 NXG` |
+| `DH8D.yaml` | FlyJSim Q400 | `DH8D` |
+| `DR40.yaml` | Robin DR-401 | `DR40` |
+| `E170.yaml` | Embraer E-Jet E170 | `E-Jets E170` |
+| `E190.yaml` | Embraer E-Jet E190 | `E-Jets Family E190` |
+| `E19L.yaml` | Embraer E-Jet Lineage 1000 | `E-Jets Lineage 1000` |
+| `E55P.yaml` | Phenom 300 | `Phenom 300 by Aerobask` |
+| `EVOT.yaml` | Lancair Evolution | `Lancair Evolution`<br>`Lancair Evolution EVOT-550`<br>`Lancair Evolution EVOT-750`<br>`Lancair Evolution EVOT-850` |
+| `GLF650.yaml` | GLF650 AKD XP12 | `GLF650_AKD` |
+| `GLF650ER.yaml` | GLF650ER AKD XP12 | `GLF650ER_AKD` |
+| `MD11.yaml` | Rotate MD-11 | `Rotate MD-11F`<br>`Rotate MD-11` |
+| `P28R_VFA_Arrow_III_E1000.yaml` | vFlyteAir Arrow III E1000 | `vFlyteAir Arrow III E1000` |
+| `P28R_VFA_Arrow_III_G5.yaml` | vFlyteAir Arrow III | `vFlyteAir Arrow III G5` |
+| `PA28A.yaml` | Piper Cherokee 140 | `vFlyteAir Cherokee 140` |
+| `S22 G1000.yaml` | Cirrus SR-22 | `Cirrus SR22 (G1000)` |
+| `S22T.yaml` | Cirrus SR-22 G1000 | `Cirrus SR-22` |
+| `SF50.yaml` | Cirrus SF-50 | `Cirrus SR-22` |
+| `SR22.yaml` | Cirrus SR-22 | `Cirrus SR-22`<br>`Cirrus SR22 (G1000)` |
 
 ## Credits
 
@@ -40,4 +54,3 @@ Last 3 contributors:
 - [nonstop73](https://forums.x-plane.org/profile/930595-nonstop73/)
 - [Fatherofsam](https://forums.x-plane.org/profile/900987-fatherofsam/)
 - [ELATES](https://forums.x-plane.org/profile/16491-elates/)
-
