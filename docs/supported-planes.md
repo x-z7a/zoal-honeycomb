@@ -1,14 +1,17 @@
 # Supported Planes
 
-This page is based on the YAML profiles in `profiles/` and excludes `default.yaml`.
+This page is generated from the YAML profiles in `profiles/` and excludes `default.yaml`.
+Do not edit the generated section by hand. Run `npm --prefix docs run docs:generate:supported-planes` instead.
 
-There are currently `38` profile files. The `Matches` column shows the exact
+<!-- BEGIN GENERATED SUPPORTED PLANES -->
+There are currently `40` profile files. The `Matches` column shows the exact
 `metadata.selectors` values used by runtime profile selection, so a single
 profile can cover multiple aircraft variants.
 
 | Profile file | Display name | Matches (`metadata.selectors`) |
 | --- | --- | --- |
 | `A319.yaml` | Toliss A319 | `ToLiSs A319 Hi Def`<br>`ToLiSs A319 Std Def` |
+| `A320.yaml` | Toliss A320 | `Toliss Airbus A320 Neo`<br>`Toliss Airbus A320 Std` |
 | `A321.yaml` | Toliss A321 | `ToLiss Airbus A321 Hi Def`<br>`ToLiss Airbus A321 Std Def` |
 | `A339.yaml` | Toliss A339 | `ToLiss Airbus A330-941 Hi Def`<br>`ToLiss Airbus A330-941 Std Def` |
 | `AMF.yaml` | Metro III AC Freighter | `Metro III AC Freighter` |
@@ -32,6 +35,7 @@ profile can cover multiple aircraft variants.
 | `DH8D.yaml` | FlyJSim Q400 | `DH8D` |
 | `DR40.yaml` | Robin DR-401 | `DR40` |
 | `E170.yaml` | Embraer E-Jet E170 | `E-Jets E170` |
+| `E175.yaml` | Embraer E-Jet E175 | `E-Jets E175` |
 | `E190.yaml` | Embraer E-Jet E190 | `E-Jets Family E190` |
 | `E19L.yaml` | Embraer E-Jet Lineage 1000 | `E-Jets Lineage 1000` |
 | `E55P.yaml` | Phenom 300 | `Phenom 300 by Aerobask` |
@@ -46,6 +50,7 @@ profile can cover multiple aircraft variants.
 | `S22T.yaml` | Cirrus SR-22 G1000 | `Cirrus SR-22` |
 | `SF50.yaml` | Cirrus SF-50 | `Cirrus SR-22` |
 | `SR22.yaml` | Cirrus SR-22 | `Cirrus SR-22`<br>`Cirrus SR22 (G1000)` |
+<!-- END GENERATED SUPPORTED PLANES -->
 
 ## Credits
 
