@@ -37,6 +37,7 @@ import KnobConfiguration from "./components/knobConfiguration";
 import ButtonConfiguration from "./components/buttonConfiguration";
 import DataConfiguration from "./components/dataConfiguration";
 import TrimWheelConfiguration from "./components/trimWheelConfiguration";
+import { decodeDatarefText } from "./utils/datarefs";
 
 const EDITOR_TABS = [
   "Autopilot Buttons",
@@ -66,21 +67,6 @@ function sanitizeProfileForApi(profile: pkg.Profile): pkg.Profile {
   return pkg.Profile.createFrom(JSON.parse(JSON.stringify(profile)));
 }
 
-function decodeDatarefText(raw: string | undefined): string {
-  if (!raw) {
-    return "";
-  }
-  try {
-    const parsed = JSON.parse(raw) as { data?: string };
-    if (!parsed?.data) {
-      return "";
-    }
-    return atob(parsed.data);
-  } catch {
-    return "";
-  }
-}
-
 function basenameWithoutExt(filePath: string): string {
   const normalized = filePath.replace(/\\/g, "/");
   const basename = normalized.split("/").pop() || "";
@@ -108,6 +94,32 @@ function parseSelectorsInput(raw: string): string[] {
     selectors.push(trimmed);
   });
   return selectors;
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error === "string" && error.trim() !== "") {
+    return error;
+  }
+  if (error instanceof Error && error.message.trim() !== "") {
+    return error.message;
+  }
+  if (error && typeof error === "object") {
+    const errorWithMessage = error as { message?: unknown; error?: unknown };
+    if (typeof errorWithMessage.message === "string" && errorWithMessage.message.trim() !== "") {
+      return errorWithMessage.message;
+    }
+    if (typeof errorWithMessage.error === "string" && errorWithMessage.error.trim() !== "") {
+      return errorWithMessage.error;
+    }
+    try {
+      const serialized = JSON.stringify(error);
+      if (serialized && serialized !== "{}") {
+        return serialized;
+      }
+    } catch {
+    }
+  }
+  return fallback;
 }
 
 function findBestProfileIndex(plane: PlaneInfo, profiles: pkg.Profile[], profileFiles: string[]): number {
@@ -184,7 +196,7 @@ function App() {
         profilesDir: "",
         profilesCount: 0,
         needsSelection: true,
-        loadError: error?.message || "Failed to load profile status."
+        loadError: getErrorMessage(error, "Failed to load profile status.")
       } as main.ProfilesStatus);
       setProfilesData([]);
       setProfileFiles([]);
@@ -375,7 +387,7 @@ function App() {
       setIsAddProfileModalOpen(false);
       setAddProfileStep(0);
     } catch (error: any) {
-      setCreateProfileError(error?.message || "Failed to create profile from default.yaml.");
+      setCreateProfileError(getErrorMessage(error, "Failed to create profile from default.yaml."));
     } finally {
       setIsCreatingProfile(false);
     }
@@ -419,7 +431,7 @@ function App() {
       );
       setSaveMessage("Profile saved to YAML.");
     } catch (error: any) {
-      setSaveError(error?.message || "Failed to save profile.");
+      setSaveError(getErrorMessage(error, "Failed to save profile."));
     } finally {
       setIsSaving(false);
     }
@@ -480,7 +492,10 @@ function App() {
                   This wizard creates a new profile by copying <code>default.yaml</code> and then updating metadata.
                 </Alert>
                 <Typography variant="body2">
-                  Template source: <code>{`${profilesStatus?.profilesDir || "--"}/default.yaml`}</code>
+                  Preferred template path: <code>{`${profilesStatus?.profilesDir || "--"}/default.yaml`}</code>
+                </Typography>
+                <Typography variant="body2">
+                  If that file is missing, the app falls back to the bundled default template.
                 </Typography>
                 <Typography variant="body2">
                   You can fine-tune all tabs after creation, then click <strong>Save YAML</strong>.

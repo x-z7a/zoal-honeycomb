@@ -5,26 +5,7 @@ import * as React from 'react';
 import {useEffect} from 'react';
 import {GetXplane} from "../../wailsjs/go/main/App";
 import {Chip, Divider, Stack} from "@mui/material";
-
-interface DatarefValueResponse {
-  data?: string;
-}
-
-function decodeDatarefText(raw: string | undefined): string {
-  if (!raw) {
-    return "";
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as DatarefValueResponse;
-    if (!parsed?.data) {
-      return "";
-    }
-    return atob(parsed.data);
-  } catch {
-    return "";
-  }
-}
+import {decodeDatarefText} from "../utils/datarefs";
 
 export default function Xplane() {
   const [icao, setIcao] = React.useState("");
