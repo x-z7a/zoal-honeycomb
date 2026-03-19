@@ -19,6 +19,7 @@ const (
 	defaultTrimWindowMs    = int64(500)
 	minimumTrimSensitivity = 1.0
 	minimumTrimWindowMs    = int64(1)
+	tolissTrimIdleTimeout  = 200 * time.Millisecond
 )
 
 func (s *xplaneService) changeApValue(command utilities.CommandRef, phase utilities.CommandPhase, ref interface{}) int {
@@ -247,6 +248,11 @@ func (s *xplaneService) trimPressed(command utilities.CommandRef, phase utilitie
 			return 0
 		}
 
+		if s.usesTolissTrimHold() {
+			s.beginOrRefreshTolissTrimCommand(cmd.CommandStr)
+			return 0
+		}
+
 		// depends on how quickly you turn the trim wheel, it will execute the command multiple times to trim faster
 		now := time.Now()
 		elapsed := now.Sub(s.lastTrimTime).Milliseconds()
@@ -273,6 +279,89 @@ func (s *xplaneService) trimPressed(command utilities.CommandRef, phase utilitie
 		s.lastTrimTime = now
 	}
 	return 0
+}
+
+func (s *xplaneService) usesTolissTrimHold() bool {
+	if s.profile == nil || s.profile.Metadata == nil {
+		return false
+	}
+
+	if strings.Contains(strings.ToLower(strings.TrimSpace(s.profile.Metadata.Name)), "toliss") {
+		return true
+	}
+
+	for _, selector := range s.profile.Metadata.Selectors {
+		if strings.Contains(strings.ToLower(selector), "toliss") {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (s *xplaneService) beginOrRefreshTolissTrimCommand(cmdStr string) {
+	cmd := utilities.FindCommand(cmdStr)
+	if cmd == nil {
+		s.Logger.Errorf("Trim command not found: %s", cmdStr)
+		return
+	}
+
+	s.tolissTrimMu.Lock()
+	defer s.tolissTrimMu.Unlock()
+
+	if s.tolissTrimCmd != "" && s.tolissTrimCmd != cmdStr {
+		s.endTolissTrimCommandLocked("Switching ToLiss trim direction")
+	}
+
+	if s.tolissTrimCmd == "" {
+		s.Logger.Debugf("Beginning ToLiss trim command: %s", cmdStr)
+		utilities.CommandBegin(cmd)
+		s.tolissTrimCmd = cmdStr
+	}
+
+	s.tolissTrimInput = time.Now()
+}
+
+func (s *xplaneService) endTolissTrimCommandIfIdle() {
+	s.tolissTrimMu.Lock()
+	defer s.tolissTrimMu.Unlock()
+
+	if s.tolissTrimCmd == "" || s.tolissTrimInput.IsZero() {
+		return
+	}
+
+	if time.Since(s.tolissTrimInput) < tolissTrimIdleTimeout {
+		return
+	}
+
+	s.endTolissTrimCommandLocked("Ending idle ToLiss trim command")
+}
+
+func (s *xplaneService) resetTolissTrimCommand() {
+	s.tolissTrimMu.Lock()
+	defer s.tolissTrimMu.Unlock()
+
+	s.endTolissTrimCommandLocked("Resetting ToLiss trim command")
+}
+
+func (s *xplaneService) endTolissTrimCommandLocked(reason string) {
+	if s.tolissTrimCmd == "" {
+		s.tolissTrimInput = time.Time{}
+		return
+	}
+
+	cmdStr := s.tolissTrimCmd
+	s.tolissTrimCmd = ""
+	s.tolissTrimInput = time.Time{}
+
+	cmd := utilities.FindCommand(cmdStr)
+	if cmd == nil {
+		s.Logger.Errorf("Trim command not found while ending hold: %s", cmdStr)
+		return
+	}
+
+	s.Logger.Debugf("%s: %s", reason, cmdStr)
+	utilities.CommandEnd(cmd)
 }
 
 func (s *xplaneService) apPressed(command utilities.CommandRef, phase utilities.CommandPhase, ref interface{}) int {

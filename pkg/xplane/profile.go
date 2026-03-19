@@ -76,6 +76,8 @@ func (s *xplaneService) tryLoadProfile() error {
 }
 
 func (s *xplaneService) setupProfile(planeProfile pkg.Profile) error {
+	s.resetTolissTrimCommand()
+
 	// Fill in any missing sections of the profile
 	if planeProfile.Metadata == nil {
 		planeProfile.Metadata = &pkg.Metadata{}

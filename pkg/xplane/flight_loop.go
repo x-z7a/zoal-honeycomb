@@ -85,6 +85,8 @@ func (s *xplaneService) flightLoop(
 		}
 	}
 
+	s.endTolissTrimCommandIfIdle()
+
 	// Return 0.1 to run again in ~100ms
 	return 0.1
 }

@@ -60,6 +60,9 @@ type xplaneService struct {
 	commandStates   map[string]*commandState
 	globalTime      float64
 	lastTrimTime    time.Time
+	tolissTrimMu    sync.Mutex
+	tolissTrimCmd   string
+	tolissTrimInput time.Time
 }
 
 var xplaneSvcLock = &sync.Mutex{}
@@ -103,6 +106,7 @@ func NewXplaneService(
 func (s *xplaneService) messageHandler(message plugins.Message) {
 	if message.MessageId == plugins.MSG_PLANE_LOADED {
 		s.Logger.Info("Plane loaded")
+		s.resetTolissTrimCommand()
 		s.profile = nil
 		honeycomb.AllOff()
 	}
