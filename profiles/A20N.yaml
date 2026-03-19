@@ -3,7 +3,7 @@ metadata:
     description: Profile for the Toliss A320 NEO
     selectors:
         - Toliss Airbus A320 Neo
-       
+
 buttons:
     hdg:
         single_click:
@@ -94,7 +94,7 @@ leds:
     ap:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/servos_on
-              operator: '>'
+              operator: ">"
               threshold: 0.01
     ias:
         datarefs:
@@ -109,21 +109,21 @@ leds:
     gear:
         datarefs:
             - dataref_str: sim/flightmodel2/gear/deploy_ratio
-              operator: '!='
+              operator: "!="
     master_warn:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/master_warning
-              operator: '>'
+              operator: ">"
               threshold: 0.01
     master_caution:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/master_caution
-              operator: '>'
+              operator: ">"
               threshold: 0.01
     fire:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/engine_fires
-              operator: '>'
+              operator: ">"
               threshold: 0.01
     oil_low_pressure:
         datarefs:
@@ -138,17 +138,17 @@ leds:
     anti_ice:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/pitot_heat
-              operator: '>'
+              operator: ">"
               threshold: 0.01
     eng_starter:
         datarefs:
             - dataref_str: sim/cockpit2/engine/actuators/starter_hit
-              operator: '>'
+              operator: ">"
               threshold: 0.01
     apu:
         datarefs:
             - dataref_str: sim/cockpit2/electrical/APU_running
-              operator: '>'
+              operator: ">"
               threshold: 0.01
             - dataref_str: sim/cockpit/electrical/gpu_on
               operator: ==
@@ -157,7 +157,7 @@ leds:
     vacuum:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/low_vacuum
-              operator: '>'
+              operator: ">"
               threshold: 0
     hydro_low_pressure:
         datarefs:
@@ -167,10 +167,10 @@ leds:
     aux_fuel_pump:
         datarefs:
             - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on
-              operator: '>'
+              operator: ">"
               threshold: 0.01
             - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on2
-              operator: '>'
+              operator: ">"
               threshold: 0.01
         condition: all
     parking_brake:
@@ -186,7 +186,7 @@ leds:
     doors:
         datarefs:
             - dataref_str: sim/flightmodel2/misc/door_open_ratio
-              operator: '>'
+              operator: ">"
               threshold: 0.9
 data:
     ap_vs_step:
@@ -196,6 +196,10 @@ data:
 conditions:
     bus_voltage:
         datarefs:
-            - dataref_str: sim/cockpit2/electrical/bus_volts
-              operator: '>'
+            - dataref_str: AirbusFBW/DCBusVoltages
+              operator: ">"
+              threshold: 0.01
+            - dataref_str: AirbusFBW/DCBusVoltages
+              index: 1
+              operator: ">"
               threshold: 0.01

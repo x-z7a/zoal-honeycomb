@@ -196,6 +196,10 @@ data:
 conditions:
     bus_voltage:
         datarefs:
-            - dataref_str: sim/cockpit2/electrical/bus_volts
+            - dataref_str: AirbusFBW/DCBusVoltages
+              operator: '>'
+              threshold: 0.01
+            - dataref_str: AirbusFBW/DCBusVoltages
+              index: 1
               operator: '>'
               threshold: 0.01
