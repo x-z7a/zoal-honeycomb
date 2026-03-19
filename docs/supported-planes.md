@@ -4,12 +4,13 @@ This page is generated from the YAML profiles in `profiles/` and excludes `defau
 Do not edit the generated section by hand. Run `npm --prefix docs run docs:generate:supported-planes` instead.
 
 <!-- BEGIN GENERATED SUPPORTED PLANES -->
-There are currently `40` profile files. The `Matches` column shows the exact
+There are currently `41` profile files. The `Matches` column shows the exact
 `metadata.selectors` values used by runtime profile selection, so a single
 profile can cover multiple aircraft variants.
 
 | Profile file | Display name | Matches (`metadata.selectors`) |
 | --- | --- | --- |
+| `A20N.yaml` | Toliss A320 NEO | `Toliss Airbus A320 Neo` |
 | `A319.yaml` | Toliss A319 | `ToLiSs A319 Hi Def`<br>`ToLiSs A319 Std Def` |
 | `A320.yaml` | Toliss A320 | `Toliss Airbus A320 Neo`<br>`Toliss Airbus A320 Std` |
 | `A321.yaml` | Toliss A321 | `ToLiss Airbus A321 Hi Def`<br>`ToLiss Airbus A321 Std Def` |
