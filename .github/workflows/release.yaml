@@ -90,6 +90,7 @@ jobs:
           cp ${{ github.workspace }}/skunkcrafts_updater.cfg ${{ github.workspace }}/build/zoal-honeycomb/
           cp -r ${{ github.workspace }}/profiles ${{ github.workspace }}/build/zoal-honeycomb/
           sed -i '' "s/REPLACE_ME/${TAG}/g" ${{ github.workspace }}/build/zoal-honeycomb/skunkcrafts_updater.cfg
+          printf '%s\n' "${TAG}" > ${{ github.workspace }}/build/zoal-honeycomb/${TAG}
 
           # sign and notarize mac builds
 
@@ -106,6 +107,11 @@ jobs:
             --password "${{ secrets.MAC_DEV_PASSWORD }}" \
             --team-id "${{ secrets.APPLE_TEAMID }}" \
             --wait
+
+      - name: Generate release notes
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          bash scripts/generate-release-notes.sh "${{ runner.temp }}/release-notes.md" "${GITHUB_REF##*/}"
 
       - run: |
           cp -r ${{ github.workspace }}/build/zoal-honeycomb/ release/
@@ -135,7 +141,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          body_path: ${{ github.workspace }}/README.md
+          body_path: ${{ runner.temp }}/release-notes.md
           files: |
             ${{ github.workspace }}/build/zoal-honeycomb.zip
           prerelease: ${{ contains(github.ref_name, '-') }}
