@@ -23,8 +23,8 @@ interface TrimWheelsEntry {
   [key: string]: any;
 }
 
-const DEFAULT_UP_COMMAND = "sim/flight_controls/pitch_trim_up_mech";
-const DEFAULT_DOWN_COMMAND = "sim/flight_controls/pitch_trim_down_mech";
+const DEFAULT_UP_COMMAND = "sim/flight_controls/pitch_trim_up";
+const DEFAULT_DOWN_COMMAND = "sim/flight_controls/pitch_trim_down";
 const DEFAULT_SENSITIVITY = 23;
 const DEFAULT_WINDOW_MS = 500;
 
@@ -152,7 +152,7 @@ export default function TrimWheelConfiguration(props: TrimWheelConfigurationProp
           </Stack>
 
           <Typography variant="body2" sx={{color: "rgba(199, 222, 241, 0.8)", textAlign: "left"}}>
-            Configure the command pair and acceleration curve for the Bravo trim wheel. Leave any field blank to use defaults.
+            Configure the command pair and smoothing curve for the Bravo trim wheel. Leave any field blank to use the generic X-Plane trim defaults.
           </Typography>
 
           <TextField
@@ -199,7 +199,7 @@ export default function TrimWheelConfiguration(props: TrimWheelConfigurationProp
           </Stack>
 
           <Typography variant="caption" sx={{textAlign: "left", color: "rgba(173, 204, 229, 0.75)"}}>
-            Higher sensitivity sends more repeated commands when the wheel is turned quickly. Window defines how long acceleration is active.
+            Higher sensitivity keeps the trim command held a little longer when the wheel is turned quickly. Window defines how fast that smoothing decays back to the base hold time.
           </Typography>
 
           <Stack spacing={0.3}>

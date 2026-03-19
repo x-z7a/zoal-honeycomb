@@ -59,7 +59,14 @@ type xplaneService struct {
 	cancelFunc      context.CancelFunc
 	commandStates   map[string]*commandState
 	globalTime      float64
-	lastTrimTime    time.Time
+	trimActive      bool
+	trimCommand     string
+	trimDirection   string
+	trimHoldUntil   float64
+	lastTrimPulseAt float64
+	hasTrimPulse    bool
+	commandBegin    func(string) bool
+	commandEnd      func(string) bool
 }
 
 var xplaneSvcLock = &sync.Mutex{}
@@ -103,6 +110,8 @@ func NewXplaneService(
 func (s *xplaneService) messageHandler(message plugins.Message) {
 	if message.MessageId == plugins.MSG_PLANE_LOADED {
 		s.Logger.Info("Plane loaded")
+		s.stopTrimCommand()
+		s.resetTrimCadence()
 		s.profile = nil
 		honeycomb.AllOff()
 	}

@@ -1,24 +1,29 @@
 # Install
 
-1. Download `zoal-honeycombo.zip` from the [Release Page](https://github.com/x-z7a/zoal-honeycomb/releases/latest).
+1. Download `zoal-honeycomb.zip` from the [Release Page](https://github.com/x-z7a/zoal-honeycomb/releases/latest).
 2. Drop the folder into X-Plane's plugins folder.
-3. See the mappings below for knobs and AP buttons.
+3. Start X-Plane with the Bravo connected.
 
-## Bravo Knobs Mapping
+## Raw HID Input
 
-![Bravo Knobs Mapping](https://github.com/user-attachments/assets/99477be6-2e40-4dc4-b57d-605c3d7457a0)
+The plugin reads the Honeycomb Bravo directly over HID, so no manual joystick/button mapping is required in X-Plane for the controls it owns.
 
-## Bravo AP Buttons Mapping
+On macOS, the Bravo is opened in shared mode so X-Plane can still see the device for axes and other controls.
 
-![Bravo AP Buttons Mapping](https://github.com/user-attachments/assets/922bff1a-9255-4245-ab5c-fc93d8604262)
+The following controls are handled by the plugin automatically:
 
-Mappings can be found by searching `honeycomb` after clicking `Edit` in X-Plane.
+- AP buttons
+- selector positions
+- rotary encoder up/down
+- trim wheel up/down
 
-![Search honeycomb after clicking Edit](https://github.com/user-attachments/assets/b0397f82-d074-4b14-aded-793a9c272b66)
+Leave those controls unassigned in X-Plane to avoid duplicate inputs.
+
+Flaps remain an X-Plane assignment. If you use the Bravo flap lever, keep that bound in X-Plane instead of the plugin.
 
 ## Smooth Trim Wheel
 
-Use plugin's trim up/down
+The trim wheel is read directly over HID. Profile trim commands override the defaults; otherwise the plugin falls back to X-Plane's generic trim commands.
 
 ![Use plugin's trim up/down](image.png)
 

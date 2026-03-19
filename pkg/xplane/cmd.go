@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/x-z7a/zoal-honeycomb/pkg"
+	"github.com/x-z7a/zoal-honeycomb/pkg/honeycomb"
 	"github.com/xairline/goplane/xplm/dataAccess"
 	"github.com/xairline/goplane/xplm/utilities"
 )
@@ -13,99 +14,133 @@ import (
 const doubleClickThreshold = 500 * time.Millisecond // Define double-click threshold
 
 const (
-	defaultTrimUpCommand   = "sim/flight_controls/pitch_trim_up_mech"
-	defaultTrimDownCommand = "sim/flight_controls/pitch_trim_down_mech"
+	defaultTrimUpCommand   = "sim/flight_controls/pitch_trim_up"
+	defaultTrimDownCommand = "sim/flight_controls/pitch_trim_down"
 	defaultTrimSensitivity = 23.0
 	defaultTrimWindowMs    = int64(500)
 	minimumTrimSensitivity = 1.0
 	minimumTrimWindowMs    = int64(1)
+	minimumTrimHoldMs      = 40.0
+	maximumTrimHoldMs      = 150.0
 )
 
 func (s *xplaneService) changeApValue(command utilities.CommandRef, phase utilities.CommandPhase, ref interface{}) int {
-	// Handle only when command phase is CommandEnd
 	if phase == utilities.Phase_CommandEnd {
-		now := time.Now()
-		elapsed := now.Sub(s.lastKnobTime).Milliseconds()
-		// Determine speed multiplier based on time elapsed
-		var multiplier float64
-		if !s.lastKnobTime.IsZero() {
-
-			if elapsed < 100 {
-				multiplier = 5.0 // Fast turn
-			} else if elapsed < 200 {
-				multiplier = 3.0 // Medium turn
-			} else {
-				multiplier = 1.0 // Slow turn
-			}
-		} else {
-			multiplier = 1.0
-		}
-
-		direction := 0
-		// Log the adjustment
+		direction := -1
 		if ref.(string) == "up" {
-			s.Logger.Debugf("Increase: %v, Phase: %v, AP Mode: %s, Multiplier: %.1f", command, phase, s.apSelector, multiplier)
 			direction = 1
-		} else {
-			s.Logger.Debugf("Decrease: %v, Phase: %v, AP Mode: %s, Multiplier: %.1f", command, phase, s.apSelector, multiplier)
-			direction = -1
 		}
-		var myProfile pkg.KnobProfile
-		var step float64
-		switch s.apSelector {
-		case "ias":
-			myProfile = s.profile.Knobs.AP_IAS
-
-			iasStep, foundIasStep := s.dataValue(&s.profile.Data.AP_IAS_STEP)
-			if foundIasStep {
-				step = iasStep
-			} else {
-				step = 1
-			}
-		case "alt":
-			myProfile = s.profile.Knobs.AP_ALT
-
-			altStep, foundAltStep := s.dataValue(&s.profile.Data.AP_ALT_STEP)
-			if foundAltStep {
-				step = altStep
-			} else {
-				step = 100
-			}
-			if elapsed < 100 {
-				multiplier *= 5
-			} else if elapsed < 200 {
-				multiplier *= 2
-			}
-		case "vs":
-			myProfile = s.profile.Knobs.AP_VS
-
-			vsStep, foundVsStep := s.dataValue(&s.profile.Data.AP_VS_STEP)
-			if foundVsStep {
-				step = vsStep
-			} else {
-				step = 1
-			}
-		case "hdg":
-			myProfile = s.profile.Knobs.AP_HDG
-			step = 1
-		case "crs":
-			myProfile = s.profile.Knobs.AP_CRS
-			step = 1
-		}
-		s.adjust(myProfile, direction, multiplier, step)
-		s.Logger.Debugf("Knob turn: %d, Mode: %s, Multiplier: %.1f, Step: %.1f", direction, s.apSelector, multiplier, step)
-		// Update the last interaction time
-		s.lastKnobTime = now
+		s.handleKnobTurn(direction)
 	}
 	return 0
 }
 
 func (s *xplaneService) changeAPMode(command utilities.CommandRef, phase utilities.CommandPhase, ref interface{}) int {
-	if s.apSelector != ref.(string) {
-		s.Logger.Debugf("AP MODE CHANGE: %v, Phase: %v, ref: %s", command, phase, ref.(string))
-		s.apSelector = ref.(string)
+	if phase == utilities.Phase_CommandEnd {
+		s.setAPSelector(ref.(string))
 	}
 	return 0
+}
+
+func (s *xplaneService) handleBravoEvent(event honeycomb.BravoEvent) {
+	switch event.Kind {
+	case honeycomb.BravoEventSelector:
+		s.setAPSelector(event.Name)
+	case honeycomb.BravoEventButton:
+		if s.profile == nil {
+			return
+		}
+		s.handleAPButtonRelease(event.Name)
+	case honeycomb.BravoEventEncoder:
+		if s.profile == nil {
+			return
+		}
+		for i := 0; i < abs(event.Delta); i++ {
+			s.handleKnobTurn(sign(event.Delta))
+		}
+	case honeycomb.BravoEventTrim:
+		for i := 0; i < abs(event.Delta); i++ {
+			if event.Delta > 0 {
+				s.handleTrimDirection("up")
+			} else if event.Delta < 0 {
+				s.handleTrimDirection("down")
+			}
+		}
+	}
+}
+
+func (s *xplaneService) setAPSelector(selector string) {
+	if s.apSelector == selector {
+		return
+	}
+
+	s.Logger.Debugf("AP MODE CHANGE: %s", selector)
+	s.apSelector = selector
+}
+
+func (s *xplaneService) apAdjustmentProfile() (pkg.KnobProfile, float64, bool) {
+	if s.profile == nil || s.profile.Knobs == nil || s.profile.Data == nil {
+		return pkg.KnobProfile{}, 0, false
+	}
+
+	switch s.apSelector {
+	case "ias":
+		if iasStep, found := s.dataValue(&s.profile.Data.AP_IAS_STEP); found {
+			return s.profile.Knobs.AP_IAS, iasStep, true
+		}
+		return s.profile.Knobs.AP_IAS, 1, true
+	case "alt":
+		if altStep, found := s.dataValue(&s.profile.Data.AP_ALT_STEP); found {
+			return s.profile.Knobs.AP_ALT, altStep, true
+		}
+		return s.profile.Knobs.AP_ALT, 100, true
+	case "vs":
+		if vsStep, found := s.dataValue(&s.profile.Data.AP_VS_STEP); found {
+			return s.profile.Knobs.AP_VS, vsStep, true
+		}
+		return s.profile.Knobs.AP_VS, 1, true
+	case "hdg":
+		return s.profile.Knobs.AP_HDG, 1, true
+	case "crs":
+		return s.profile.Knobs.AP_CRS, 1, true
+	default:
+		return pkg.KnobProfile{}, 0, false
+	}
+}
+
+func (s *xplaneService) handleKnobTurn(direction int) {
+	if direction == 0 {
+		return
+	}
+
+	now := time.Now()
+	elapsed := now.Sub(s.lastKnobTime).Milliseconds()
+	multiplier := 1.0
+	if !s.lastKnobTime.IsZero() {
+		if elapsed < 100 {
+			multiplier = 5.0
+		} else if elapsed < 200 {
+			multiplier = 3.0
+		}
+	}
+
+	myProfile, step, ok := s.apAdjustmentProfile()
+	if !ok {
+		s.Logger.Warningf("Knob turn ignored: selector %q is not active", s.apSelector)
+		return
+	}
+
+	if s.apSelector == "alt" {
+		if elapsed < 100 {
+			multiplier *= 5
+		} else if elapsed < 200 {
+			multiplier *= 2
+		}
+	}
+
+	s.adjust(myProfile, direction, multiplier, step)
+	s.Logger.Debugf("Knob turn: %d, Mode: %s, Multiplier: %.1f, Step: %.1f", direction, s.apSelector, multiplier, step)
+	s.lastKnobTime = now
 }
 
 func (s *xplaneService) adjust(myProfile pkg.KnobProfile, direction int, multiplier float64, step float64) {
@@ -229,89 +264,216 @@ func (s *xplaneService) trimWheelConfig() (string, string, float64, int64) {
 	return upCommand, downCommand, sensitivity, windowMs
 }
 
+func trimCommandMultiplier(lastTrimPulseAt, now float64, sensitivity float64, windowMs int64) float64 {
+	if now < lastTrimPulseAt {
+		return minimumTrimSensitivity
+	}
+	if now == lastTrimPulseAt {
+		return sensitivity
+	}
+
+	elapsed := (now - lastTrimPulseAt) * 1000
+	if elapsed >= float64(windowMs) {
+		return minimumTrimSensitivity
+	}
+
+	multiplier := sensitivity - ((sensitivity - minimumTrimSensitivity) * elapsed / float64(windowMs))
+	if multiplier < minimumTrimSensitivity {
+		return minimumTrimSensitivity
+	}
+
+	return multiplier
+}
+
+func trimHoldDuration(multiplier, sensitivity float64, windowMs int64) float64 {
+	maxHoldMs := float64(windowMs) / 4
+	if maxHoldMs < minimumTrimHoldMs {
+		maxHoldMs = minimumTrimHoldMs
+	}
+	if maxHoldMs > maximumTrimHoldMs {
+		maxHoldMs = maximumTrimHoldMs
+	}
+
+	if sensitivity <= minimumTrimSensitivity {
+		return minimumTrimHoldMs / 1000
+	}
+
+	normalized := (multiplier - minimumTrimSensitivity) / (sensitivity - minimumTrimSensitivity)
+	if normalized < 0 {
+		normalized = 0
+	}
+	if normalized > 1 {
+		normalized = 1
+	}
+
+	holdMs := minimumTrimHoldMs + normalized*(maxHoldMs-minimumTrimHoldMs)
+	return holdMs / 1000
+}
+
+func (s *xplaneService) beginCommandSignal(cmdStr string) bool {
+	if strings.TrimSpace(cmdStr) == "" {
+		return false
+	}
+
+	if s.commandBegin != nil {
+		return s.commandBegin(cmdStr)
+	}
+
+	cmd := utilities.FindCommand(cmdStr)
+	if cmd == nil {
+		s.Logger.Errorf("Command not found: %s", cmdStr)
+		return false
+	}
+
+	s.Logger.Debugf("Beginning command: %s", cmdStr)
+	utilities.CommandBegin(cmd)
+	return true
+}
+
+func (s *xplaneService) endCommandSignal(cmdStr string) bool {
+	if strings.TrimSpace(cmdStr) == "" {
+		return false
+	}
+
+	if s.commandEnd != nil {
+		return s.commandEnd(cmdStr)
+	}
+
+	cmd := utilities.FindCommand(cmdStr)
+	if cmd == nil {
+		s.Logger.Errorf("Command not found: %s", cmdStr)
+		return false
+	}
+
+	s.Logger.Debugf("Ending command: %s", cmdStr)
+	utilities.CommandEnd(cmd)
+	return true
+}
+
+func (s *xplaneService) stopTrimCommand() {
+	if s.trimActive && s.trimCommand != "" {
+		s.endCommandSignal(s.trimCommand)
+	}
+
+	s.trimActive = false
+	s.trimCommand = ""
+	s.trimDirection = ""
+	s.trimHoldUntil = 0
+}
+
+func (s *xplaneService) resetTrimCadence() {
+	s.hasTrimPulse = false
+	s.lastTrimPulseAt = 0
+}
+
+func (s *xplaneService) updateTrimCommandState() {
+	if !s.trimActive || s.trimCommand == "" {
+		return
+	}
+	if s.globalTime < s.trimHoldUntil {
+		return
+	}
+
+	s.stopTrimCommand()
+	s.resetTrimCadence()
+}
+
+func (s *xplaneService) handleTrimDirection(buttonRef string) {
+	upCommand, downCommand, sensitivity, windowMs := s.trimWheelConfig()
+
+	var cmdStr string
+	switch buttonRef {
+	case "up":
+		cmdStr = upCommand
+	case "down":
+		cmdStr = downCommand
+	default:
+		s.Logger.Warningf("Unknown trim button reference: %s", buttonRef)
+		return
+	}
+
+	if s.trimActive && s.trimDirection != "" && s.trimDirection != buttonRef {
+		s.stopTrimCommand()
+		s.resetTrimCadence()
+	}
+
+	multiplier := minimumTrimSensitivity
+	if s.hasTrimPulse {
+		multiplier = trimCommandMultiplier(s.lastTrimPulseAt, s.globalTime, sensitivity, windowMs)
+	}
+	holdSeconds := trimHoldDuration(multiplier, sensitivity, windowMs)
+
+	if s.trimCommand != "" && s.trimCommand != cmdStr {
+		s.stopTrimCommand()
+	}
+
+	if !s.trimActive {
+		if !s.beginCommandSignal(cmdStr) {
+			return
+		}
+		s.trimActive = true
+	}
+
+	s.trimCommand = cmdStr
+	s.trimDirection = buttonRef
+	s.trimHoldUntil = s.globalTime + holdSeconds
+	s.lastTrimPulseAt = s.globalTime
+	s.hasTrimPulse = true
+
+	s.Logger.Infof(
+		"Trim command active: %s, Direction: %s, Hold: %.0f ms, Multiplier: %.1f, Sensitivity: %.1f, Window: %d ms",
+		cmdStr,
+		buttonRef,
+		holdSeconds*1000,
+		multiplier,
+		sensitivity,
+		windowMs,
+	)
+}
+
 func (s *xplaneService) trimPressed(command utilities.CommandRef, phase utilities.CommandPhase, ref interface{}) int {
 	if phase == utilities.Phase_CommandEnd {
-		buttonRef := ref.(string) // Convert ref to string (or your button identifier type)
-		s.Logger.Debugf("Trim command: %v, Phase: %v, Button: %s", command, phase, buttonRef)
-
-		upCommand, downCommand, sensitivity, windowMs := s.trimWheelConfig()
-
-		var cmd pkg.Command
-		switch buttonRef {
-		case "up":
-			cmd = pkg.Command{CommandStr: upCommand}
-		case "down":
-			cmd = pkg.Command{CommandStr: downCommand}
-		default:
-			s.Logger.Warningf("Unknown trim button reference: %s", buttonRef)
-			return 0
-		}
-
-		// depends on how quickly you turn the trim wheel, it will execute the command multiple times to trim faster
-		now := time.Now()
-		elapsed := now.Sub(s.lastTrimTime).Milliseconds()
-
-		multiplier := minimumTrimSensitivity
-		if !s.lastTrimTime.IsZero() {
-			if elapsed < windowMs {
-				multiplier = sensitivity - ((sensitivity - minimumTrimSensitivity) * float64(elapsed) / float64(windowMs))
-				if multiplier < minimumTrimSensitivity {
-					multiplier = minimumTrimSensitivity
-				}
-			} else {
-				multiplier = minimumTrimSensitivity
-			}
-		}
-
-		// log elapsed time and multiplier for debugging
-		s.Logger.Infof("Trim command: %s, Elapsed: %d ms, Multiplier: %.1f, Sensitivity: %.1f, Window: %d ms", cmd.CommandStr, elapsed, multiplier, sensitivity, windowMs)
-		for i := 0; i < int(multiplier); i++ {
-			utilities.CommandOnce(utilities.FindCommand(cmd.CommandStr))
-		}
-
-		s.Logger.Debugf("Trim command executed: %s, Multiplier: %.1f", cmd.CommandStr, multiplier)
-		s.lastTrimTime = now
+		s.Logger.Debugf("Trim command: %v, Phase: %v, Button: %s", command, phase, ref.(string))
+		s.handleTrimDirection(ref.(string))
 	}
 	return 0
 }
 
 func (s *xplaneService) apPressed(command utilities.CommandRef, phase utilities.CommandPhase, ref interface{}) int {
 	if phase == utilities.Phase_CommandEnd {
-		buttonRef := ref.(string) // Convert ref to string (or your button identifier type)
-		now := time.Now()
-
-		s.mutex.Lock()
-		defer s.mutex.Unlock()
-
-		// Check if there's an existing timer for the button
-		if timer, exists := s.clickTimers[buttonRef]; exists {
-			// Double-click detected, cancel the timer and trigger double-click logic
-			timer.Stop()
-			delete(s.clickTimers, buttonRef)
-			s.Logger.Debugf("Double-click detected for button: %s, timestamp: %s", buttonRef, now)
-			s.handleClick(buttonRef, true)
-			return 0
-		}
-
-		// Single-click detected; set a timer to delay action
-		timer := time.AfterFunc(doubleClickThreshold, func() {
-			s.mutex.Lock()
-			defer s.mutex.Unlock()
-
-			// Ensure the timer is not removed by a double-click
-			if s.clickTimers[buttonRef] != nil {
-				delete(s.clickTimers, buttonRef)
-				s.Logger.Debugf("Single-click detected for button: %s, timestamp: %s", buttonRef, now)
-				s.handleClick(buttonRef, false)
-			}
-		})
-
-		// Store the timer in the map
-		s.clickTimers[buttonRef] = timer
-		s.lastClickTime[buttonRef] = now
+		s.handleAPButtonRelease(ref.(string))
 	}
 
 	return 0
+}
+
+func (s *xplaneService) handleAPButtonRelease(buttonRef string) {
+	now := time.Now()
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if timer, exists := s.clickTimers[buttonRef]; exists {
+		timer.Stop()
+		delete(s.clickTimers, buttonRef)
+		s.Logger.Debugf("Double-click detected for button: %s, timestamp: %s", buttonRef, now)
+		s.handleClick(buttonRef, true)
+		return
+	}
+
+	timer := time.AfterFunc(doubleClickThreshold, func() {
+		s.mutex.Lock()
+		defer s.mutex.Unlock()
+
+		if s.clickTimers[buttonRef] != nil {
+			delete(s.clickTimers, buttonRef)
+			s.Logger.Debugf("Single-click detected for button: %s, timestamp: %s", buttonRef, now)
+			s.handleClick(buttonRef, false)
+		}
+	})
+
+	s.clickTimers[buttonRef] = timer
+	s.lastClickTime[buttonRef] = now
 }
 
 func (s *xplaneService) getButtonCommands(ref string, doubleClick bool) []pkg.Command {
@@ -368,5 +530,23 @@ func (s *xplaneService) handleClick(ref string, doubleClick bool) {
 			clickType = "Double-click"
 		}
 		s.Logger.Warningf("%s detected for button: %s (no commands configured)", clickType, ref)
+	}
+}
+
+func abs(value int) int {
+	if value < 0 {
+		return -value
+	}
+	return value
+}
+
+func sign(value int) int {
+	switch {
+	case value > 0:
+		return 1
+	case value < 0:
+		return -1
+	default:
+		return 0
 	}
 }

@@ -64,15 +64,16 @@ func (s *xplaneService) onPluginStart() {
 	} else {
 		menus.CheckMenuItem(s.myMenuId, s.myMenuItemIndex, menus.Menu_Unchecked)
 	}
-	s.setupKnobsCmds()
-	s.setupApCmds()
-	s.setupTrimCmds()
 	s.checkForNewReleaseVersion()
 
 }
 
 func (s *xplaneService) onPluginStop() {
-	s.BravoService.Exit()
+	s.stopTrimCommand()
+	s.resetTrimCadence()
+	if s.BravoService != nil {
+		s.BravoService.Exit()
+	}
 	s.Logger.Info("Plugin stopped")
 	s.cancelFunc()
 }

@@ -6,7 +6,11 @@ import (
 	"github.com/x-z7a/zoal-honeycomb/pkg"
 	"github.com/x-z7a/zoal-honeycomb/pkg/honeycomb"
 	"github.com/xairline/goplane/xplm/dataAccess"
-	"github.com/xairline/goplane/xplm/utilities"
+)
+
+const (
+	defaultFlightLoopInterval = float32(0.1)
+	activeTrimFlightLoopDelay = float32(0.02)
 )
 
 // flightLoop is called periodically. You return 0.1, meaning it runs every ~100ms
@@ -16,16 +20,13 @@ func (s *xplaneService) flightLoop(
 	counter int,
 	ref interface{},
 ) float32 {
-
-	if honeycomb.BRAVO_CONNECTED == false {
-		return 0
-	}
-
 	if s.profile == nil {
 		s.Logger.Info("Profile is nil, try to load it again")
 		s.lastCounter = 0
 		err := s.tryLoadProfile()
 		if err != nil {
+			s.stopTrimCommand()
+			s.resetTrimCadence()
 			s.profile = nil
 			return 1
 		}
@@ -42,6 +43,8 @@ func (s *xplaneService) flightLoop(
 		s.lastCounter = counter
 	}
 
+	s.drainBravoEvents()
+	s.updateTrimCommandState()
 	s.updateLeds()
 
 	s.cmdEventQueueMu.Lock()
@@ -51,16 +54,11 @@ func (s *xplaneService) flightLoop(
 
 	// Process new command events:
 	for _, cmdStr := range queuedCommands {
-		cmd := utilities.FindCommand(cmdStr)
-		if cmd == nil {
-			s.Logger.Errorf("Command not found: %s", cmdStr)
-			continue
-		}
-
 		// Start the command if it's not already active
 		if _, exists := s.commandStates[cmdStr]; !exists {
-			s.Logger.Debugf("Beginning command: %s", cmdStr)
-			utilities.CommandBegin(cmd)
+			if !s.beginCommandSignal(cmdStr) {
+				continue
+			}
 			s.commandStates[cmdStr] = &commandState{
 				startTime: s.globalTime,
 				active:    true,
@@ -76,26 +74,22 @@ func (s *xplaneService) flightLoop(
 	// End commands that have been held for at least 200ms
 	for cmdStr, state := range s.commandStates {
 		if state.active && (s.globalTime-state.startTime) >= 0.2 {
-			cmd := utilities.FindCommand(cmdStr)
-			if cmd != nil {
-				s.Logger.Debugf("Ending command: %s", cmdStr)
-				utilities.CommandEnd(cmd)
-			}
+			s.endCommandSignal(cmdStr)
 			delete(s.commandStates, cmdStr)
 		}
 	}
 
-	// Return 0.1 to run again in ~100ms
-	return 0.1
+	if s.trimActive {
+		return activeTrimFlightLoopDelay
+	}
+
+	return defaultFlightLoopInterval
 }
 
 func (s *xplaneService) updateLeds() {
 	if s.profile == nil {
-		honeycomb.PROFILE_LOADED = false
 		return
 	}
-
-	honeycomb.PROFILE_LOADED = true
 
 	// special case for bus voltage
 	busVoltage, busVoltageOK := s.evaluateCondition(&s.profile.Conditions.BUS_VOLTAGE)
@@ -206,4 +200,27 @@ func (s *xplaneService) updateGearLEDs(output []float32) {
 		}
 	}
 
+}
+
+func (s *xplaneService) drainBravoEvents() {
+	if s.BravoService == nil {
+		return
+	}
+
+	events := s.BravoService.Events()
+	if events == nil {
+		return
+	}
+
+	for {
+		select {
+		case event, ok := <-events:
+			if !ok {
+				return
+			}
+			s.handleBravoEvent(event)
+		default:
+			return
+		}
+	}
 }
