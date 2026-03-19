@@ -293,3 +293,9 @@ conditions:
         index: 1
         operator: ">"
         threshold: 0.01
+
+trim_wheels:
+  up_cmd: sim/flight_controls/pitch_trim_up
+  down_cmd: sim/flight_controls/pitch_trim_down
+  sensitivity: 23
+  window_ms: 500
