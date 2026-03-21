@@ -4,7 +4,7 @@ This page is generated from the YAML profiles in `profiles/` and excludes `defau
 Do not edit the generated section by hand. Run `npm --prefix docs run docs:generate:supported-planes` instead.
 
 <!-- BEGIN GENERATED SUPPORTED PLANES -->
-There are currently `41` profile files. The `Matches` column shows the exact
+There are currently `42` profile files. The `Matches` column shows the exact
 `metadata.selectors` values used by runtime profile selection, so a single
 profile can cover multiple aircraft variants.
 
@@ -39,6 +39,7 @@ profile can cover multiple aircraft variants.
 | `E175.yaml` | Embraer E-Jet E175 | `E-Jets E175` |
 | `E190.yaml` | Embraer E-Jet E190 | `E-Jets Family E190` |
 | `E19L.yaml` | Embraer E-Jet Lineage 1000 | `E-Jets Lineage 1000` |
+| `E45X.yaml` | X-Crafts ERJ 145XR | `X-Crafts ERJ 145XR` |
 | `E55P.yaml` | Phenom 300 | `Phenom 300 by Aerobask` |
 | `EVOT.yaml` | Lancair Evolution | `Lancair Evolution`<br>`Lancair Evolution EVOT-550`<br>`Lancair Evolution EVOT-750`<br>`Lancair Evolution EVOT-850` |
 | `GLF650.yaml` | GLF650 AKD XP12 | `GLF650_AKD` |
