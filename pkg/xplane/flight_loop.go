@@ -180,7 +180,7 @@ func (s *xplaneService) updateGearLEDs(output []float32) {
 		honeycomb.OnLEDLeftGearRed()
 	}
 
-	if s.profile.Metadata.Name != "Flight Factor B772" {
+	if s.profile.Metadata.Name != "Flight Factor B772" && s.profile.Metadata.Name != "Flight Factor B777-F Freighter" {
 		if output[2] >= 0.99 {
 			honeycomb.OnLEDRightGearGreen()
 			honeycomb.OffLEDRightGearRed()
