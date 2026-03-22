@@ -10,6 +10,10 @@ export function GetProfile(arg1) {
   return window['go']['main']['App']['GetProfile'](arg1);
 }
 
+export function GetProfileErrors() {
+  return window['go']['main']['App']['GetProfileErrors']();
+}
+
 export function GetProfileFiles() {
   return window['go']['main']['App']['GetProfileFiles']();
 }

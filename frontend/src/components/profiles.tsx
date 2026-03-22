@@ -16,10 +16,13 @@ import {
 } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import LocalAirportOutlinedIcon from '@mui/icons-material/LocalAirportOutlined';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
 interface TabPanelProps {
   profiles: pkg.Profile[];
+  profileErrors: string[];
+  profileFiles: string[];
   selectedProfileIndex: number;
   onSelectProfile: (index: number) => void;
   onOpenAddProfile: () => void;
@@ -28,6 +31,13 @@ interface TabPanelProps {
 
 export default function Profiles(props: TabPanelProps) {
   const [query, setQuery] = React.useState("");
+
+  const basenameFromPath = (index: number): string => {
+    const filePath = props.profileFiles[index] || "";
+    const normalized = filePath.replace(/\\/g, "/");
+    const basename = normalized.split("/").pop() || "";
+    return basename.endsWith(".yaml") ? basename.slice(0, -5) : basename || `Profile ${index + 1}`;
+  };
 
   const filteredProfiles = React.useMemo(() => {
     const indexedProfiles = props.profiles.map((profile, index) => ({
@@ -114,8 +124,12 @@ export default function Profiles(props: TabPanelProps) {
       <List sx={{px: 1.25, py: 1.25, overflowY: "auto", flex: 1}}>
         {filteredProfiles.map((item, index) => {
           const profile = item.profile;
-          const name = profile.metadata?.name || `Profile ${index + 1}`;
-          const description = profile.metadata?.description || "No description";
+          const profileError = props.profileErrors[item.originalIndex] || "";
+          const hasError = profileError !== "";
+          const name = hasError
+            ? (profile.metadata?.name || basenameFromPath(item.originalIndex))
+            : (profile.metadata?.name || `Profile ${index + 1}`);
+          const description = hasError ? "YAML parse error" : (profile.metadata?.description || "No description");
           const selectors = profile.metadata?.selectors || [];
           const isSelected = props.selectedProfileIndex === item.originalIndex;
           return (
@@ -126,22 +140,27 @@ export default function Profiles(props: TabPanelProps) {
               sx={{
                 borderRadius: 2,
                 mb: 0.75,
-                border: "1px solid transparent",
+                border: hasError ? "1px solid rgba(244, 67, 54, 0.4)" : "1px solid transparent",
                 alignItems: "flex-start",
+                backgroundColor: hasError ? "rgba(244, 67, 54, 0.06)" : undefined,
                 "&.Mui-selected": {
-                  backgroundColor: "rgba(3, 169, 244, 0.16)",
-                  borderColor: "rgba(3, 169, 244, 0.55)",
+                  backgroundColor: hasError ? "rgba(244, 67, 54, 0.14)" : "rgba(3, 169, 244, 0.16)",
+                  borderColor: hasError ? "rgba(244, 67, 54, 0.55)" : "rgba(3, 169, 244, 0.55)",
                 },
                 "&.Mui-selected:hover": {
-                  backgroundColor: "rgba(3, 169, 244, 0.2)",
+                  backgroundColor: hasError ? "rgba(244, 67, 54, 0.18)" : "rgba(3, 169, 244, 0.2)",
                 },
                 "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.08)",
+                  backgroundColor: hasError ? "rgba(244, 67, 54, 0.1)" : "rgba(255,255,255,0.08)",
                 }
               }}
             >
               <ListItemIcon sx={{minWidth: 34, mt: 0.35}}>
-                <LocalAirportOutlinedIcon sx={{color: isSelected ? "#84d8ff" : "#7fd1a5"}}/>
+                {hasError ? (
+                  <ErrorOutlineIcon sx={{color: "#f44336"}}/>
+                ) : (
+                  <LocalAirportOutlinedIcon sx={{color: isSelected ? "#84d8ff" : "#7fd1a5"}}/>
+                )}
               </ListItemIcon>
               <ListItemText
                 primary={name}
@@ -149,21 +168,21 @@ export default function Profiles(props: TabPanelProps) {
                 primaryTypographyProps={{
                   sx: {
                     fontWeight: isSelected ? 700 : 600,
-                    color: "rgba(247, 250, 252, 0.95)",
+                    color: hasError ? "rgba(244, 67, 54, 0.9)" : "rgba(247, 250, 252, 0.95)",
                     lineHeight: 1.2
                   }
                 }}
                 secondaryTypographyProps={{
                   sx: {
                     mt: 0.35,
-                    color: "rgba(236, 244, 252, 0.66)",
+                    color: hasError ? "rgba(244, 67, 54, 0.7)" : "rgba(236, 244, 252, 0.66)",
                     lineHeight: 1.25,
                     maxHeight: "2.5em",
                     overflow: "hidden"
                   }
                 }}
               />
-              {selectors.length > 0 && (
+              {!hasError && selectors.length > 0 && (
                 <Chip
                   label={selectors.length}
                   size="small"

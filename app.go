@@ -50,6 +50,7 @@ type ProfilesStatus struct {
 	ProfilesCount  int    `json:"profilesCount"`
 	NeedsSelection bool   `json:"needsSelection"`
 	LoadError      string `json:"loadError"`
+	ParseErrors    int    `json:"parseErrors"`
 }
 
 // App struct
@@ -58,6 +59,7 @@ type App struct {
 	profilesDir            string
 	profiles               []pkg.Profile
 	profileFiles           []string
+	profileErrors          []string
 	profilesLoadErr        string
 	needsProfilesSelection bool
 	mu                     sync.RWMutex
@@ -114,15 +116,32 @@ func (a *App) GetProfileFiles() []string {
 	return res
 }
 
+func (a *App) GetProfileErrors() []string {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+
+	res := make([]string, len(a.profileErrors))
+	copy(res, a.profileErrors)
+	return res
+}
+
 func (a *App) GetProfilesStatus() ProfilesStatus {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
+
+	parseErrors := 0
+	for _, e := range a.profileErrors {
+		if e != "" {
+			parseErrors++
+		}
+	}
 
 	return ProfilesStatus{
 		ProfilesDir:    a.profilesDir,
 		ProfilesCount:  len(a.profiles),
 		NeedsSelection: a.needsProfilesSelection,
 		LoadError:      a.profilesLoadErr,
+		ParseErrors:    parseErrors,
 	}
 }
 
@@ -321,7 +340,7 @@ func (a *App) defaultProfilesDirectoryForDialog() string {
 
 func (a *App) loadProfilesFromDir(profilesDir string) error {
 	normalized := normalizeDir(profilesDir)
-	profiles, files, err := readProfilesFromDir(normalized)
+	profiles, files, profileErrors, err := readProfilesFromDir(normalized)
 	if err != nil {
 		return err
 	}
@@ -330,6 +349,7 @@ func (a *App) loadProfilesFromDir(profilesDir string) error {
 	a.profilesDir = normalized
 	a.profiles = profiles
 	a.profileFiles = files
+	a.profileErrors = profileErrors
 	a.profilesLoadErr = ""
 	a.needsProfilesSelection = false
 	a.mu.Unlock()
@@ -344,10 +364,10 @@ func (a *App) setProfilesError(errMessage string, needsSelection bool) {
 	a.mu.Unlock()
 }
 
-func readProfilesFromDir(profilesDir string) ([]pkg.Profile, []string, error) {
+func readProfilesFromDir(profilesDir string) ([]pkg.Profile, []string, []string, error) {
 	entries, err := os.ReadDir(profilesDir)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to read profiles folder %q: %w", profilesDir, err)
+		return nil, nil, nil, fmt.Errorf("failed to read profiles folder %q: %w", profilesDir, err)
 	}
 
 	yamlFiles := make([]string, 0, len(entries))
@@ -362,28 +382,36 @@ func readProfilesFromDir(profilesDir string) ([]pkg.Profile, []string, error) {
 
 	sort.Strings(yamlFiles)
 	if len(yamlFiles) == 0 {
-		return nil, nil, errors.New("profiles folder does not contain any .yaml files")
+		return nil, nil, nil, errors.New("profiles folder does not contain any .yaml files")
 	}
 
 	profiles := make([]pkg.Profile, 0, len(yamlFiles))
 	profileFiles := make([]string, 0, len(yamlFiles))
+	profileErrors := make([]string, 0, len(yamlFiles))
 	for _, yamlFile := range yamlFiles {
 		fileName := filepath.Join(profilesDir, yamlFile)
 		content, err := os.ReadFile(fileName)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to read profile %q: %w", fileName, err)
+			profiles = append(profiles, pkg.Profile{})
+			profileFiles = append(profileFiles, fileName)
+			profileErrors = append(profileErrors, fmt.Sprintf("failed to read: %v", err))
+			continue
 		}
 
 		var profile pkg.Profile
 		if err := yaml.Unmarshal(content, &profile); err != nil {
-			return nil, nil, fmt.Errorf("failed to parse profile %q: %w", fileName, err)
+			profiles = append(profiles, pkg.Profile{})
+			profileFiles = append(profileFiles, fileName)
+			profileErrors = append(profileErrors, fmt.Sprintf("YAML syntax error: %v", err))
+			continue
 		}
 
 		profiles = append(profiles, profile)
 		profileFiles = append(profileFiles, fileName)
+		profileErrors = append(profileErrors, "")
 	}
 
-	return profiles, profileFiles, nil
+	return profiles, profileFiles, profileErrors, nil
 }
 
 func isValidProfilesDir(profilesDir string) bool {

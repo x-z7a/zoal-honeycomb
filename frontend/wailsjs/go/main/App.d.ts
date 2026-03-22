@@ -7,6 +7,8 @@ export function CreateProfileFromDefault(arg1:string,arg2:string,arg3:string,arg
 
 export function GetProfile(arg1:string):Promise<pkg.Profile>;
 
+export function GetProfileErrors():Promise<Array<string>>;
+
 export function GetProfileFiles():Promise<Array<string>>;
 
 export function GetProfiles():Promise<Array<pkg.Profile>>;

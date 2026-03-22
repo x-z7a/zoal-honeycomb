@@ -5,6 +5,7 @@ export namespace main {
 	    profilesCount: number;
 	    needsSelection: boolean;
 	    loadError: string;
+	    parseErrors: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new ProfilesStatus(source);
@@ -16,6 +17,7 @@ export namespace main {
 	        this.profilesCount = source["profilesCount"];
 	        this.needsSelection = source["needsSelection"];
 	        this.loadError = source["loadError"];
+	        this.parseErrors = source["parseErrors"];
 	    }
 	}
 

@@ -282,6 +282,65 @@ buttons:
 	}
 }
 
+func TestReadProfilesFromDirSkipsBrokenYamlAndLoadsRest(t *testing.T) {
+	profilesDir := t.TempDir()
+	writeProfileYAML(t, profilesDir, "A319.yaml", "A319")
+	if err := os.WriteFile(filepath.Join(profilesDir, "Broken.yaml"), []byte("bad: [unclosed"), 0o644); err != nil {
+		t.Fatalf("failed to write broken yaml: %v", err)
+	}
+	writeProfileYAML(t, profilesDir, "default.yaml", "Default")
+
+	app := NewApp()
+	if err := app.loadProfilesFromDir(profilesDir); err != nil {
+		t.Fatalf("loadProfilesFromDir returned error: %v", err)
+	}
+
+	profiles := app.GetProfiles()
+	files := app.GetProfileFiles()
+	errors := app.GetProfileErrors()
+	if len(profiles) != 3 {
+		t.Fatalf("expected 3 profiles (including broken), got %d", len(profiles))
+	}
+	if len(files) != 3 {
+		t.Fatalf("expected 3 profile files, got %d", len(files))
+	}
+	if len(errors) != 3 {
+		t.Fatalf("expected 3 profile errors, got %d", len(errors))
+	}
+
+	// A319.yaml is OK
+	if errors[0] != "" {
+		t.Fatalf("expected no error for A319.yaml, got %q", errors[0])
+	}
+	if profiles[0].Metadata == nil || profiles[0].Metadata.Name != "A319" {
+		t.Fatalf("expected A319 metadata, got %v", profiles[0].Metadata)
+	}
+
+	// Broken.yaml has parse error
+	if errors[1] == "" {
+		t.Fatalf("expected parse error for Broken.yaml, got empty string")
+	}
+	if !strings.Contains(errors[1], "YAML syntax error") {
+		t.Fatalf("expected YAML syntax error message, got %q", errors[1])
+	}
+
+	// default.yaml is OK
+	if errors[2] != "" {
+		t.Fatalf("expected no error for default.yaml, got %q", errors[2])
+	}
+
+	status := app.GetProfilesStatus()
+	if status.NeedsSelection {
+		t.Fatalf("expected needsSelection=false when profiles dir is valid")
+	}
+	if status.ParseErrors != 1 {
+		t.Fatalf("expected parseErrors=1, got %d", status.ParseErrors)
+	}
+	if status.ProfilesCount != 3 {
+		t.Fatalf("expected profilesCount=3, got %d", status.ProfilesCount)
+	}
+}
+
 func TestCreateProfileFromDefaultErrorsWhenTemplateMissing(t *testing.T) {
 	profilesDir := t.TempDir()
 	writeProfileYAML(t, profilesDir, "A319.yaml", "A319")

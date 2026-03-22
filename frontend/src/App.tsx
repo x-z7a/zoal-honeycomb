@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './App.css';
 import {
   CreateProfileFromDefault,
+  GetProfileErrors,
   GetProfileFiles,
   GetProfiles,
   GetProfilesStatus,
@@ -159,6 +160,7 @@ function findBestProfileIndex(plane: PlaneInfo, profiles: pkg.Profile[], profile
 function App() {
   const [profilesData, setProfilesData] = useState([] as pkg.Profile[]);
   const [profileFiles, setProfileFiles] = useState([] as string[]);
+  const [profileErrors, setProfileErrors] = useState([] as string[]);
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(-1);
   const [editableProfile, setEditableProfile] = useState<pkg.Profile | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -178,16 +180,18 @@ function App() {
   const [createProfileError, setCreateProfileError] = useState("");
 
   const refreshProfiles = useCallback(async () => {
-    const [status, profiles, files] = await Promise.all([
+    const [status, profiles, files, errors] = await Promise.all([
       GetProfilesStatus(),
       GetProfiles(),
-      GetProfileFiles()
+      GetProfileFiles(),
+      GetProfileErrors()
     ]);
     const normalizedProfiles = profiles.map((profile) => sanitizeProfileForApi(profile));
     setProfilesStatus(status);
     setProfilesData(normalizedProfiles);
     setProfileFiles(files);
-    return { status, profiles: normalizedProfiles, files };
+    setProfileErrors(errors);
+    return { status, profiles: normalizedProfiles, files, errors };
   }, []);
 
   useEffect(() => {
@@ -200,6 +204,7 @@ function App() {
       } as main.ProfilesStatus);
       setProfilesData([]);
       setProfileFiles([]);
+      setProfileErrors([]);
     });
   }, [refreshProfiles]);
 
@@ -241,7 +246,8 @@ function App() {
   const selectedProfilePath = selectedProfileIndex >= 0 ? profileFiles[selectedProfileIndex] || "" : "";
   const needsProfilesSelection = profilesStatus?.needsSelection || false;
   const profilesLoadError = profilesStatus?.loadError || "";
-  const showProfilesModal = needsProfilesSelection || !!profilesLoadError;
+  const showProfilesModal = needsProfilesSelection;
+  const selectedProfileError = selectedProfileIndex >= 0 ? (profileErrors[selectedProfileIndex] || "") : "";
   const normalizedNewProfileFilename = normalizeFilenameInput(newProfileFilename);
   const newProfileFinalFilename = normalizedNewProfileFilename === "" ? "new-profile.yaml" : `${normalizedNewProfileFilename}.yaml`;
   const newProfileSelectors = useMemo(
@@ -619,6 +625,8 @@ function App() {
         <Box className="sidebarPane">
           <Profiles
             profiles={profilesData}
+            profileErrors={profileErrors}
+            profileFiles={profileFiles}
             selectedProfileIndex={selectedProfileIndex}
             onSelectProfile={handleProfileSelect}
             onOpenAddProfile={handleOpenAddProfileTutorial}
@@ -644,14 +652,14 @@ function App() {
                 <Stack direction="row" spacing={1}>
                   <Button
                     variant="contained"
-                    disabled={showProfilesModal || !isDirty || isSaving || selectedProfileIndex < 0}
+                    disabled={showProfilesModal || !!selectedProfileError || !isDirty || isSaving || selectedProfileIndex < 0}
                     onClick={handleSave}
                   >
                     Save YAML
                   </Button>
                   <Button
                     variant="outlined"
-                    disabled={showProfilesModal || !isDirty || isSaving || selectedProfileIndex < 0}
+                    disabled={showProfilesModal || !!selectedProfileError || !isDirty || isSaving || selectedProfileIndex < 0}
                     onClick={handleRevert}
                   >
                     Revert
@@ -671,6 +679,20 @@ function App() {
               {saveError && <Alert severity="error" sx={{ mt: 1 }}>{saveError}</Alert>}
             </Box>
 
+            {selectedProfileError ? (
+              <Alert severity="error" sx={{ mt: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
+                  Profile has a YAML error
+                </Typography>
+                <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "0.8rem" }}>
+                  {selectedProfileError}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  Fix the YAML syntax in <code>{selectedProfilePath}</code> and the profile will reload automatically.
+                </Typography>
+              </Alert>
+            ) : (
+            <>
             <Metadata metadata={editableProfile?.metadata} filePath={selectedProfilePath} />
             <Box
               sx={{
@@ -802,6 +824,8 @@ function App() {
                 )}
               </Box>
             </Box>
+            </>
+            )}
           </Stack>
         </Box>
       </Box>
