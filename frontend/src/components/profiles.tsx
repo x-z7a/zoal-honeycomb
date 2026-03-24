@@ -11,6 +11,8 @@ import {
   ListItemIcon,
   ListItemText,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography
 } from "@mui/material";
@@ -19,10 +21,13 @@ import LocalAirportOutlinedIcon from '@mui/icons-material/LocalAirportOutlined';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
+type SourceFilter = "all" | "default" | "user";
+
 interface TabPanelProps {
   profiles: pkg.Profile[];
   profileErrors: string[];
   profileFiles: string[];
+  profileSources: string[];
   selectedProfileIndex: number;
   onSelectProfile: (index: number) => void;
   onOpenAddProfile: () => void;
@@ -31,6 +36,7 @@ interface TabPanelProps {
 
 export default function Profiles(props: TabPanelProps) {
   const [query, setQuery] = React.useState("");
+  const [sourceFilter, setSourceFilter] = React.useState<SourceFilter>("all");
 
   const basenameFromPath = (index: number): string => {
     const filePath = props.profileFiles[index] || "";
@@ -45,14 +51,31 @@ export default function Profiles(props: TabPanelProps) {
       originalIndex: index,
     }));
     const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) {
-      return indexedProfiles;
-    }
-    return indexedProfiles.filter(({profile}) => {
-      const metadata = profile.metadata || {};
-      return JSON.stringify(metadata).toLowerCase().includes(normalizedQuery);
+
+    return indexedProfiles.filter(({profile, originalIndex}) => {
+      // Source filter
+      if (sourceFilter !== "all") {
+        const source = props.profileSources[originalIndex] || "default";
+        if (source !== sourceFilter) {
+          return false;
+        }
+      }
+      // Text search filter
+      if (normalizedQuery) {
+        const metadata = profile.metadata || {};
+        if (!JSON.stringify(metadata).toLowerCase().includes(normalizedQuery)) {
+          return false;
+        }
+      }
+      return true;
     });
-  }, [props.profiles, query]);
+  }, [props.profiles, props.profileSources, query, sourceFilter]);
+
+  const handleSourceFilterChange = (_: React.MouseEvent<HTMLElement>, value: SourceFilter | null) => {
+    if (value !== null) {
+      setSourceFilter(value);
+    }
+  };
 
   return (
     <Box sx={{height: "100%", display: "flex", flexDirection: "column"}}>
@@ -86,12 +109,14 @@ export default function Profiles(props: TabPanelProps) {
           onChange={(event) => setQuery(event.target.value)}
           size="small"
           placeholder="Search by metadata..."
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchRoundedIcon fontSize="small" sx={{color: "rgba(255,255,255,0.72)"}}/>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchRoundedIcon fontSize="small" sx={{color: "rgba(255,255,255,0.72)"}}/>
+                </InputAdornment>
+              ),
+            }
           }}
           sx={{
             "& .MuiOutlinedInput-root": {
@@ -110,6 +135,41 @@ export default function Profiles(props: TabPanelProps) {
             }
           }}
         />
+
+        <ToggleButtonGroup
+          value={sourceFilter}
+          exclusive
+          onChange={handleSourceFilterChange}
+          size="small"
+          sx={{
+            mt: 1,
+            width: "100%",
+            "& .MuiToggleButton-root": {
+              flex: 1,
+              py: 0.3,
+              fontSize: "0.7rem",
+              fontWeight: 600,
+              textTransform: "none",
+              color: "rgba(200, 220, 240, 0.7)",
+              borderColor: "rgba(255,255,255,0.12)",
+              "&.Mui-selected": {
+                color: "#e6f6ff",
+                backgroundColor: "rgba(3, 169, 244, 0.18)",
+                borderColor: "rgba(3, 169, 244, 0.4)",
+              },
+              "&.Mui-selected:hover": {
+                backgroundColor: "rgba(3, 169, 244, 0.24)",
+              },
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.06)",
+              }
+            }
+          }}
+        >
+          <ToggleButton value="all">All</ToggleButton>
+          <ToggleButton value="default">Default</ToggleButton>
+          <ToggleButton value="user">User</ToggleButton>
+        </ToggleButtonGroup>
 
         <Typography
           variant="caption"
@@ -132,6 +192,8 @@ export default function Profiles(props: TabPanelProps) {
           const description = hasError ? "YAML parse error" : (profile.metadata?.description || "No description");
           const selectors = profile.metadata?.selectors || [];
           const isSelected = props.selectedProfileIndex === item.originalIndex;
+          const source = props.profileSources[item.originalIndex] || "default";
+          const isUserProfile = source === "user";
           return (
             <ListItemButton
               key={`${name}-${item.originalIndex}`}
@@ -182,19 +244,38 @@ export default function Profiles(props: TabPanelProps) {
                   }
                 }}
               />
-              {!hasError && selectors.length > 0 && (
-                <Chip
-                  label={selectors.length}
-                  size="small"
-                  sx={{
-                    height: 20,
-                    mt: 0.2,
-                    fontSize: "0.68rem",
-                    color: "#b7f3ce",
-                    border: "1px solid rgba(183,243,206,0.35)",
-                    backgroundColor: "rgba(183,243,206,0.08)"
-                  }}
-                />
+              {!hasError && (
+                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5, mt: 0.2 }}>
+                  <Chip
+                    label={isUserProfile ? "User" : "Default"}
+                    size="small"
+                    sx={{
+                      height: 20,
+                      fontSize: "0.65rem",
+                      fontWeight: 700,
+                      color: isUserProfile ? "#ffd59e" : "#a8c8e8",
+                      border: isUserProfile
+                        ? "1px solid rgba(255,213,158,0.4)"
+                        : "1px solid rgba(168,200,232,0.3)",
+                      backgroundColor: isUserProfile
+                        ? "rgba(255,213,158,0.1)"
+                        : "rgba(168,200,232,0.06)"
+                    }}
+                  />
+                  {selectors.length > 0 && (
+                    <Chip
+                      label={selectors.length}
+                      size="small"
+                      sx={{
+                        height: 20,
+                        fontSize: "0.68rem",
+                        color: "#b7f3ce",
+                        border: "1px solid rgba(183,243,206,0.35)",
+                        backgroundColor: "rgba(183,243,206,0.08)"
+                      }}
+                    />
+                  )}
+                </Box>
               )}
             </ListItemButton>
           );

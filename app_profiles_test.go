@@ -114,7 +114,11 @@ func TestResolveProfilesDirFallsBackToCwdProfiles(t *testing.T) {
 }
 
 func TestSaveProfileByIndexDoesNotMarshalRuntimeFunctionFields(t *testing.T) {
-	profilesDir := t.TempDir()
+	root := t.TempDir()
+	profilesDir := filepath.Join(root, profilesFolderName)
+	if err := os.MkdirAll(profilesDir, 0o755); err != nil {
+		t.Fatalf("failed to create profiles dir: %v", err)
+	}
 	content := []byte(strings.TrimSpace(`
 metadata:
   name: A319
@@ -149,7 +153,9 @@ leds:
 		t.Fatalf("SaveProfileByIndex returned error: %v", err)
 	}
 
-	saved, err := os.ReadFile(filepath.Join(profilesDir, "A319.yaml"))
+	// Save now writes to "user profiles" directory
+	userProfilesDir := filepath.Join(root, userProfilesFolderName)
+	saved, err := os.ReadFile(filepath.Join(userProfilesDir, "A319.yaml"))
 	if err != nil {
 		t.Fatalf("failed to read saved profile yaml: %v", err)
 	}
@@ -161,7 +167,11 @@ leds:
 }
 
 func TestSaveProfileByIndexPersistsZeroThreshold(t *testing.T) {
-	profilesDir := t.TempDir()
+	root := t.TempDir()
+	profilesDir := filepath.Join(root, profilesFolderName)
+	if err := os.MkdirAll(profilesDir, 0o755); err != nil {
+		t.Fatalf("failed to create profiles dir: %v", err)
+	}
 	content := []byte(strings.TrimSpace(`
 metadata:
   name: A319
@@ -195,7 +205,9 @@ leds:
 		t.Fatalf("SaveProfileByIndex returned error: %v", err)
 	}
 
-	saved, err := os.ReadFile(filepath.Join(profilesDir, "A319.yaml"))
+	// Save now writes to "user profiles" directory
+	userProfilesDir := filepath.Join(root, userProfilesFolderName)
+	saved, err := os.ReadFile(filepath.Join(userProfilesDir, "A319.yaml"))
 	if err != nil {
 		t.Fatalf("failed to read saved profile yaml: %v", err)
 	}
@@ -217,7 +229,11 @@ leds:
 }
 
 func TestCreateProfileFromDefaultCreatesProfileFromTemplate(t *testing.T) {
-	profilesDir := t.TempDir()
+	root := t.TempDir()
+	profilesDir := filepath.Join(root, profilesFolderName)
+	if err := os.MkdirAll(profilesDir, 0o755); err != nil {
+		t.Fatalf("failed to create profiles dir: %v", err)
+	}
 	defaultContent := []byte(strings.TrimSpace(`
 metadata:
   name: Default Profile
@@ -250,6 +266,13 @@ buttons:
 
 	if filepath.Base(createdPath) != "A320.yaml" {
 		t.Fatalf("expected created file A320.yaml, got %q", filepath.Base(createdPath))
+	}
+
+	// New profiles are created in the "user profiles" directory
+	userProfilesDir := filepath.Join(root, userProfilesFolderName)
+	expectedDir := normalizeDir(userProfilesDir)
+	if normalizeDir(filepath.Dir(createdPath)) != expectedDir {
+		t.Fatalf("expected profile to be created in user profiles dir %q, got %q", expectedDir, filepath.Dir(createdPath))
 	}
 
 	savedContent, err := os.ReadFile(createdPath)
@@ -342,7 +365,11 @@ func TestReadProfilesFromDirSkipsBrokenYamlAndLoadsRest(t *testing.T) {
 }
 
 func TestCreateProfileFromDefaultErrorsWhenTemplateMissing(t *testing.T) {
-	profilesDir := t.TempDir()
+	root := t.TempDir()
+	profilesDir := filepath.Join(root, profilesFolderName)
+	if err := os.MkdirAll(profilesDir, 0o755); err != nil {
+		t.Fatalf("failed to create profiles dir: %v", err)
+	}
 	writeProfileYAML(t, profilesDir, "A319.yaml", "A319")
 
 	app := NewApp()
@@ -392,5 +419,161 @@ func writeProfileYAML(t *testing.T, profilesDir string, filename string, profile
 	content := []byte("metadata:\n  name: " + profileName + "\n")
 	if err := os.WriteFile(filepath.Join(profilesDir, filename), content, 0o644); err != nil {
 		t.Fatalf("failed to write profile yaml %q: %v", filename, err)
+	}
+}
+
+func TestUserAndDefaultProfilesBothAppear(t *testing.T) {
+	root := t.TempDir()
+	profilesDir := filepath.Join(root, profilesFolderName)
+	userProfilesDir := filepath.Join(root, userProfilesFolderName)
+	if err := os.MkdirAll(profilesDir, 0o755); err != nil {
+		t.Fatalf("failed to create profiles dir: %v", err)
+	}
+	if err := os.MkdirAll(userProfilesDir, 0o755); err != nil {
+		t.Fatalf("failed to create user profiles dir: %v", err)
+	}
+
+	writeProfileYAML(t, profilesDir, "A319.yaml", "Default A319")
+	writeProfileYAML(t, profilesDir, "default.yaml", "Default")
+	writeProfileYAML(t, userProfilesDir, "A319.yaml", "User A319")
+
+	app := NewApp()
+	if err := app.loadProfilesFromDir(profilesDir); err != nil {
+		t.Fatalf("loadProfilesFromDir returned error: %v", err)
+	}
+
+	profiles := app.GetProfiles()
+	sources := app.GetProfileSources()
+
+	// Both the default A319 and user A319 should appear (3 total)
+	if len(profiles) != 3 {
+		t.Fatalf("expected 3 combined profiles (2 default + 1 user), got %d", len(profiles))
+	}
+
+	defaultA319Found := false
+	userA319Found := false
+	for i, p := range profiles {
+		if p.Metadata == nil {
+			continue
+		}
+		if p.Metadata.Name == "Default A319" && sources[i] == profileSourceDefault {
+			defaultA319Found = true
+		}
+		if p.Metadata.Name == "User A319" && sources[i] == profileSourceUser {
+			userA319Found = true
+		}
+	}
+	if !defaultA319Found {
+		t.Fatalf("expected Default A319 with source 'default' in combined list")
+	}
+	if !userA319Found {
+		t.Fatalf("expected User A319 with source 'user' in combined list")
+	}
+}
+
+func TestUserProfilesOnlyInUserDir(t *testing.T) {
+	root := t.TempDir()
+	profilesDir := filepath.Join(root, profilesFolderName)
+	userProfilesDir := filepath.Join(root, userProfilesFolderName)
+	if err := os.MkdirAll(profilesDir, 0o755); err != nil {
+		t.Fatalf("failed to create profiles dir: %v", err)
+	}
+	if err := os.MkdirAll(userProfilesDir, 0o755); err != nil {
+		t.Fatalf("failed to create user profiles dir: %v", err)
+	}
+
+	writeProfileYAML(t, profilesDir, "default.yaml", "Default")
+	writeProfileYAML(t, userProfilesDir, "Custom.yaml", "Custom User Profile")
+
+	app := NewApp()
+	if err := app.loadProfilesFromDir(profilesDir); err != nil {
+		t.Fatalf("loadProfilesFromDir returned error: %v", err)
+	}
+
+	profiles := app.GetProfiles()
+	sources := app.GetProfileSources()
+
+	if len(profiles) != 2 {
+		t.Fatalf("expected 2 profiles (1 default + 1 user-only), got %d", len(profiles))
+	}
+
+	// Find the custom profile
+	found := false
+	for i, p := range profiles {
+		if p.Metadata != nil && p.Metadata.Name == "Custom User Profile" {
+			found = true
+			if sources[i] != profileSourceUser {
+				t.Fatalf("expected source 'user' for Custom profile, got %q", sources[i])
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("Custom User Profile not found in merged results")
+	}
+}
+
+func TestSaveProfileByIndexWritesToUserProfilesDir(t *testing.T) {
+	root := t.TempDir()
+	profilesDir := filepath.Join(root, profilesFolderName)
+	if err := os.MkdirAll(profilesDir, 0o755); err != nil {
+		t.Fatalf("failed to create profiles dir: %v", err)
+	}
+	writeProfileYAML(t, profilesDir, "A319.yaml", "A319")
+
+	app := NewApp()
+	if err := app.loadProfilesFromDir(profilesDir); err != nil {
+		t.Fatalf("loadProfilesFromDir returned error: %v", err)
+	}
+
+	sources := app.GetProfileSources()
+	if sources[0] != profileSourceDefault {
+		t.Fatalf("expected initial source 'default', got %q", sources[0])
+	}
+
+	profiles := app.GetProfiles()
+	if err := app.SaveProfileByIndex(0, profiles[0]); err != nil {
+		t.Fatalf("SaveProfileByIndex returned error: %v", err)
+	}
+
+	// Verify file was saved to user profiles dir
+	userProfilesDir := filepath.Join(root, userProfilesFolderName)
+	if _, err := os.Stat(filepath.Join(userProfilesDir, "A319.yaml")); err != nil {
+		t.Fatalf("expected A319.yaml to exist in user profiles dir: %v", err)
+	}
+
+	// Source should now be "user"
+	sources = app.GetProfileSources()
+	if sources[0] != profileSourceUser {
+		t.Fatalf("expected source 'user' after save, got %q", sources[0])
+	}
+
+	// File path should now point to user profiles
+	files := app.GetProfileFiles()
+	if !strings.Contains(files[0], userProfilesFolderName) {
+		t.Fatalf("expected file path to contain %q, got %q", userProfilesFolderName, files[0])
+	}
+}
+
+func TestLoadWithNoUserProfilesDirStillWorks(t *testing.T) {
+	root := t.TempDir()
+	profilesDir := filepath.Join(root, profilesFolderName)
+	if err := os.MkdirAll(profilesDir, 0o755); err != nil {
+		t.Fatalf("failed to create profiles dir: %v", err)
+	}
+	writeProfileYAML(t, profilesDir, "default.yaml", "Default")
+
+	app := NewApp()
+	if err := app.loadProfilesFromDir(profilesDir); err != nil {
+		t.Fatalf("loadProfilesFromDir returned error: %v", err)
+	}
+
+	profiles := app.GetProfiles()
+	sources := app.GetProfileSources()
+
+	if len(profiles) != 1 {
+		t.Fatalf("expected 1 profile, got %d", len(profiles))
+	}
+	if sources[0] != profileSourceDefault {
+		t.Fatalf("expected source 'default', got %q", sources[0])
 	}
 }

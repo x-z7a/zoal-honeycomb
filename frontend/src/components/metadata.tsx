@@ -8,10 +8,12 @@ import {pkg} from "../../wailsjs/go/models";
 interface ListProps {
   metadata?: pkg.Metadata;
   filePath?: string;
+  source?: string;
 }
 
 export default function Metadata(props: ListProps) {
   const selectors = props.metadata?.selectors || [];
+  const isUserProfile = props.source === "user";
 
   return (
     <Card
@@ -24,9 +26,27 @@ export default function Metadata(props: ListProps) {
       }}
     >
       <CardContent sx={{px: 2.5, py: 2.25}}>
-        <Typography variant="overline" sx={{letterSpacing: "0.14em", color: "rgba(187, 220, 248, 0.8)"}}>
-          Active Profile
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography variant="overline" sx={{letterSpacing: "0.14em", color: "rgba(187, 220, 248, 0.8)"}}>
+            Active Profile
+          </Typography>
+          <Chip
+            label={isUserProfile ? "User Profile" : "Default Profile"}
+            size="small"
+            sx={{
+              height: 20,
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              color: isUserProfile ? "#ffd59e" : "#a8c8e8",
+              border: isUserProfile
+                ? "1px solid rgba(255,213,158,0.4)"
+                : "1px solid rgba(168,200,232,0.3)",
+              backgroundColor: isUserProfile
+                ? "rgba(255,213,158,0.1)"
+                : "rgba(168,200,232,0.06)"
+            }}
+          />
+        </Stack>
         <Typography
           variant="h4"
           component="div"

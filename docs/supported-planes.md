@@ -4,7 +4,7 @@ This page is generated from the YAML profiles in `profiles/` and excludes `defau
 Do not edit the generated section by hand. Run `npm --prefix docs run docs:generate:supported-planes` instead.
 
 <!-- BEGIN GENERATED SUPPORTED PLANES -->
-There are currently `45` profile files. The `Matches` column shows the exact
+There are currently `46` profile files. The `Matches` column shows the exact
 `metadata.selectors` values used by runtime profile selection, so a single
 profile can cover multiple aircraft variants.
 
@@ -37,6 +37,7 @@ profile can cover multiple aircraft variants.
 | `DC3.yaml` | Douglas DC-3 | `Douglas C-47 Classic`<br>`Douglas C-47 GNS530`<br>`Douglas C-47 Passenger`<br>`Douglas CX-47 Float`<br>`Douglas DC-3 NXG` |
 | `DH8D.yaml` | FlyJSim Q400 | `DH8D` |
 | `DR40.yaml` | Robin DR-401 | `DR40` |
+| `E135.yaml` | X-Crafts ERJ 135LR | `X-Crafts ERJ 135LR` |
 | `E170.yaml` | Embraer E-Jet E170 | `E-Jets E170` |
 | `E175.yaml` | Embraer E-Jet E175 | `E-Jets E175` |
 | `E190.yaml` | Embraer E-Jet E190 | `E-Jets Family E190` |

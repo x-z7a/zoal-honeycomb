@@ -2,6 +2,7 @@ export namespace main {
 	
 	export class ProfilesStatus {
 	    profilesDir: string;
+	    userProfilesDir: string;
 	    profilesCount: number;
 	    needsSelection: boolean;
 	    loadError: string;
@@ -14,6 +15,7 @@ export namespace main {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.profilesDir = source["profilesDir"];
+	        this.userProfilesDir = source["userProfilesDir"];
 	        this.profilesCount = source["profilesCount"];
 	        this.needsSelection = source["needsSelection"];
 	        this.loadError = source["loadError"];

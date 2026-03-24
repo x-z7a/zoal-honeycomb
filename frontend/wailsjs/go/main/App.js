@@ -18,6 +18,10 @@ export function GetProfileFiles() {
   return window['go']['main']['App']['GetProfileFiles']();
 }
 
+export function GetProfileSources() {
+  return window['go']['main']['App']['GetProfileSources']();
+}
+
 export function GetProfiles() {
   return window['go']['main']['App']['GetProfiles']();
 }

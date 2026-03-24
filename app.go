@@ -21,12 +21,15 @@ import (
 )
 
 const (
-	profilesDirEnvVar      = "ZOAL_PROFILES_DIR"
-	profilesFolderName     = "profiles"
-	defaultProfileTemplate = "default.yaml"
-	selectionErrorMsg      = "no profiles folder selected. Please select a folder containing YAML profiles"
-	missingProfilesMsg     = "profiles folder not found. Please select your external profiles folder"
-	invalidProfilesMsg     = "selected folder does not contain valid YAML profiles"
+	profilesDirEnvVar        = "ZOAL_PROFILES_DIR"
+	profilesFolderName       = "profiles"
+	userProfilesFolderName   = "user profiles"
+	defaultProfileTemplate   = "default.yaml"
+	selectionErrorMsg        = "no profiles folder selected. Please select a folder containing YAML profiles"
+	missingProfilesMsg       = "profiles folder not found. Please select your external profiles folder"
+	invalidProfilesMsg       = "selected folder does not contain valid YAML profiles"
+	profileSourceUser        = "user"
+	profileSourceDefault     = "default"
 )
 
 var (
@@ -46,20 +49,23 @@ type ListResponse struct {
 }
 
 type ProfilesStatus struct {
-	ProfilesDir    string `json:"profilesDir"`
-	ProfilesCount  int    `json:"profilesCount"`
-	NeedsSelection bool   `json:"needsSelection"`
-	LoadError      string `json:"loadError"`
-	ParseErrors    int    `json:"parseErrors"`
+	ProfilesDir      string `json:"profilesDir"`
+	UserProfilesDir  string `json:"userProfilesDir"`
+	ProfilesCount    int    `json:"profilesCount"`
+	NeedsSelection   bool   `json:"needsSelection"`
+	LoadError        string `json:"loadError"`
+	ParseErrors      int    `json:"parseErrors"`
 }
 
 // App struct
 type App struct {
 	ctx                    context.Context
 	profilesDir            string
+	userProfilesDir        string
 	profiles               []pkg.Profile
 	profileFiles           []string
 	profileErrors          []string
+	profileSources         []string
 	profilesLoadErr        string
 	needsProfilesSelection bool
 	mu                     sync.RWMutex
@@ -125,6 +131,15 @@ func (a *App) GetProfileErrors() []string {
 	return res
 }
 
+func (a *App) GetProfileSources() []string {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+
+	res := make([]string, len(a.profileSources))
+	copy(res, a.profileSources)
+	return res
+}
+
 func (a *App) GetProfilesStatus() ProfilesStatus {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
@@ -137,11 +152,12 @@ func (a *App) GetProfilesStatus() ProfilesStatus {
 	}
 
 	return ProfilesStatus{
-		ProfilesDir:    a.profilesDir,
-		ProfilesCount:  len(a.profiles),
-		NeedsSelection: a.needsProfilesSelection,
-		LoadError:      a.profilesLoadErr,
-		ParseErrors:    parseErrors,
+		ProfilesDir:     a.profilesDir,
+		UserProfilesDir: a.userProfilesDir,
+		ProfilesCount:   len(a.profiles),
+		NeedsSelection:  a.needsProfilesSelection,
+		LoadError:       a.profilesLoadErr,
+		ParseErrors:     parseErrors,
 	}
 }
 
@@ -173,7 +189,6 @@ func (a *App) SaveProfileByIndex(index int, profile pkg.Profile) error {
 		return errors.New("profile file index out of range")
 	}
 
-	fileName := a.profileFiles[index]
 	cleanProfile, err := sanitizeProfileForSave(profile)
 	if err != nil {
 		return err
@@ -184,18 +199,37 @@ func (a *App) SaveProfileByIndex(index int, profile pkg.Profile) error {
 		return err
 	}
 
-	err = os.WriteFile(fileName, output, 0o644)
-	if err != nil {
+	// Always save into the user profiles directory
+	userDir := a.userProfilesDir
+	if userDir == "" {
+		userDir = filepath.Join(filepath.Dir(a.profilesDir), userProfilesFolderName)
+	}
+	if err := os.MkdirAll(userDir, 0o755); err != nil {
+		return fmt.Errorf("failed to create user profiles folder: %w", err)
+	}
+
+	baseName := filepath.Base(a.profileFiles[index])
+	userFilePath := filepath.Join(userDir, baseName)
+
+	if err := os.WriteFile(userFilePath, output, 0o644); err != nil {
 		return err
 	}
 
 	a.profiles[index] = cleanProfile
+	a.profileFiles[index] = userFilePath
+	if index < len(a.profileSources) {
+		a.profileSources[index] = profileSourceUser
+	}
+	if a.userProfilesDir == "" {
+		a.userProfilesDir = userDir
+	}
 	return nil
 }
 
 func (a *App) CreateProfileFromDefault(filename string, profileName string, description string, selectors []string) (string, error) {
 	a.mu.RLock()
 	profilesDir := a.profilesDir
+	userProfilesDir := a.userProfilesDir
 	a.mu.RUnlock()
 
 	if !dirExists(profilesDir) {
@@ -217,9 +251,19 @@ func (a *App) CreateProfileFromDefault(filename string, profileName string, desc
 		return "", errors.New("at least one selector is required")
 	}
 
-	newProfilePath := filepath.Join(profilesDir, normalizedFilename)
+	// New profiles are always created in the user profiles directory
+	targetDir := userProfilesDir
+	if targetDir == "" {
+		targetDir = filepath.Join(filepath.Dir(profilesDir), userProfilesFolderName)
+	}
+	if err := os.MkdirAll(targetDir, 0o755); err != nil {
+		return "", fmt.Errorf("failed to create user profiles folder: %w", err)
+	}
+
+	newProfilePath := filepath.Join(targetDir, normalizedFilename)
+	// Also check the default profiles dir for duplicates
 	if _, err := os.Stat(newProfilePath); err == nil {
-		return "", fmt.Errorf("profile %q already exists", normalizedFilename)
+		return "", fmt.Errorf("profile %q already exists in user profiles", normalizedFilename)
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return "", fmt.Errorf("failed to check existing profile %q: %w", normalizedFilename, err)
 	}
@@ -345,11 +389,32 @@ func (a *App) loadProfilesFromDir(profilesDir string) error {
 		return err
 	}
 
+	sources := make([]string, len(profiles))
+	for i := range sources {
+		sources[i] = profileSourceDefault
+	}
+
+	// Derive user profiles dir as sibling "user profiles" folder
+	userDir := filepath.Join(filepath.Dir(normalized), userProfilesFolderName)
+	userDir = normalizeDir(userDir)
+
+	if dirExists(userDir) {
+		userProfiles, userFiles, userErrors, userErr := readProfilesFromDir(userDir)
+		if userErr == nil {
+			profiles, files, profileErrors, sources = combineProfiles(
+				profiles, files, profileErrors,
+				userProfiles, userFiles, userErrors,
+			)
+		}
+	}
+
 	a.mu.Lock()
 	a.profilesDir = normalized
+	a.userProfilesDir = userDir
 	a.profiles = profiles
 	a.profileFiles = files
 	a.profileErrors = profileErrors
+	a.profileSources = sources
 	a.profilesLoadErr = ""
 	a.needsProfilesSelection = false
 	a.mu.Unlock()
@@ -412,6 +477,63 @@ func readProfilesFromDir(profilesDir string) ([]pkg.Profile, []string, []string,
 	}
 
 	return profiles, profileFiles, profileErrors, nil
+}
+
+// combineProfiles appends default and user profiles into a single sorted list.
+// Both directories may contain files with the same name — both are kept and
+// distinguished by their source tag ("default" or "user").
+func combineProfiles(
+	defaultProfiles []pkg.Profile, defaultFiles []string, defaultErrors []string,
+	userProfiles []pkg.Profile, userFiles []string, userErrors []string,
+) ([]pkg.Profile, []string, []string, []string) {
+	type entry struct {
+		profile pkg.Profile
+		file    string
+		err     string
+		source  string
+		sortKey string
+	}
+
+	total := len(defaultFiles) + len(userFiles)
+	entries := make([]entry, 0, total)
+
+	for i, file := range defaultFiles {
+		entries = append(entries, entry{
+			profile: defaultProfiles[i],
+			file:    file,
+			err:     defaultErrors[i],
+			source:  profileSourceDefault,
+			sortKey: strings.ToLower(filepath.Base(file)),
+		})
+	}
+
+	for i, file := range userFiles {
+		entries = append(entries, entry{
+			profile: userProfiles[i],
+			file:    file,
+			err:     userErrors[i],
+			source:  profileSourceUser,
+			sortKey: strings.ToLower(filepath.Base(file)),
+		})
+	}
+
+	sort.SliceStable(entries, func(i, j int) bool {
+		return entries[i].sortKey < entries[j].sortKey
+	})
+
+	profiles := make([]pkg.Profile, 0, total)
+	files := make([]string, 0, total)
+	errors := make([]string, 0, total)
+	sources := make([]string, 0, total)
+
+	for _, e := range entries {
+		profiles = append(profiles, e.profile)
+		files = append(files, e.file)
+		errors = append(errors, e.err)
+		sources = append(sources, e.source)
+	}
+
+	return profiles, files, errors, sources
 }
 
 func isValidProfilesDir(profilesDir string) bool {

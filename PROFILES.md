@@ -15,13 +15,43 @@ This guide shows how to build a new profile using `profiles/C172 G1000.yaml` as 
 9. Tune trim wheel commands/acceleration in `trim_wheels` (optional).
 10. Reload the profile in plugin and verify behavior in cockpit.
 
+## Default profiles vs user profiles
+
+The plugin uses two profile directories:
+
+| Directory | Purpose | Survives updates? |
+| --- | --- | --- |
+| `profiles/` | Ships with each release. Contains default profiles for supported aircraft. | No — overwritten on update. |
+| `user profiles/` | Your customizations. Created automatically the first time you save or create a profile from the UI. | Yes — never touched by updates. |
+
+**Priority rules:**
+
+- When loading, `user profiles/` is checked first. If a file with the same name exists in both directories, the user version wins.
+- All saves and new profile creation from the UI go into `user profiles/`.
+- Profiles that only exist in `user profiles/` (no matching file in `profiles/`) are loaded alongside the defaults.
+
+**Example directory layout:**
+
+```
+zoal-honeycomb/
+  profiles/
+    default.yaml          <-- shipped default
+    A320.yaml             <-- shipped A320 profile
+    C172 G1000.yaml       <-- shipped C172 G1000 profile
+  user profiles/
+    A320.yaml             <-- your customized A320 (overrides shipped version)
+    MyCustomPlane.yaml    <-- your own profile (no default equivalent)
+```
+
+In the UI, each profile shows a **User** or **Default** tag so you always know which version you are editing.
+
 ## File naming and selection logic
 
 The plugin loads profiles like this:
 
 1. It reads aircraft ICAO from `sim/aircraft/view/acf_ICAO`.
-2. It first tries `profiles/<ICAO>.yaml`.
-3. It then scans files that start with the same ICAO prefix and picks the one whose `metadata.selectors` contains the exact aircraft UI name (`sim/aircraft/view/acf_ui_name`).
+2. It first tries `user profiles/<ICAO>.yaml`, then `profiles/<ICAO>.yaml`.
+3. It then scans files that start with the same ICAO prefix (in both directories, user profiles first) and picks the one whose `metadata.selectors` contains the exact aircraft UI name (`sim/aircraft/view/acf_ui_name`).
 
 Example:
 
@@ -330,3 +360,4 @@ trim_wheels:
 4. Every LED/condition dataref item has `operator` and `threshold`.
 5. Array datarefs use `index` when needed (for example second door).
 6. Profile reload succeeds without plugin log errors.
+7. If customizing a shipped profile, verify your file is saved in `user profiles/` (check the **User** tag in the UI).

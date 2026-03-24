@@ -38,28 +38,33 @@ func (s *xplaneService) tryLoadProfile() error {
 		}
 
 		// try to load other profiles for this aircraft
+		// scan user profiles first (higher priority), then default profiles
 		aircraftNameDrf, found := dataAccess.FindDataRef("sim/aircraft/view/acf_ui_name")
 		if found {
 			aircraftName := dataAccess.GetString(aircraftNameDrf)
-			configFilePath := path.Join(s.pluginPath, "profiles")
-			entries, err := os.ReadDir(configFilePath)
-			if err != nil {
-				s.Logger.Errorf("Error reading profiles folder: %v", err)
-				return err
+			profileDirs := []string{
+				path.Join(s.pluginPath, "user profiles"),
+				path.Join(s.pluginPath, "profiles"),
 			}
-			for _, entry := range entries {
-				if !entry.IsDir() && path.Ext(entry.Name()) == ".yaml" && strings.HasPrefix(entry.Name(), aircraftIACO) {
-					s.Logger.Infof("Checking profile: %s", entry.Name())
-					profile, err := s.loadProfile(strings.Replace(entry.Name(), ".yaml", "", 1))
-					if err != nil {
-						s.Logger.Errorf("Error loading profile %s: %v", entry.Name(), err)
-					}
-					for _, selector := range profile.Metadata.Selectors {
-						if selector == aircraftName {
-							planeProfile = profile
-							break
-						} else {
-							s.Logger.Infof("Skipping profile %s for %s, ui name: %s", entry.Name(), selector, aircraftName)
+			for _, configFilePath := range profileDirs {
+				entries, err := os.ReadDir(configFilePath)
+				if err != nil {
+					continue
+				}
+				for _, entry := range entries {
+					if !entry.IsDir() && path.Ext(entry.Name()) == ".yaml" && strings.HasPrefix(entry.Name(), aircraftIACO) {
+						s.Logger.Infof("Checking profile: %s", entry.Name())
+						profile, err := s.loadProfile(strings.Replace(entry.Name(), ".yaml", "", 1))
+						if err != nil {
+							s.Logger.Errorf("Error loading profile %s: %v", entry.Name(), err)
+						}
+						for _, selector := range profile.Metadata.Selectors {
+							if selector == aircraftName {
+								planeProfile = profile
+								break
+							} else {
+								s.Logger.Infof("Skipping profile %s for %s, ui name: %s", entry.Name(), selector, aircraftName)
+							}
 						}
 					}
 				}
@@ -140,19 +145,29 @@ func (s *xplaneService) setupProfile(planeProfile pkg.Profile) error {
 }
 
 func (s *xplaneService) loadProfile(airplaneConfig string) (pkg.Profile, error) {
-	// load datarefs for the airplane from YAML
-	configFilePath := path.Join(s.pluginPath, "profiles", fmt.Sprintf("%s.yaml", airplaneConfig))
-	f, err := os.ReadFile(configFilePath)
-	if err != nil {
-		return pkg.Profile{}, err
+	fileName := fmt.Sprintf("%s.yaml", airplaneConfig)
+
+	// Try user profiles first, then fall back to default profiles
+	candidates := []string{
+		path.Join(s.pluginPath, "user profiles", fileName),
+		path.Join(s.pluginPath, "profiles", fileName),
 	}
-	s.Logger.Infof("Loading datarefs from: %s", configFilePath)
-	var res pkg.Profile
-	err = yaml.Unmarshal(f, &res)
-	if err != nil {
-		return pkg.Profile{}, err
+
+	for _, configFilePath := range candidates {
+		f, err := os.ReadFile(configFilePath)
+		if err != nil {
+			continue
+		}
+		s.Logger.Infof("Loading datarefs from: %s", configFilePath)
+		var res pkg.Profile
+		if err := yaml.Unmarshal(f, &res); err != nil {
+			s.Logger.Errorf("Error parsing profile %s: %v", configFilePath, err)
+			continue
+		}
+		return res, nil
 	}
-	return res, nil
+
+	return pkg.Profile{}, fmt.Errorf("profile %q not found in user profiles or default profiles", airplaneConfig)
 }
 
 func (s *xplaneService) loadDatarefProfile(fieldName string, fieldValue *pkg.DatarefProfile) error {

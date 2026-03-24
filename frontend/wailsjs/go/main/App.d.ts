@@ -11,6 +11,8 @@ export function GetProfileErrors():Promise<Array<string>>;
 
 export function GetProfileFiles():Promise<Array<string>>;
 
+export function GetProfileSources():Promise<Array<string>>;
+
 export function GetProfiles():Promise<Array<pkg.Profile>>;
 
 export function GetProfilesStatus():Promise<main.ProfilesStatus>;

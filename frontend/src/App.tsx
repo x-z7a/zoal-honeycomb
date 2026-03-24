@@ -4,6 +4,7 @@ import {
   CreateProfileFromDefault,
   GetProfileErrors,
   GetProfileFiles,
+  GetProfileSources,
   GetProfiles,
   GetProfilesStatus,
   GetXplane,
@@ -161,6 +162,7 @@ function App() {
   const [profilesData, setProfilesData] = useState([] as pkg.Profile[]);
   const [profileFiles, setProfileFiles] = useState([] as string[]);
   const [profileErrors, setProfileErrors] = useState([] as string[]);
+  const [profileSources, setProfileSources] = useState([] as string[]);
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(-1);
   const [editableProfile, setEditableProfile] = useState<pkg.Profile | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -180,18 +182,20 @@ function App() {
   const [createProfileError, setCreateProfileError] = useState("");
 
   const refreshProfiles = useCallback(async () => {
-    const [status, profiles, files, errors] = await Promise.all([
+    const [status, profiles, files, errors, sources] = await Promise.all([
       GetProfilesStatus(),
       GetProfiles(),
       GetProfileFiles(),
-      GetProfileErrors()
+      GetProfileErrors(),
+      GetProfileSources()
     ]);
     const normalizedProfiles = profiles.map((profile) => sanitizeProfileForApi(profile));
     setProfilesStatus(status);
     setProfilesData(normalizedProfiles);
     setProfileFiles(files);
     setProfileErrors(errors);
-    return { status, profiles: normalizedProfiles, files, errors };
+    setProfileSources(sources);
+    return { status, profiles: normalizedProfiles, files, errors, sources };
   }, []);
 
   useEffect(() => {
@@ -205,6 +209,7 @@ function App() {
       setProfilesData([]);
       setProfileFiles([]);
       setProfileErrors([]);
+      setProfileSources([]);
     });
   }, [refreshProfiles]);
 
@@ -244,6 +249,7 @@ function App() {
 
   const selectedProfile = selectedProfileIndex >= 0 ? profilesData[selectedProfileIndex] : null;
   const selectedProfilePath = selectedProfileIndex >= 0 ? profileFiles[selectedProfileIndex] || "" : "";
+  const selectedProfileSource = selectedProfileIndex >= 0 ? (profileSources[selectedProfileIndex] || "default") : "default";
   const needsProfilesSelection = profilesStatus?.needsSelection || false;
   const profilesLoadError = profilesStatus?.loadError || "";
   const showProfilesModal = needsProfilesSelection;
@@ -432,10 +438,20 @@ function App() {
     setSaveError("");
     try {
       await SaveProfileByIndex(selectedProfileIndex, profileToSave);
-      setProfilesData((previous) =>
-        previous.map((profile, index) => (index === selectedProfileIndex ? cloneProfile(profileToSave) : profile))
+
+      // Reload all profiles from backend to pick up updated paths and any new entries
+      const refreshed = await refreshProfiles();
+      // Re-select the saved profile — find the user copy by matching the profile name
+      const savedName = profileToSave.metadata?.name || "";
+      const userIdx = refreshed.files.findIndex((_, i) =>
+        refreshed.sources[i] === "user" && refreshed.profiles[i]?.metadata?.name === savedName
       );
-      setSaveMessage("Profile saved to YAML.");
+      if (userIdx >= 0 && userIdx !== selectedProfileIndex) {
+        setHasUserSelectedProfile(true);
+        setSelectedProfileIndex(userIdx);
+      }
+
+      setSaveMessage("Profile saved to user profiles.");
     } catch (error: any) {
       setSaveError(getErrorMessage(error, "Failed to save profile."));
     } finally {
@@ -627,6 +643,7 @@ function App() {
             profiles={profilesData}
             profileErrors={profileErrors}
             profileFiles={profileFiles}
+            profileSources={profileSources}
             selectedProfileIndex={selectedProfileIndex}
             onSelectProfile={handleProfileSelect}
             onOpenAddProfile={handleOpenAddProfileTutorial}
@@ -693,7 +710,7 @@ function App() {
               </Alert>
             ) : (
             <>
-            <Metadata metadata={editableProfile?.metadata} filePath={selectedProfilePath} />
+            <Metadata metadata={editableProfile?.metadata} filePath={selectedProfilePath} source={selectedProfileSource} />
             <Box
               sx={{
                 borderRadius: 3,
