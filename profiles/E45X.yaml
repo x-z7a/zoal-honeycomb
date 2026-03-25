@@ -1,8 +1,8 @@
 metadata:
-    name: X-Crafts ERJ 145XR
-    description: Profile for X-Crafts ERJ 145XR
+    name: X-Crafts ERJ 135LR
+    description: Profile for X-Crafts ERJ 135LR
     selectors:
-        - X-Crafts ERJ 145XR
+        - X-Crafts ERJ 135LR
 buttons:
     hdg:
         single_click:
@@ -89,7 +89,7 @@ leds:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/vvi_status
               operator: ==
-              threshold: 1
+              threshold: 2
     ap:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/servos_on
@@ -111,14 +111,14 @@ leds:
               operator: '!='
     master_warn:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/master_warning
-              operator: '>'
-              threshold: 0.01
+            - dataref_str: XCrafts/ERJ/master_warning_light
+              operator: ==
+              threshold: 1
     master_caution:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/master_caution
-              operator: '>'
-              threshold: 0.01
+            - dataref_str: XCrafts/ERJ/master_caution_light
+              operator: ==
+              threshold: 1
     fire:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/engine_fires
@@ -126,19 +126,23 @@ leds:
               threshold: 0.01
     oil_low_pressure:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/oil_pressure_low
+            - dataref_str: sim/cockpit/warnings/annunciators/oil_pressure
               operator: ==
-              threshold: 1
+              threshold: 3
     fuel_low_pressure:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/fuel_pressure_low
+            - dataref_str: sim/cockpit/warnings/annunciators/fuel_pressure
               operator: ==
-              threshold: 1
+              threshold: 3
     anti_ice:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/pitot_heat
-              operator: '>'
-              threshold: 0.01
+            - dataref_str: sim/cockpit/switches/pitot_heat_on
+              operator: ==
+              threshold: 0
+            - dataref_str: sim/cockpit/switches/pitot_heat_on2
+              operator: ==
+              threshold: 0
+        condition: any
     eng_starter:
         datarefs:
             - dataref_str: sim/cockpit2/engine/actuators/starter_hit
@@ -146,10 +150,7 @@ leds:
               threshold: 0.01
     apu:
         datarefs:
-            - dataref_str: sim/cockpit2/electrical/APU_running
-              operator: '>'
-              threshold: 0.01
-            - dataref_str: sim/cockpit/electrical/gpu_on
+            - dataref_str: XCrafts/ERJ/APU_on
               operator: ==
               threshold: 1
         condition: any
@@ -165,9 +166,13 @@ leds:
               threshold: 1
     aux_fuel_pump:
         datarefs:
-            - operator: ==
-              threshold: 0
-        condition: all
+            - dataref_str: XCrafts/ERJ/fuel/fuel_pump_left_state
+              operator: '!='
+              threshold: 2
+            - dataref_str: XCrafts/ERJ/fuel/fuel_pump_right_state
+              operator: '!='
+              threshold: 2
+        condition: any
     parking_brake:
         datarefs:
             - dataref_str: sim/cockpit2/controls/parking_brake_ratio
@@ -180,9 +185,16 @@ leds:
               threshold: 27
     doors:
         datarefs:
-            - dataref_str: sim/flightmodel2/misc/door_open_ratio
-              operator: '>'
-              threshold: 0.9
+            - dataref_str: XCrafts/doors/FM_OPEN
+              operator: ==
+              threshold: 1
+            - dataref_str: XCrafts/doors/BC_OPEN
+              operator: ==
+              threshold: 1
+            - dataref_str: XCrafts/doors/FS_OPEN
+              operator: ==
+              threshold: 1
+        condition: any
 data:
     ap_vs_step:
         value: 10

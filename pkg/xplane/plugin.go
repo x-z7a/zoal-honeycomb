@@ -97,7 +97,7 @@ func (s *xplaneService) checkForNewReleaseVersion() {
 		remoteVersion,
 	)
 	s.Logger.Warning(message)
-	utilities.SpeakString(message)
+	// utilities.SpeakString(message)
 }
 
 func fetchLatestGithubReleaseVersion(client *http.Client, endpoint string) (string, error) {
