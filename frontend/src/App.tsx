@@ -834,9 +834,9 @@ function App() {
                     editable
                     collapsible={false}
                     title={"Landing Gear Configuration"}
-                    sectionData={editableProfile?.leds}
-                    onSectionDataChange={(next) => updateProfileField("leds", next)}
-                    keys={["gear"]}
+                    sectionData={editableProfile?.conditions}
+                    onSectionDataChange={(next) => updateProfileField("conditions", next)}
+                    keys={["retractable_gear"]}
                   />
                 )}
               </Box>
