@@ -55,6 +55,7 @@ jobs:
         run: |
           # sign and notarize mac builds
           codesign \
+            --force \
             --deep \
             --timestamp \
             --options runtime \
@@ -82,7 +83,8 @@ jobs:
           VERSION=${GITHUB_REF##*/} make mac win -j 2
           rm -f ${{ github.workspace }}/build/zoal-honeycomb/mac_arm.xpl ${{ github.workspace }}/build/zoal-honeycomb/mac_amd.xpl
 
-          codesign --timestamp \
+          codesign --force \
+            --timestamp \
             --options runtime \
             --sign "${{ secrets.CODESIGN_IDENTITY }}" ${{ github.workspace }}/build/zoal-honeycomb/mac.xpl
 
