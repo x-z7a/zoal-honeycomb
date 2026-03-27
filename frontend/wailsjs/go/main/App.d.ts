@@ -5,6 +5,8 @@ import {main} from '../models';
 
 export function CreateProfileFromDefault(arg1:string,arg2:string,arg3:string,arg4:Array<string>):Promise<string>;
 
+export function CreateProfileFromImport(arg1:string,arg2:string,arg3:string,arg4:string,arg5:Array<string>):Promise<string>;
+
 export function GetProfile(arg1:string):Promise<pkg.Profile>;
 
 export function GetProfileErrors():Promise<Array<string>>;
@@ -22,5 +24,7 @@ export function GetXplane():Promise<Array<string>>;
 export function GetXplaneDataref(arg1:string):Promise<string>;
 
 export function SaveProfileByIndex(arg1:number,arg2:pkg.Profile):Promise<void>;
+
+export function SelectImportFile():Promise<main.ImportPreview>;
 
 export function SelectProfilesFolder():Promise<void>;

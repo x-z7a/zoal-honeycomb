@@ -6,6 +6,10 @@ export function CreateProfileFromDefault(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['CreateProfileFromDefault'](arg1, arg2, arg3, arg4);
 }
 
+export function CreateProfileFromImport(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['main']['App']['CreateProfileFromImport'](arg1, arg2, arg3, arg4, arg5);
+}
+
 export function GetProfile(arg1) {
   return window['go']['main']['App']['GetProfile'](arg1);
 }
@@ -40,6 +44,10 @@ export function GetXplaneDataref(arg1) {
 
 export function SaveProfileByIndex(arg1, arg2) {
   return window['go']['main']['App']['SaveProfileByIndex'](arg1, arg2);
+}
+
+export function SelectImportFile() {
+  return window['go']['main']['App']['SelectImportFile']();
 }
 
 export function SelectProfilesFolder() {

@@ -1,0 +1,994 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/honeycomb-bravo-profile.schema.json",
+  "title": "Honeycomb Bravo Profile",
+  "description": "Canonical on-disk profile format used by the Honeycomb Configurator for the Bravo Throttle Quadrant.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "Version",
+    "SaveName",
+    "Data",
+    "LEDs",
+    "ConfiguratorSettings"
+  ],
+  "properties": {
+    "Version": {
+      "type": "integer",
+      "const": 1
+    },
+    "SaveName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Data": {
+      "type": "array",
+      "minItems": 48,
+      "maxItems": 48,
+      "items": {
+        "$ref": "#/$defs/buttonEntry"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 0
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 1
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 2
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 3
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 4
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 5
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 6
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 7
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 8
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 9
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 10
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 11
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 12
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 13
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 14
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 15
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 16
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 17
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 18
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 19
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 20
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 21
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 22
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 23
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 24
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 25
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 26
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 27
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 28
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 29
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 30
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 31
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 32
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 33
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 34
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 35
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 36
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 37
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 38
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 39
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 40
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 41
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 42
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 43
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 44
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 45
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 46
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "ButtonNumber": {
+                "const": 47
+              }
+            },
+            "required": [
+              "ButtonNumber"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "LEDs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ledEntry"
+      }
+    },
+    "ConfiguratorSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "device"
+      ],
+      "properties": {
+        "device": {
+          "type": "string",
+          "const": "Bravo Throttle Quadrant"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "logicOperator": {
+      "type": "string",
+      "enum": [
+        "",
+        "AND",
+        "OR"
+      ]
+    },
+    "variableBoundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "MinValue",
+        "MaxValue",
+        "Clamp"
+      ],
+      "properties": {
+        "MinValue": {
+          "type": "string"
+        },
+        "MaxValue": {
+          "type": "string"
+        },
+        "Clamp": {
+          "type": "boolean"
+        }
+      }
+    },
+    "variableEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Variable",
+        "Value",
+        "VariableIsCustom",
+        "VariableBoundaries"
+      ],
+      "properties": {
+        "Variable": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        },
+        "VariableIsCustom": {
+          "type": "boolean"
+        },
+        "VariableBoundaries": {
+          "$ref": "#/$defs/variableBoundaries"
+        }
+      }
+    },
+    "conditionEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Variable",
+        "Value",
+        "VariableIsCustom",
+        "VariableBoundaries",
+        "Condition",
+        "ConditionValue",
+        "ConditionIsCustom"
+      ],
+      "properties": {
+        "Variable": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        },
+        "VariableIsCustom": {
+          "type": "boolean"
+        },
+        "VariableBoundaries": {
+          "$ref": "#/$defs/variableBoundaries"
+        },
+        "Condition": {
+          "type": "string"
+        },
+        "ConditionValue": {
+          "type": "string"
+        },
+        "ConditionIsCustom": {
+          "type": "boolean"
+        }
+      }
+    },
+    "eventEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Variables",
+        "Variable",
+        "Value",
+        "Name",
+        "Condition",
+        "ConditionValue",
+        "ConditionLogic",
+        "Conditions",
+        "Repeat"
+      ],
+      "properties": {
+        "Variables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/variableEntry"
+          }
+        },
+        "Variable": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Condition": {
+          "type": "string"
+        },
+        "ConditionValue": {
+          "type": "string"
+        },
+        "ConditionLogic": {
+          "$ref": "#/$defs/logicOperator"
+        },
+        "Conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/conditionEntry"
+          }
+        },
+        "Repeat": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "buttonEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ButtonNumber",
+        "PressEvent",
+        "ReleaseEvent"
+      ],
+      "properties": {
+        "ButtonNumber": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 47
+        },
+        "PressEvent": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/eventEntry"
+          }
+        },
+        "ReleaseEvent": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/eventEntry"
+          }
+        }
+      }
+    },
+    "ledCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Condition",
+        "ConditionValue",
+        "ConditionIsCustom"
+      ],
+      "properties": {
+        "Condition": {
+          "type": "string"
+        },
+        "ConditionValue": {
+          "type": "string"
+        },
+        "ConditionIsCustom": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ledEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ByteIndex",
+        "BitIndex",
+        "ConditionLogic",
+        "Conditions"
+      ],
+      "properties": {
+        "ByteIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "BitIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "ConditionLogic": {
+          "$ref": "#/$defs/logicOperator"
+        },
+        "Conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ledCondition"
+          }
+        }
+      }
+    }
+  }
+}

@@ -352,6 +352,59 @@ trim_wheels:
   window_ms: 500
 ```
 
+## Importing from Old Honeycomb Configurator
+
+If you have `.json` profiles from the original Honeycomb Bravo Configurator app, you can import them into this plugin using the **Import** button (upload icon) in the sidebar.
+
+### What gets imported automatically
+
+- **LED configurations** — all LED datarefs, operators, thresholds, and AND/OR logic are converted from the old `(ByteIndex, BitIndex)` format to named LED keys (`hdg`, `nav`, `master_warn`, etc.).
+- **Bus voltage condition** — the old `(ByteIndex=0, BitIndex=0)` entry is mapped to `conditions.bus_voltage`.
+- **Profile name** — the old `SaveName` field is used to pre-fill the profile name and filename.
+
+### What gets imported on a best-effort basis
+
+These sections use a best-effort mapping. The import wizard shows warnings for any items that could not be auto-mapped — those fall back to `default.yaml` values.
+
+| Section | How it's mapped | When it fails |
+| --- | --- | --- |
+| `buttons` (AP panel) | Buttons 21-28 on the Bravo map to `hdg`, `nav`, `apr`, `rev`, `alt`, `vs`, `ias`, `ap`. If a button's first PressEvent has a simple `Variable` (direct command), it becomes `single_click`. | Fails if the button is empty, uses conditional logic, or only sets internal variables. |
+| `knobs` (encoder commands) | Encoder buttons 12 (up) and 13 (down) are parsed for `FCU_SELECTOR` conditions. Each selector value (`HDG`, `VS`, `ALT`, `IAS`, `CRS`) maps to the corresponding knob's increment/decrement commands. | Fails if a knob mode has no condition entry, uses custom variables, or is missing either the increment or decrement command. |
+
+### What is NOT imported (always uses defaults)
+
+| Section | Why it can't be auto-converted |
+| --- | --- |
+| `trim_wheels` | Not present in the old format. |
+| `data` (AP rotary steps) | Not present in the old format. |
+| `conditions.retractable_gear` | Not present in the old format. |
+| Landing gear LEDs | Old format has 6 individual entries (green/red for left, nose, right gear). This plugin handles gear display differently with a single `deploy_ratio` approach. |
+| `buttons.*.double_click` | Old format does not distinguish single vs double press. Only `single_click` is populated from import. |
+| Knob datarefs | The old format uses commands (fire X-Plane command) for encoder actions, not direct dataref writes. Imported knobs get commands but keep the default datarefs from `default.yaml`. |
+
+### Import wizard steps
+
+1. **Select File** — pick your `.json` file. The wizard shows a preview with the profile name, LED count, and device type.
+2. **File Name** — choose the YAML filename (pre-filled from the old `SaveName`).
+3. **Metadata** — set the display name and description.
+4. **Selectors** — enter exact X-Plane aircraft UI names (required for profile auto-selection).
+5. **Review** — confirm and create the profile.
+
+### Post-import checklist
+
+After importing, select the new profile and review each tab. Check the warnings shown during import to see which items were auto-mapped and which fell back to defaults.
+
+1. **Autopilot Buttons** — check that `single_click` commands match your aircraft. Any buttons flagged in the warnings will have generic defaults. Add `double_click` commands if desired (the old format does not support double-click).
+2. **Autopilot Lights** — verify the imported LED datarefs are correct. The old configurator may have used custom datarefs (`ConditionIsCustom: true`) that were skipped during import.
+3. **Annunciators** — same as above; check that thresholds and operators look correct.
+4. **Auto Pilot Knobs** — if knob commands were imported, verify they work correctly. If a knob was flagged in the warnings, configure its datarefs and/or commands manually. The knob datarefs always come from `default.yaml` — update them if your aircraft uses non-standard datarefs.
+5. **AP Rotary Steps** — set step sizes if your aircraft needs non-default increments (not in the old format).
+6. **Trim Wheels** — adjust commands and sensitivity if needed (not in the old format).
+7. **Bus Voltage** — verify the imported bus voltage condition is correct.
+8. **Landing Gear** — configure gear LED behavior if your aircraft has retractable gear.
+
+Once satisfied, click **Save YAML** to persist your changes.
+
 ## Validation checklist
 
 1. File name starts with ICAO (for variants) or exactly matches ICAO.

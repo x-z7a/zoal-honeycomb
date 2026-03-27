@@ -1,5 +1,25 @@
 export namespace main {
 	
+	export class ImportPreview {
+	    saveName: string;
+	    ledCount: number;
+	    device: string;
+	    filePath: string;
+	    warnings: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ImportPreview(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.saveName = source["saveName"];
+	        this.ledCount = source["ledCount"];
+	        this.device = source["device"];
+	        this.filePath = source["filePath"];
+	        this.warnings = source["warnings"];
+	    }
+	}
 	export class ProfilesStatus {
 	    profilesDir: string;
 	    userProfilesDir: string;
