@@ -169,7 +169,8 @@ leds:
             - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on
               operator: '>'
               threshold: 0.01
-            - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on2
+            - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on
+              index: 1
               operator: '>'
               threshold: 0.01
         condition: all
