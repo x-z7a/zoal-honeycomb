@@ -4,7 +4,7 @@ This page is generated from the YAML profiles in `profiles/` and excludes `defau
 Do not edit the generated section by hand. Run `npm --prefix docs run docs:generate:supported-planes` instead.
 
 <!-- BEGIN GENERATED SUPPORTED PLANES -->
-There are currently `47` profile files. The `Matches` column shows the exact
+There are currently `50` profile files. The `Matches` column shows the exact
 `metadata.selectors` values used by runtime profile selection, so a single
 profile can cover multiple aircraft variants.
 
@@ -38,18 +38,21 @@ profile can cover multiple aircraft variants.
 | `DH8D.yaml` | FlyJSim Q400 | `DH8D` |
 | `DR40.yaml` | Robin DR-401 | `DR40` |
 | `DV20.yaml` | Diamond DA20 SV by Aerobask | `Diamond DA20 SV by Aerobask` |
-| `E135.yaml` | X-Crafts ERJ 135LR | `X-Crafts ERJ 135LR` |
+| `E135.yaml` | X-Crafts ERJ 135 | `X-Crafts ERJ 135` |
+| `E140.yaml` | X-Crafts ERJ 140 | `X-Crafts ERJ 140` |
+| `E145.yaml` | X-Crafts ERJ 145 | `X-Crafts ERJ 145` |
 | `E170.yaml` | Embraer E-Jet E170 | `E-Jets E170` |
 | `E175.yaml` | Embraer E-Jet E175 | `E-Jets E175` |
 | `E190.yaml` | Embraer E-Jet E190 | `E-Jets Family E190` |
 | `E195.yaml` | Embraer E-Jet E195 | `E-Jets E195` |
 | `E19L.yaml` | Embraer E-Jet Lineage 1000 | `E-Jets Lineage 1000` |
-| `E45X.yaml` | X-Crafts ERJ 135LR | `X-Crafts ERJ 135LR` |
+| `E45X.yaml` | X-Crafts ERJ 145LR | `X-Crafts ERJ 145LR` |
 | `E55P.yaml` | Phenom 300 | `Phenom 300 by Aerobask` |
 | `EVOT.yaml` | Lancair Evolution | `Lancair Evolution`<br>`Lancair Evolution EVOT-550`<br>`Lancair Evolution EVOT-750`<br>`Lancair Evolution EVOT-850` |
 | `GLF650.yaml` | GLF650 AKD XP12 | `GLF650_AKD` |
 | `GLF650ER.yaml` | GLF650ER AKD XP12 | `GLF650ER_AKD` |
 | `MD11.yaml` | Rotate MD-11 | `Rotate MD-11F`<br>`Rotate MD-11` |
+| `P06T Steam.yaml` | VSKYLABS P2006T Analog | `VSKYLABS P2006T-Analog` |
 | `P28R_VFA_Arrow_III_E1000.yaml` | vFlyteAir Arrow III E1000 | `vFlyteAir Arrow III E1000` |
 | `P28R_VFA_Arrow_III_G5.yaml` | vFlyteAir Arrow III | `vFlyteAir Arrow III G5` |
 | `PA28A.yaml` | Piper Cherokee 140 | `vFlyteAir Cherokee 140` |

@@ -1,8 +1,8 @@
 metadata:
-    name: X-Crafts ERJ 135LR
-    description: Profile for X-Crafts ERJ 135LR
+    name: X-Crafts ERJ 135
+    description: Profile for X-Crafts ERJ 135
     selectors:
-        - X-Crafts ERJ 135LR
+        - X-Crafts ERJ 135
 buttons:
     hdg:
         single_click:
@@ -38,7 +38,7 @@ buttons:
         single_click:
             - command_str: sim/autopilot/speed_hold
         double_click:
-            - command_str: XCrafts/ERJ/FLC
+            - command_str: sim/autopilot/speed_hold
     rev:
         single_click:
             - command_str: sim/autopilot/back_course
@@ -69,7 +69,7 @@ leds:
     nav:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/nav_status
-              operator: '>='
+              operator: ==
               threshold: 1
             - dataref_str: sim/cockpit2/autopilot/gpss_status
               operator: ==
@@ -100,10 +100,6 @@ leds:
             - dataref_str: sim/cockpit2/autopilot/altitude_mode
               operator: ==
               threshold: 5
-            - dataref_str: XCrafts/ERJ/FLC_stat
-              operator: ==
-              threshold: 2
-        condition: any
     rev:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/backcourse_status

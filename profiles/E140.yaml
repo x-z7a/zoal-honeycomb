@@ -1,8 +1,8 @@
 metadata:
-    name: X-Crafts ERJ 145LR
-    description: Profile for X-Crafts ERJ 145LR
+    name: X-Crafts ERJ 140
+    description: Profile for X-Crafts ERJ 140
     selectors:
-        - X-Crafts ERJ 145LR
+        - X-Crafts ERJ 140
 buttons:
     hdg:
         single_click:

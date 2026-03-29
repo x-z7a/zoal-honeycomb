@@ -1,8 +1,8 @@
 metadata:
-    name: Default_Throttle
-    description: Imported from Default_Throttle
+    name: X-Crafts ERJ 145
+    description: Profile for X-Crafts ERJ 145
     selectors:
-        - Test
+        - X-Crafts ERJ 145
 buttons:
     hdg:
         single_click:
@@ -28,7 +28,7 @@ buttons:
         single_click:
             - command_str: sim/autopilot/vertical_speed
         double_click:
-            - command_str: sim/autopilot/vnav
+            - command_str: sim/autopilot/vertical_speed
     ap:
         single_click:
             - command_str: sim/autopilot/servos_toggle
@@ -69,37 +69,41 @@ leds:
     nav:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/nav_status
-              operator: '>='
+              operator: ==
               threshold: 1
+            - dataref_str: sim/cockpit2/autopilot/gpss_status
+              operator: ==
+              threshold: 1
+        condition: any
     alt:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/altitude_hold_status
-              operator: '>='
+              operator: ==
               threshold: 1
     apr:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/approach_status
-              operator: '>='
+              operator: ==
               threshold: 1
     vs:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/vvi_status
-              operator: '>='
-              threshold: 1
+              operator: ==
+              threshold: 2
     ap:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/servos_on
-              operator: ==
-              threshold: 1
+              operator: '>'
+              threshold: 0.01
     ias:
         datarefs:
-            - dataref_str: sim/cockpit2/autopilot/speed_status
-              operator: '>='
-              threshold: 1
+            - dataref_str: sim/cockpit2/autopilot/altitude_mode
+              operator: ==
+              threshold: 5
     rev:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/backcourse_status
-              operator: '>='
+              operator: ==
               threshold: 1
     gear:
         datarefs:
@@ -107,130 +111,90 @@ leds:
               operator: '!='
     master_warn:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/master_warning
+            - dataref_str: XCrafts/ERJ/master_warning_light
               operator: ==
               threshold: 1
     master_caution:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/master_caution
+            - dataref_str: XCrafts/ERJ/master_caution_light
               operator: ==
               threshold: 1
     fire:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/engine_fires
-              operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/annunciators/engine_fires
-              index: 1
-              operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/annunciators/engine_fires
-              index: 2
-              operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/annunciators/engine_fires
-              index: 3
-              operator: ==
-              threshold: 1
-        condition: any
+              operator: '>'
+              threshold: 0.01
     oil_low_pressure:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/oil_pressure_low
+            - dataref_str: sim/cockpit/warnings/annunciators/oil_pressure
               operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/annunciators/oil_pressure_low
-              index: 1
-              operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/annunciators/oil_pressure_low
-              index: 2
-              operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/annunciators/oil_pressure_low
-              index: 3
-              operator: ==
-              threshold: 1
-        condition: any
+              threshold: 3
     fuel_low_pressure:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/fuel_pressure_low
+            - dataref_str: sim/cockpit/warnings/annunciators/fuel_pressure
               operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/annunciators/fuel_pressure_low
-              index: 1
-              operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/annunciators/fuel_pressure_low
-              index: 2
-              operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/annunciators/fuel_pressure_low
-              index: 3
-              operator: ==
-              threshold: 1
-        condition: any
+              threshold: 3
     anti_ice:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/pitot_heat
+            - dataref_str: sim/cockpit/switches/pitot_heat_on
               operator: ==
               threshold: 0
+            - dataref_str: sim/cockpit/switches/pitot_heat_on2
+              operator: ==
+              threshold: 0
+        condition: any
     eng_starter:
         datarefs:
             - dataref_str: sim/cockpit2/engine/actuators/starter_hit
-              operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/engine/actuators/starter_hit
-              index: 1
-              operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/engine/actuators/starter_hit
-              index: 2
-              operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/engine/actuators/starter_hit
-              index: 3
+              operator: '>'
+              threshold: 0.01
+    apu:
+        datarefs:
+            - dataref_str: XCrafts/ERJ/APU_on
               operator: ==
               threshold: 1
         condition: any
-    apu:
-        datarefs:
-            - dataref_str: sim/cockpit/engine/APU_running
-              operator: ==
-              threshold: 1
     vacuum:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/low_vacuum
-              operator: ==
-              threshold: 1
+              operator: '>'
+              threshold: 0
     hydro_low_pressure:
         datarefs:
-            - dataref_str: sim/cockpit/warnings/annunciators/hydraulic_pressure
+            - dataref_str: sim/cockpit2/annunciators/hydraulic_pressure
               operator: ==
               threshold: 1
     aux_fuel_pump:
         datarefs:
-            - dataref_str: sim/cockpit2/fuel/transfer_pump_left
-              operator: ==
+            - dataref_str: XCrafts/ERJ/fuel/fuel_pump_left_state
+              operator: '!='
               threshold: 2
-            - dataref_str: sim/cockpit2/fuel/transfer_pump_right
-              operator: ==
+            - dataref_str: XCrafts/ERJ/fuel/fuel_pump_right_state
+              operator: '!='
               threshold: 2
         condition: any
     parking_brake:
         datarefs:
-            - dataref_str: sim/flightmodel/controls/parkbrake
+            - dataref_str: sim/cockpit2/controls/parking_brake_ratio
               operator: ==
               threshold: 1
     volt_low:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/low_voltage
-              operator: ==
-              threshold: 1
+            - dataref_str: sim/cockpit2/electrical/bus_volts
+              operator: <
+              threshold: 27
     doors:
         datarefs:
-            - dataref_str: sim/cockpit2/annunciators/cabin_door_open
+            - dataref_str: XCrafts/doors/FM_OPEN
               operator: ==
               threshold: 1
+            - dataref_str: XCrafts/doors/BC_OPEN
+              operator: ==
+              threshold: 1
+            - dataref_str: XCrafts/doors/FS_OPEN
+              operator: ==
+              threshold: 1
+        condition: any
 data:
     ap_vs_step:
         value: 10
@@ -241,4 +205,4 @@ conditions:
         datarefs:
             - dataref_str: sim/cockpit2/electrical/bus_volts
               operator: '>'
-              threshold: 0
+              threshold: 0.01
