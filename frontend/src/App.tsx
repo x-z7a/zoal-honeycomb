@@ -540,6 +540,18 @@ function App() {
     });
   };
 
+  const handleMetadataChange = (metadata: pkg.Metadata) => {
+    setEditableProfile((previous) => {
+      if (!previous) {
+        return previous;
+      }
+      return {
+        ...previous,
+        metadata
+      } as pkg.Profile;
+    });
+  };
+
   const handleRevert = () => {
     if (!selectedProfile) {
       return;
@@ -1016,7 +1028,13 @@ function App() {
               </Alert>
             ) : (
             <>
-            <Metadata metadata={editableProfile?.metadata} filePath={selectedProfilePath} source={selectedProfileSource} />
+            <Metadata
+              metadata={editableProfile?.metadata}
+              filePath={selectedProfilePath}
+              source={selectedProfileSource}
+              editable
+              onMetadataChange={handleMetadataChange}
+            />
             <Box
               sx={{
                 borderRadius: 3,
