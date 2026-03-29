@@ -281,7 +281,7 @@ export default function LightConfiguration(props: LightConfigurationProps) {
                     <TableBody>
                       {rows.map((dataref, idx) => (
                         <TableRow
-                          key={`${section.key}-${dataref.dataref_str || idx}-${idx}`}
+                          key={`${section.key}-${idx}`}
                           sx={{
                             "&:last-child td, &:last-child th": { border: 0 },
                             "& td": { borderColor: "rgba(102, 134, 164, 0.24)" }

@@ -6,6 +6,7 @@ The structure is:
 
 * bin - Output directory
 * darwin - macOS specific files
+* linux - Linux specific files
 * windows - Windows specific files
 
 ## Mac
