@@ -32,7 +32,7 @@ dev:
 	cp -r profiles ~/X-Plane\ 12/Resources/plugins/zoal-honeycomb/
 win:
 	CGO_CFLAGS="-DIBM=1 -static -O2 -g" \
-	CGO_LDFLAGS="-L${CURDIR}/Libraries/Win -lXPLM_64 -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL" \
+	CGO_LDFLAGS="${CURDIR}/Libraries/Win/XPLM_64.lib -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL" \
 	GOOS=windows \
 	GOARCH=amd64 \
 	CGO_ENABLED=1 \

@@ -1,110 +1,220 @@
 name: Release
 
-# Controls when the workflow will run
 on:
   push:
     tags:
       - "v*"
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  build-mac:
     runs-on: macos-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - run: |
-          echo "============================="
-          # xcrun notarytool log 6391f075-00bb-488b-9d14-679c1f1597b2 \
-          #   --apple-id "${{ secrets.APPLE_ID }}" \
-          #   --password "${{ secrets.MAC_DEV_PASSWORD }}" \
-          #   --team-id "${{ secrets.APPLE_TEAMID }}"
-
-          echo "============================="
-          brew install mingw-w64
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.23.4" # The Go version to download (if necessary) and use.
+          go-version: "1.23.4"
 
-      # Imports your .p12 into a temporary keychain
       - name: Import Apple code signing cert
         uses: apple-actions/import-codesign-certs@v3
         with:
           p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           p12-password: ${{ secrets.P12_PASSWORD }}
-      - name: Build wails
+
+      - name: Build wails (macOS)
         uses: dAppServer/wails-build-action@main
         id: build
         with:
           build-name: bravo
-          build-platform: darwin/universal,windows/amd64
+          build-platform: darwin/universal
           nsis: false
           go-version: "1.23.4"
           package: false
 
-      - name: Sign Wails mac builds
+      - name: Sign and notarize macOS app
         run: |
-          # sign and notarize mac builds
           codesign \
-            --force \
-            --deep \
-            --timestamp \
-            --options runtime \
+            --force --deep --timestamp --options runtime \
             --sign "${{ secrets.CODESIGN_IDENTITY }}" \
             ${{ github.workspace }}/build/bin/bravo.app
 
-          ditto -c -k --keepParent ${{ github.workspace }}/build/bin/bravo.app ${{ github.workspace }}/build/bin/bravo.zip
+          ditto -c -k --keepParent \
+            ${{ github.workspace }}/build/bin/bravo.app \
+            ${{ github.workspace }}/build/bin/bravo.zip
 
-          xcrun notarytool submit ${{ github.workspace }}/build/bin/bravo.zip\
+          xcrun notarytool submit ${{ github.workspace }}/build/bin/bravo.zip \
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.MAC_DEV_PASSWORD }}" \
             --team-id "${{ secrets.APPLE_TEAMID }}" \
-            --wait 
+            --wait
 
           xcrun stapler staple ${{ github.workspace }}/build/bin/bravo.app
           xcrun stapler validate ${{ github.workspace }}/build/bin/bravo.app
 
-          mkdir -p ${{ github.workspace }}/build/zoal-honeycomb
-          ditto ${{ github.workspace }}/build/bin/bravo.app ${{ github.workspace }}/build/zoal-honeycomb/bravo.app
-          cp ${{ github.workspace }}/build/bin/bravo ${{ github.workspace }}/build/zoal-honeycomb/bravo.exe
-
-      - run: |
+      - name: Build mac XPL plugin
+        run: |
           go mod tidy
-          export VERSION=${GITHUB_REF##*/} 
-          VERSION=${GITHUB_REF##*/} make mac win -j 2
-          rm -f ${{ github.workspace }}/build/zoal-honeycomb/mac_arm.xpl ${{ github.workspace }}/build/zoal-honeycomb/mac_amd.xpl
+          VERSION=${GITHUB_REF##*/} make mac
+          rm -f build/zoal-honeycomb/mac_arm.xpl build/zoal-honeycomb/mac_amd.xpl
 
-          codesign --force \
-            --timestamp \
-            --options runtime \
-            --sign "${{ secrets.CODESIGN_IDENTITY }}" ${{ github.workspace }}/build/zoal-honeycomb/mac.xpl
+      - name: Sign mac XPL plugin
+        run: |
+          codesign --force --timestamp --options runtime \
+            --sign "${{ secrets.CODESIGN_IDENTITY }}" \
+            build/zoal-honeycomb/mac.xpl
 
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-mac
+          path: |
+            build/bin/bravo.app
+            build/zoal-honeycomb/mac.xpl
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          path-type: inherit
+          update: true
+          install: >-
+            make
+            mingw-w64-x86_64-toolchain
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.4"
+
+      - name: Build wails (Windows)
+        uses: dAppServer/wails-build-action@main
+        id: build
+        with:
+          build-name: bravo
+          build-platform: windows/amd64
+          nsis: false
+          go-version: "1.23.4"
+          package: false
+
+      - name: Build Windows XPL plugin
+        shell: msys2 {0}
+        run: |
+          VERSION=${GITHUB_REF##*/} make win
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-windows
+          path: |
+            build/bin/bravo
+            build/zoal-honeycomb/win.xpl
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.4"
+
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y gcc libudev-dev
+
+      - name: Build wails (Linux)
+        uses: dAppServer/wails-build-action@main
+        id: build
+        with:
+          build-name: bravo
+          build-platform: linux/amd64
+          nsis: false
+          go-version: "1.23.4"
+          package: false
+
+      - name: Build Linux XPL plugin
+        run: |
+          export VERSION=${GITHUB_REF##*/}
+          CGO_ENABLED=1 \
+          CGO_CFLAGS="-DLIN=1 -DAPL=0 -DIBM=0 -O2 -g" \
+          CGO_LDFLAGS="-shared -rdynamic -nodefaultlibs" \
+          go build -buildmode c-shared -o build/zoal-honeycomb/lin.xpl \
+            -ldflags="-X github.com/x-z7a/zoal-honeycomb/pkg/xplane.VERSION=${VERSION}" plugin/plugin.go
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-linux
+          path: |
+            build/bin/bravo
+            build/zoal-honeycomb/lin.xpl
+
+  release:
+    needs: [build-mac, build-windows, build-linux]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-mac
+          path: artifacts/mac
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-windows
+          path: artifacts/windows
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-linux
+          path: artifacts/linux
+
+      - name: Assemble release package
+        run: |
           TAG=${GITHUB_REF##*/}
-          cp ${{ github.workspace }}/skunkcrafts_updater.cfg ${{ github.workspace }}/build/zoal-honeycomb/
-          cp -r ${{ github.workspace }}/profiles ${{ github.workspace }}/build/zoal-honeycomb/
-          sed -i '' "s/REPLACE_ME/${TAG}/g" ${{ github.workspace }}/build/zoal-honeycomb/skunkcrafts_updater.cfg
-          printf '%s\n' "${TAG}" > ${{ github.workspace }}/build/zoal-honeycomb/${TAG}
+          mkdir -p build/zoal-honeycomb
 
-          # sign and notarize mac builds
+          # macOS artifacts
+          ditto artifacts/mac/bin/bravo.app build/zoal-honeycomb/bravo.app
+          cp artifacts/mac/zoal-honeycomb/mac.xpl build/zoal-honeycomb/mac.xpl
 
+          # Windows artifacts
+          cp artifacts/windows/bin/bravo build/zoal-honeycomb/bravo.exe
+          cp artifacts/windows/zoal-honeycomb/win.xpl build/zoal-honeycomb/win.xpl
+
+          # Linux artifacts
+          cp artifacts/linux/bin/bravo build/zoal-honeycomb/bravo
+          cp artifacts/linux/zoal-honeycomb/lin.xpl build/zoal-honeycomb/lin.xpl
+
+          # Config and profiles
+          cp skunkcrafts_updater.cfg build/zoal-honeycomb/
+          cp -r profiles build/zoal-honeycomb/
+          sed -i '' "s/REPLACE_ME/${TAG}/g" build/zoal-honeycomb/skunkcrafts_updater.cfg
+          printf '%s\n' "${TAG}" > build/zoal-honeycomb/${TAG}
+
+      - name: Notarize release zip
+        run: |
           root=$(pwd)
-          cd ${{ github.workspace }}/build/ && \
-            ditto -c -k \
-              --sequesterRsrc \
-              --keepParent \
-              zoal-honeycomb zoal-honeycomb.zip && \
+          cd build && \
+            ditto -c -k --sequesterRsrc --keepParent zoal-honeycomb zoal-honeycomb.zip && \
             cd $root
 
-          xcrun notarytool submit ${{ github.workspace }}/build/zoal-honeycomb.zip \
+          xcrun notarytool submit build/zoal-honeycomb.zip \
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.MAC_DEV_PASSWORD }}" \
             --team-id "${{ secrets.APPLE_TEAMID }}" \
@@ -115,17 +225,15 @@ jobs:
         run: |
           bash scripts/generate-release-notes.sh "${{ runner.temp }}/release-notes.md" "${GITHUB_REF##*/}"
 
-      - run: |
-          cp -r ${{ github.workspace }}/build/zoal-honeycomb/ release/
-          # create crc32 checksum for all values and write to skunkcrafts_updater_whitelist.txt
-          # format is <filename>|<crc32 checksum>
-          # include subdirectories
+      - name: Prepare release branch and checksums
+        run: |
+          cp -r build/zoal-honeycomb/ release/
+
+          # Create CRC32 checksums
           rm -f release/skunkcrafts_updater_whitelist.txt
           find release -type f ! \( -name '*skunkcrafts_updater*' -o -path '*skunkcrafts_updater*' \) -print0 | while IFS= read -r -d '' file; do
             checksum_hex=$(crc32 "$file")
-            # Convert hex checksum to uint32 decimal
             checksum_decimal=$((16#$checksum_hex))
-            # Remove "release/" prefix from $file
             modified_file="${file#release/}"
             echo "$modified_file|$checksum_decimal" >> release/skunkcrafts_updater_whitelist.txt
           done
@@ -133,7 +241,6 @@ jobs:
 
           TAG=${GITHUB_REF##*/}
           TARGET_BRANCH="release"
-          # if TAG contains -
           git checkout -b ${TARGET_BRANCH}
           git add .
           git commit -m "new ${TARGET_BRANCH} - ${TAG}"
