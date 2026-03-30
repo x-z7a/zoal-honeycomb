@@ -1,42 +1,45 @@
 metadata:
-    name: Flight Factor 752
-    description: Profile for the Flight Factor B752
+    name: Flight Factor 757/767
+    description: "Profile for the Flight Factor B757/767. NOTE: doors might need work because 757/767 are different. This is only tested on B752"
     selectors:
-        - Boeing 757-200
+        - Boeing 757-200 XP12
+        - Boeing 757-300 XP12
+        - Boeing 767-300 XP12
+        - Boeing 767-400 XP12
 buttons:
     hdg:
         single_click:
-            - command_str: 1-sim/AP/hdgConfButton
+            - command_str: 1-sim/comm/AP/hdgHoldButton
         double_click:
             - command_str: sim/autopilot/heading_sync_pilot
     nav:
         single_click:
-            - command_str: sim/autopilot/NAV
+            - command_str: 1-sim/comm/AP/lnavButton
         double_click:
             - command_str: sim/autopilot/gpss
     alt:
         single_click:
-            - command_str: 1-sim/comm/HC/ALT
+            - command_str: 1-sim/comm/AP/altHoldButton
         double_click:
             - command_str: sim/autopilot/altitude_hold
     apr:
         single_click:
-            - command_str: sim/autopilot/approach
+            - command_str: 1-sim/command/AP/appButton_button
         double_click:
             - command_str: sim/autopilot/approach
     vs:
         single_click:
-            - command_str: sim/autopilot/vertical_speed
+            - command_str: 1-sim/comm/AP/vviButton
         double_click:
             - command_str: sim/autopilot/vnav
     ap:
         single_click:
-            - command_str: sim/autopilot/servos_toggle
+            - command_str: 1-sim/comm/AP/CMD_L
         double_click:
             - command_str: sim/autopilot/servos_toggle
     ias:
         single_click:
-            - command_str: sim/autopilot/speed_hold
+            - command_str: 1-sim/command/AP/spdButton_button
         double_click:
             - command_str: sim/autopilot/speed_hold
     rev:
@@ -62,9 +65,8 @@ knobs:
             - command_str: 1-sim/comm/AP/spdUP
             - command_str: 1-sim/comm/AP/spdDN
     ap_crs:
-        commands:
-            - {}
-            - {}
+        datarefs:
+            - dataref_str: sim/cockpit/radios/nav2_obs_degm
 leds:
     hdg:
         datarefs:
@@ -73,33 +75,33 @@ leds:
               threshold: 1
     nav:
         datarefs:
-            - dataref_str: sim/cockpit2/autopilot/nav_status
+            - dataref_str: 1-sim/AP/lnavButton
               operator: ==
               threshold: 1
         condition: any
     alt:
         datarefs:
-            - dataref_str: sim/cockpit2/autopilot/altitude_hold_status
+            - dataref_str: 1-sim/AP/altHoldButton
               operator: ==
-              threshold: 1
+              threshold: 0
     apr:
         datarefs:
-            - dataref_str: sim/cockpit2/autopilot/approach_status
+            - dataref_str: 1-sim/AP/appButton
               operator: ==
               threshold: 1
     vs:
         datarefs:
-            - dataref_str: sim/cockpit2/autopilot/vvi_status
+            - dataref_str: 1-sim/AP/vviButton
               operator: ==
               threshold: 1
     ap:
         datarefs:
-            - dataref_str: sim/cockpit2/autopilot/servos_on
-              operator: '>'
+            - dataref_str: 1-sim/AP/cmd_L_Button
+              operator: ">"
               threshold: 0.01
     ias:
         datarefs:
-            - dataref_str: sim/cockpit2/autopilot/autothrottle_on
+            - dataref_str: 1-sim/AP/spdButton
               operator: ==
               threshold: 1
     rev:
@@ -110,21 +112,21 @@ leds:
     gear:
         datarefs:
             - dataref_str: sim/flightmodel2/gear/deploy_ratio
-              operator: '!='
+              operator: "!="
     master_warn:
         datarefs:
-            - dataref_str: inst/loopwarning
-              operator: '>'
-              threshold: 0.01
+            - dataref_str: inst/warning
+              operator: ==
+              threshold: 1
     master_caution:
         datarefs:
             - dataref_str: 1-sim/mcaution/masterButton
-              operator: '>'
+              operator: ">"
               threshold: 0.01
     fire:
         datarefs:
             - dataref_str: sim/cockpit2/annunciators/engine_fires
-              operator: '>'
+              operator: ">"
               threshold: 0.01
     oil_low_pressure:
         datarefs:
@@ -154,12 +156,12 @@ leds:
     eng_starter:
         datarefs:
             - dataref_str: sim/cockpit2/engine/actuators/starter_hit
-              operator: '>'
+              operator: ">"
               threshold: 0.01
     apu:
         datarefs:
             - dataref_str: sim/cockpit2/electrical/APU_running
-              operator: '>'
+              operator: ">"
               threshold: 0.01
         condition: any
     vacuum:
@@ -179,11 +181,11 @@ leds:
     aux_fuel_pump:
         datarefs:
             - dataref_str: sim/cockpit2/fuel/transfer_pump_right
-              operator: '>'
+              operator: ">"
               threshold: 0.01
             - dataref_str: sim/cockpit2/fuel/transfer_pump_left
               index: 1
-              operator: '>'
+              operator: ">"
               threshold: 0.01
         condition: any
     parking_brake:
@@ -199,28 +201,28 @@ leds:
     doors:
         datarefs:
             - dataref_str: anim/door/FL
-              operator: '>'
+              operator: ">"
               threshold: 0
             - dataref_str: 1-sim/anim/doors/cargoBack/anim
-              operator: '>'
+              operator: ">"
               threshold: 0
             - dataref_str: 1-sim/anim/doors/cargoSide/anim
-              operator: '>'
+              operator: ">"
               threshold: 0
             - dataref_str: anim/door/FR
-              operator: '>'
+              operator: ">"
               threshold: 0
             - dataref_str: anim/door/MR
-              operator: '>'
+              operator: ">"
               threshold: 0
             - dataref_str: anim/door/ML
-              operator: '>'
+              operator: ">"
               threshold: 0
             - dataref_str: anim/door/BR
-              operator: '>'
+              operator: ">"
               threshold: 0
             - dataref_str: anim/door/BL
-              operator: '>'
+              operator: ">"
               threshold: 0
         condition: any
 data:
@@ -232,5 +234,5 @@ conditions:
     bus_voltage:
         datarefs:
             - dataref_str: sim/cockpit2/electrical/bus_volts
-              operator: '>'
+              operator: ">"
               threshold: 0.01
