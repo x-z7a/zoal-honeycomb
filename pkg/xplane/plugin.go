@@ -72,9 +72,11 @@ func (s *xplaneService) onPluginStart() {
 }
 
 func (s *xplaneService) onPluginStop() {
-	s.resetTolissTrimCommand()
 	s.BravoService.Exit()
 	s.Logger.Info("Plugin stopped")
+	if s.usesTolissTrimHold() {
+		s.resetTolissTrimCommand()
+	}
 	s.cancelFunc()
 }
 
