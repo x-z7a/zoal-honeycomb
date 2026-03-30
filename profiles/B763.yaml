@@ -2,10 +2,7 @@ metadata:
     name: Flight Factor 757/767
     description: "Profile for the Flight Factor B757/767. NOTE: doors might need work because 757/767 are different. This is only tested on B752"
     selectors:
-        - Boeing 757-200 XP12
-        - Boeing 757-300 XP12
         - Boeing 767-300 XP12
-        - Boeing 767-400 XP12
 buttons:
     hdg:
         single_click:
