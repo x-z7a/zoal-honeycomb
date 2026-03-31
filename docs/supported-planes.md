@@ -4,7 +4,7 @@ This page is generated from the YAML profiles in `profiles/` and excludes `defau
 Do not edit the generated section by hand. Run `npm --prefix docs run docs:generate:supported-planes` instead.
 
 <!-- BEGIN GENERATED SUPPORTED PLANES -->
-There are currently `50` profile files. The `Matches` column shows the exact
+There are currently `55` profile files. The `Matches` column shows the exact
 `metadata.selectors` values used by runtime profile selection, so a single
 profile can cover multiple aircraft variants.
 
@@ -23,6 +23,10 @@ profile can cover multiple aircraft variants.
 | `B738_level_up.yaml` | Level Up 737-800 NG | `Boeing 737-800NG` |
 | `B738_zibo.yaml` | Zibo 738 | `Boeing 737-800X`<br>`Boeing 737-800X (4k)` |
 | `B739_level_up.yaml` | Level Up 737-900 NG | `Boeing 737-900NG`<br>`Boeing 737-900ER` |
+| `B752.yaml` | Flight Factor 757/767 | `Boeing 757-200 XP12` |
+| `B753.yaml` | Flight Factor 757/767 | `Boeing 757-300 XP12` |
+| `B763.yaml` | Flight Factor 757/767 | `Boeing 767-300 XP12` |
+| `B764.yaml` | Flight Factor 757/767 | `Boeing 767-400 XP12` |
 | `B772.yaml` | Flight Factor B772 | `Boeing 777-200ER` |
 | `B77L.yaml` | Flight Factor B777-F Freighter | `B77L` |
 | `BE58.yaml` | Beechcraft Baron 58 | `Baron_58` |
@@ -53,6 +57,7 @@ profile can cover multiple aircraft variants.
 | `GLF650ER.yaml` | GLF650ER AKD XP12 | `GLF650ER_AKD` |
 | `MD11.yaml` | Rotate MD-11 | `Rotate MD-11F`<br>`Rotate MD-11` |
 | `P06T Steam.yaml` | VSKYLABS P2006T Analog | `VSKYLABS P2006T-Analog` |
+| `P06T-G1000.yaml` | VSKYLABS P2006T-G1000 | `VSKYLABS P2006T-G1000` |
 | `P28R_VFA_Arrow_III_E1000.yaml` | vFlyteAir Arrow III E1000 | `vFlyteAir Arrow III E1000` |
 | `P28R_VFA_Arrow_III_G5.yaml` | vFlyteAir Arrow III | `vFlyteAir Arrow III G5` |
 | `PA28A.yaml` | Piper Cherokee 140 | `vFlyteAir Cherokee 140` |
