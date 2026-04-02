@@ -3,6 +3,8 @@ metadata:
   description: Laminar Cessna 172 Skyhawk (G1000) FOSM
   selectors:
     - Cessna Skyhawk (G1000)
+    # XP11 test selectors
+    - Cessna 172 SP Skyhawk - 180HP - G1000
 buttons:
   # rev:
   nav:
