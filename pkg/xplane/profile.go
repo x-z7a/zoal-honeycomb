@@ -40,6 +40,11 @@ func (s *xplaneService) tryLoadProfile() error {
 		// try to load other profiles for this aircraft
 		// scan user profiles first (higher priority), then default profiles
 		aircraftNameDrf, found := dataAccess.FindDataRef("sim/aircraft/view/acf_ui_name")
+		if !found {
+			s.Logger.Warningf("Dataref sim/aircraft/view/acf_ui_name not found, cannot load profile based on aircraft name")
+			s.Logger.Warningf("This is likely XP11")
+			aircraftNameDrf, found = dataAccess.FindDataRef("sim/aircraft/view/acf_descrip")
+		}
 		if found {
 			aircraftName := dataAccess.GetString(aircraftNameDrf)
 			profileDirs := []string{
