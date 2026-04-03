@@ -1,18 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './App.css';
 import {
-  CreateProfileFromDefault,
-  CreateProfileFromImport,
-  GetProfileErrors,
-  GetProfileFiles,
-  GetProfileSources,
-  GetProfiles,
-  GetProfilesStatus,
-  GetXplane,
-  SaveProfileByIndex,
-  SelectImportFile
-} from "../wailsjs/go/main/App";
-import { Quit } from "../wailsjs/runtime/runtime";
+  createProfileFromDefault,
+  getProfilesData,
+  getXplaneInfo,
+  saveProfileByIndex,
+} from "./api";
 import {
   Alert,
   Box,
@@ -32,16 +25,15 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { main, pkg } from "../wailsjs/go/models";
+import type { Profile, Metadata as MetadataType, ProfilesStatus } from "./types";
 import Profiles from "./components/profiles";
-import Metadata from "./components/metadata";
+import MetadataPanel from "./components/metadata";
 import LightConfiguration from './components/lightConfiguration';
 import Xplane from "./components/xplane";
 import KnobConfiguration from "./components/knobConfiguration";
 import ButtonConfiguration from "./components/buttonConfiguration";
 import DataConfiguration from "./components/dataConfiguration";
 import TrimWheelConfiguration from "./components/trimWheelConfiguration";
-import { decodeDatarefText } from "./utils/datarefs";
 
 const EDITOR_TABS = [
   "Autopilot Buttons",
@@ -56,7 +48,6 @@ const EDITOR_TABS = [
 ];
 
 const ADD_PROFILE_STEPS = ["Template", "File Name", "Metadata", "Selectors", "Create"];
-const IMPORT_STEPS = ["Select File", "File Name", "Metadata", "Selectors", "Review"];
 
 interface PlaneInfo {
   icao: string;
@@ -64,12 +55,12 @@ interface PlaneInfo {
   connected: boolean;
 }
 
-function cloneProfile(profile: pkg.Profile): pkg.Profile {
+function cloneProfile(profile: Profile): Profile {
   return JSON.parse(JSON.stringify(profile));
 }
 
-function sanitizeProfileForApi(profile: pkg.Profile): pkg.Profile {
-  return pkg.Profile.createFrom(JSON.parse(JSON.stringify(profile)));
+function sanitizeProfileForApi(profile: Profile): Profile {
+  return JSON.parse(JSON.stringify(profile));
 }
 
 function basenameWithoutExt(filePath: string): string {
@@ -127,7 +118,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
-function findBestProfileIndex(plane: PlaneInfo, profiles: pkg.Profile[], profileFiles: string[]): number {
+function findBestProfileIndex(plane: PlaneInfo, profiles: Profile[], profileFiles: string[]): number {
   if (!plane.connected || profiles.length === 0 || profileFiles.length !== profiles.length) {
     return -1;
   }
@@ -162,18 +153,18 @@ function findBestProfileIndex(plane: PlaneInfo, profiles: pkg.Profile[], profile
 }
 
 function App() {
-  const [profilesData, setProfilesData] = useState([] as pkg.Profile[]);
+  const [profilesData, setProfilesData] = useState([] as Profile[]);
   const [profileFiles, setProfileFiles] = useState([] as string[]);
   const [profileErrors, setProfileErrors] = useState([] as string[]);
   const [profileSources, setProfileSources] = useState([] as string[]);
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(-1);
-  const [editableProfile, setEditableProfile] = useState<pkg.Profile | null>(null);
+  const [editableProfile, setEditableProfile] = useState<Profile | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [saveError, setSaveError] = useState("");
   const [hasUserSelectedProfile, setHasUserSelectedProfile] = useState(false);
   const [planeInfo, setPlaneInfo] = useState<PlaneInfo>({ icao: "", name: "", connected: false });
-  const [profilesStatus, setProfilesStatus] = useState<main.ProfilesStatus | null>(null);
+  const [profilesStatus, setProfilesStatus] = useState<ProfilesStatus | null>(null);
   const [editorTab, setEditorTab] = useState(0);
   const [isAddProfileModalOpen, setIsAddProfileModalOpen] = useState(false);
   const [addProfileStep, setAddProfileStep] = useState(0);
@@ -184,41 +175,27 @@ function App() {
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const [createProfileError, setCreateProfileError] = useState("");
 
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [importStep, setImportStep] = useState(0);
-  const [importPreview, setImportPreview] = useState<{ saveName: string; ledCount: number; device: string; filePath: string; warnings: string[] } | null>(null);
-  const [importFilename, setImportFilename] = useState("");
-  const [importName, setImportName] = useState("");
-  const [importDescription, setImportDescription] = useState("");
-  const [importSelectorsInput, setImportSelectorsInput] = useState("");
-  const [isImporting, setIsImporting] = useState(false);
-  const [importError, setImportError] = useState("");
-
   const refreshProfiles = useCallback(async () => {
-    const [status, profiles, files, errors, sources] = await Promise.all([
-      GetProfilesStatus(),
-      GetProfiles(),
-      GetProfileFiles(),
-      GetProfileErrors(),
-      GetProfileSources()
-    ]);
-    const normalizedProfiles = profiles.map((profile) => sanitizeProfileForApi(profile));
-    setProfilesStatus(status);
+    const data = await getProfilesData();
+    const normalizedProfiles = data.profiles.map((profile) => sanitizeProfileForApi(profile));
+    setProfilesStatus(data.status);
     setProfilesData(normalizedProfiles);
-    setProfileFiles(files);
-    setProfileErrors(errors);
-    setProfileSources(sources);
-    return { status, profiles: normalizedProfiles, files, errors, sources };
+    setProfileFiles(data.files);
+    setProfileErrors(data.errors);
+    setProfileSources(data.sources);
+    return { status: data.status, profiles: normalizedProfiles, files: data.files, errors: data.errors, sources: data.sources };
   }, []);
 
   useEffect(() => {
     refreshProfiles().catch((error: any) => {
       setProfilesStatus({
         profilesDir: "",
+        userProfilesDir: "",
         profilesCount: 0,
         needsSelection: true,
-        loadError: getErrorMessage(error, "Failed to load profile status.")
-      } as main.ProfilesStatus);
+        loadError: getErrorMessage(error, "Failed to load profile status."),
+        parseErrors: 0,
+      } as ProfilesStatus);
       setProfilesData([]);
       setProfileFiles([]);
       setProfileErrors([]);
@@ -239,11 +216,8 @@ function App() {
 
   useEffect(() => {
     const refresh = () => {
-      GetXplane()
-        .then((res) => {
-          const values = res || [];
-          const icao = decodeDatarefText(values[0]);
-          const name = decodeDatarefText(values[1]);
+      getXplaneInfo()
+        .then(({ icao, name }) => {
           setPlaneInfo({
             icao,
             name,
@@ -335,10 +309,6 @@ function App() {
     }
   }, [profilesData, profileFiles, planeInfo, hasUserSelectedProfile, isDirty, selectedProfileIndex]);
 
-  const handleExitApp = () => {
-    Quit();
-  };
-
   const handleProfileSelect = (index: number) => {
     setHasUserSelectedProfile(true);
     setSelectedProfileIndex(index);
@@ -387,20 +357,28 @@ function App() {
     setIsCreatingProfile(true);
     setCreateProfileError("");
     try {
-      const createdPath = await CreateProfileFromDefault(
+      const result = await createProfileFromDefault(
         newProfileFinalFilename,
         newProfileName.trim(),
         newProfileDescription.trim(),
         newProfileSelectors
       );
 
-      const refreshed = await refreshProfiles();
+      const createdPath = result.createdPath;
+      const refreshedData = result.data;
+      const normalizedProfiles = refreshedData.profiles.map((p) => sanitizeProfileForApi(p));
+      setProfilesStatus(refreshedData.status);
+      setProfilesData(normalizedProfiles);
+      setProfileFiles(refreshedData.files);
+      setProfileErrors(refreshedData.errors);
+      setProfileSources(refreshedData.sources);
+
       const normalizedCreatedPath = createdPath.replace(/\\/g, "/");
       const createdBasename = basenameWithoutExt(normalizedCreatedPath);
-      const createdIndexByPath = refreshed.files.findIndex((file) => file.replace(/\\/g, "/") === normalizedCreatedPath);
+      const createdIndexByPath = refreshedData.files.findIndex((file) => file.replace(/\\/g, "/") === normalizedCreatedPath);
       const createdIndex = createdIndexByPath >= 0
         ? createdIndexByPath
-        : refreshed.files.findIndex((file) => basenameWithoutExt(file) === createdBasename);
+        : refreshedData.files.findIndex((file) => basenameWithoutExt(file) === createdBasename);
 
       if (createdIndex >= 0) {
         setHasUserSelectedProfile(true);
@@ -418,117 +396,7 @@ function App() {
     }
   };
 
-  // --- Import profile handlers ---
-  const normalizedImportFilename = normalizeFilenameInput(importFilename);
-  const importFinalFilename = normalizedImportFilename === "" ? "imported-profile.yaml" : `${normalizedImportFilename}.yaml`;
-  const importSelectors = useMemo(
-    () => parseSelectorsInput(importSelectorsInput),
-    [importSelectorsInput]
-  );
-  const canProceedImportStep = useMemo(() => {
-    if (importStep === 0) {
-      return importPreview !== null;
-    }
-    if (importStep === 1) {
-      return normalizedImportFilename.length > 0;
-    }
-    if (importStep === 2) {
-      return importName.trim().length > 0;
-    }
-    if (importStep === 3) {
-      return importSelectors.length > 0;
-    }
-    return true;
-  }, [importStep, importPreview, normalizedImportFilename, importName, importSelectors.length]);
-
-  const handleOpenImport = () => {
-    setImportPreview(null);
-    setImportFilename("");
-    setImportName("");
-    setImportDescription("");
-    setImportSelectorsInput("");
-    setImportError("");
-    setImportStep(0);
-    setIsImportModalOpen(true);
-  };
-
-  const handleCloseImport = () => {
-    setIsImportModalOpen(false);
-    setImportStep(0);
-    setImportError("");
-  };
-
-  const handleSelectImportFile = async () => {
-    setImportError("");
-    try {
-      const preview = await SelectImportFile();
-      setImportPreview(preview);
-      setImportFilename(preview.saveName || "");
-      setImportName(preview.saveName || "");
-      setImportDescription(preview.saveName ? `Imported from ${preview.saveName}` : "");
-    } catch (error: any) {
-      const msg = getErrorMessage(error, "Failed to select file.");
-      if (!msg.includes("no file selected")) {
-        setImportError(msg);
-      }
-    }
-  };
-
-  const handleNextImportStep = () => {
-    if (!canProceedImportStep || importStep >= IMPORT_STEPS.length - 1) {
-      return;
-    }
-    setImportStep((current) => current + 1);
-  };
-
-  const handleBackImportStep = () => {
-    if (importStep <= 0) {
-      return;
-    }
-    setImportStep((current) => current - 1);
-  };
-
-  const handleCreateProfileFromImport = async () => {
-    if (!canProceedImportStep || importStep !== IMPORT_STEPS.length - 1 || !importPreview) {
-      return;
-    }
-
-    setIsImporting(true);
-    setImportError("");
-    try {
-      const createdPath = await CreateProfileFromImport(
-        importPreview.filePath,
-        importFinalFilename,
-        importName.trim(),
-        importDescription.trim(),
-        importSelectors
-      );
-
-      const refreshed = await refreshProfiles();
-      const normalizedCreatedPath = createdPath.replace(/\\/g, "/");
-      const createdBasename = basenameWithoutExt(normalizedCreatedPath);
-      const createdIndexByPath = refreshed.files.findIndex((file) => file.replace(/\\/g, "/") === normalizedCreatedPath);
-      const createdIndex = createdIndexByPath >= 0
-        ? createdIndexByPath
-        : refreshed.files.findIndex((file) => basenameWithoutExt(file) === createdBasename);
-
-      if (createdIndex >= 0) {
-        setHasUserSelectedProfile(true);
-        setSelectedProfileIndex(createdIndex);
-      }
-
-      setSaveMessage(`Imported profile ${importFinalFilename}.`);
-      setSaveError("");
-      setIsImportModalOpen(false);
-      setImportStep(0);
-    } catch (error: any) {
-      setImportError(getErrorMessage(error, "Failed to import profile."));
-    } finally {
-      setIsImporting(false);
-    }
-  };
-
-  const updateProfileField = (field: keyof pkg.Profile, value: any) => {
+  const updateProfileField = (field: keyof Profile, value: any) => {
     setEditableProfile((previous) => {
       if (!previous) {
         return previous;
@@ -536,11 +404,11 @@ function App() {
       return {
         ...previous,
         [field]: value
-      } as pkg.Profile;
+      } as Profile;
     });
   };
 
-  const handleMetadataChange = (metadata: pkg.Metadata) => {
+  const handleMetadataChange = (metadata: MetadataType) => {
     setEditableProfile((previous) => {
       if (!previous) {
         return previous;
@@ -548,7 +416,7 @@ function App() {
       return {
         ...previous,
         metadata
-      } as pkg.Profile;
+      } as Profile;
     });
   };
 
@@ -572,14 +440,19 @@ function App() {
     setSaveMessage("");
     setSaveError("");
     try {
-      await SaveProfileByIndex(selectedProfileIndex, profileToSave);
+      const refreshedData = await saveProfileByIndex(selectedProfileIndex, profileToSave);
 
-      // Reload all profiles from backend to pick up updated paths and any new entries
-      const refreshed = await refreshProfiles();
+      const normalizedProfiles = refreshedData.profiles.map((p) => sanitizeProfileForApi(p));
+      setProfilesStatus(refreshedData.status);
+      setProfilesData(normalizedProfiles);
+      setProfileFiles(refreshedData.files);
+      setProfileErrors(refreshedData.errors);
+      setProfileSources(refreshedData.sources);
+
       // Re-select the saved profile — find the user copy by matching the profile name
       const savedName = profileToSave.metadata?.name || "";
-      const userIdx = refreshed.files.findIndex((_, i) =>
-        refreshed.sources[i] === "user" && refreshed.profiles[i]?.metadata?.name === savedName
+      const userIdx = refreshedData.files.findIndex((_, i) =>
+        refreshedData.sources[i] === "user" && normalizedProfiles[i]?.metadata?.name === savedName
       );
       if (userIdx >= 0 && userIdx !== selectedProfileIndex) {
         setHasUserSelectedProfile(true);
@@ -615,15 +488,6 @@ function App() {
             )}
           </Stack>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleExitApp}
-          >
-            Exit App
-          </Button>
-        </DialogActions>
       </Dialog>
 
       <Dialog
@@ -771,188 +635,6 @@ function App() {
         </DialogActions>
       </Dialog>
 
-      <Dialog
-        open={isImportModalOpen}
-        onClose={handleCloseImport}
-        fullWidth
-        maxWidth="md"
-      >
-        <DialogTitle>Import Configurator Profile</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{pt: 1}}>
-            <Stepper activeStep={importStep} alternativeLabel>
-              {IMPORT_STEPS.map((step) => (
-                <Step key={step}>
-                  <StepLabel>{step}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-
-            {importStep === 0 && (
-              <Stack spacing={1.2}>
-                <Alert severity="info">
-                  Import a profile from the old Honeycomb Bravo Configurator. LEDs, AP buttons, and knob commands are converted on a best-effort basis.
-                  Trim wheels and rotary steps will use defaults and can be customized after import.
-                </Alert>
-                <Button variant="outlined" onClick={handleSelectImportFile}>
-                  Select JSON File...
-                </Button>
-                {importPreview && (
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2">
-                      Profile name: <strong>{importPreview.saveName}</strong>
-                    </Typography>
-                    <Typography variant="body2">
-                      LED configurations found: <strong>{importPreview.ledCount}</strong>
-                    </Typography>
-                    {importPreview.device && (
-                      <Typography variant="body2">
-                        Device: <strong>{importPreview.device}</strong>
-                      </Typography>
-                    )}
-                    {importPreview.warnings && importPreview.warnings.length > 0 && (
-                      <Alert severity="warning" sx={{ mt: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                          Some items could not be auto-mapped and will use defaults:
-                        </Typography>
-                        {importPreview.warnings.map((w, i) => (
-                          <Typography key={i} variant="caption" component="div">{w}</Typography>
-                        ))}
-                      </Alert>
-                    )}
-                  </Stack>
-                )}
-              </Stack>
-            )}
-
-            {importStep === 1 && (
-              <Stack spacing={1.2}>
-                <TextField
-                  label="Profile file name"
-                  value={importFilename}
-                  onChange={(event) => setImportFilename(event.target.value)}
-                  placeholder="A320 or A320.yaml"
-                  fullWidth
-                  autoFocus
-                />
-                <Typography variant="caption">
-                  Final file: <code>{importFinalFilename}</code>
-                </Typography>
-              </Stack>
-            )}
-
-            {importStep === 2 && (
-              <Stack spacing={1.2}>
-                <TextField
-                  label="Profile display name"
-                  value={importName}
-                  onChange={(event) => setImportName(event.target.value)}
-                  placeholder="Toliss A320"
-                  fullWidth
-                  autoFocus
-                />
-                <TextField
-                  label="Description"
-                  value={importDescription}
-                  onChange={(event) => setImportDescription(event.target.value)}
-                  placeholder="Profile for Toliss A320"
-                  fullWidth
-                />
-              </Stack>
-            )}
-
-            {importStep === 3 && (
-              <Stack spacing={1.2}>
-                <TextField
-                  label="Selectors (one per line or comma-separated)"
-                  value={importSelectorsInput}
-                  onChange={(event) => setImportSelectorsInput(event.target.value)}
-                  placeholder={"ToLiss Airbus A320 Neo\nToLiss Airbus A320 Std"}
-                  multiline
-                  minRows={4}
-                  fullWidth
-                  autoFocus
-                />
-                <Typography variant="caption">
-                  Matching uses exact aircraft UI names from X-Plane.
-                </Typography>
-                {importSelectors.length > 0 && (
-                  <Stack direction="row" spacing={1} sx={{flexWrap: "wrap", rowGap: 1}}>
-                    {importSelectors.map((selector) => (
-                      <Chip key={selector} label={selector} size="small" />
-                    ))}
-                  </Stack>
-                )}
-              </Stack>
-            )}
-
-            {importStep === 4 && (
-              <Stack spacing={1.2}>
-                <Alert severity="info">
-                  LEDs, bus voltage, AP buttons, and knob commands will be imported on a best-effort basis.
-                  Trim wheels, rotary steps, and items flagged below will use defaults from <code>default.yaml</code> and can be customized after import.
-                </Alert>
-                <Typography variant="body2">
-                  Source: <code>{importPreview?.filePath || "--"}</code>
-                </Typography>
-                <Typography variant="body2">
-                  New file: <code>{importFinalFilename}</code>
-                </Typography>
-                <Typography variant="body2">
-                  Name: <strong>{importName.trim() || "--"}</strong>
-                </Typography>
-                <Typography variant="body2">
-                  Description: {importDescription.trim() || "--"}
-                </Typography>
-                <Typography variant="body2">Selectors:</Typography>
-                <Stack direction="row" spacing={1} sx={{flexWrap: "wrap", rowGap: 1}}>
-                  {importSelectors.map((selector) => (
-                    <Chip key={selector} label={selector} size="small" />
-                  ))}
-                </Stack>
-                {importPreview?.warnings && importPreview.warnings.length > 0 && (
-                  <Alert severity="warning" sx={{ mt: 0.5 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                      Items that could not be auto-mapped (will use defaults):
-                    </Typography>
-                    {importPreview.warnings.map((w, i) => (
-                      <Typography key={i} variant="caption" component="div">{w}</Typography>
-                    ))}
-                  </Alert>
-                )}
-              </Stack>
-            )}
-
-            {importError && <Alert severity="error">{importError}</Alert>}
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{px: 3, pb: 2}}>
-          <Button onClick={handleCloseImport} disabled={isImporting}>
-            Cancel
-          </Button>
-          <Button onClick={handleBackImportStep} disabled={importStep === 0 || isImporting}>
-            Back
-          </Button>
-          {importStep < IMPORT_STEPS.length - 1 ? (
-            <Button
-              variant="contained"
-              onClick={handleNextImportStep}
-              disabled={!canProceedImportStep || isImporting}
-            >
-              Next
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              onClick={handleCreateProfileFromImport}
-              disabled={!canProceedImportStep || isImporting}
-            >
-              {isImporting ? "Importing..." : "Import Profile"}
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
-
       <Box className="appBackdrop" />
       <Box className="appLayout">
         <Box className="sidebarPane">
@@ -964,8 +646,7 @@ function App() {
             selectedProfileIndex={selectedProfileIndex}
             onSelectProfile={handleProfileSelect}
             onOpenAddProfile={handleOpenAddProfileTutorial}
-            onOpenImport={handleOpenImport}
-            addProfileDisabled={showProfilesModal || isCreatingProfile || isImporting}
+            addProfileDisabled={showProfilesModal || isCreatingProfile}
           />
           <Box className="xplanePane">
             <Xplane />
@@ -1028,7 +709,7 @@ function App() {
               </Alert>
             ) : (
             <>
-            <Metadata
+            <MetadataPanel
               metadata={editableProfile?.metadata}
               filePath={selectedProfilePath}
               source={selectedProfileSource}

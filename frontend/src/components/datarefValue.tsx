@@ -1,7 +1,7 @@
 import {Typography} from '@mui/material';
 import * as React from 'react';
 import {useEffect} from 'react';
-import {GetXplaneDataref} from "../../wailsjs/go/main/App";
+import {getXplaneDataref} from "../api";
 
 interface ListProps {
   dataref: string;
@@ -13,29 +13,21 @@ export default function DatarefValue(props: ListProps) {
 
   useEffect(() => {
     const refresh = () => {
-      GetXplaneDataref(props.dataref)
+      getXplaneDataref(props.dataref)
         .then((res) => {
-          if (!res) {
+          if (res == null) {
             setValue("--");
             return;
           }
 
-          let obj: { data?: number | number[] };
-          try {
-            obj = JSON.parse(res);
-          } catch {
-            setValue("--");
-            return;
-          }
-
-          if (Array.isArray(obj.data)) {
-            const next = obj.data[props.index];
+          if (Array.isArray(res)) {
+            const next = res[props.index];
             setValue(next ?? "--");
             return;
           }
 
-          if (typeof obj.data === "number") {
-            setValue(obj.data);
+          if (typeof res === "number") {
+            setValue(res);
             return;
           }
 
