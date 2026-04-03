@@ -29,7 +29,6 @@ jobs:
         run: |
           go mod tidy
           VERSION=${GITHUB_REF##*/} make mac
-          rm -f build/zoal-honeycomb/mac_arm.xpl build/zoal-honeycomb/mac_amd.xpl
 
       - name: Sign mac XPL plugin
         run: |

@@ -12,16 +12,8 @@ mac:
 	CGO_ENABLED=1 \
 	CGO_CFLAGS="-DAPL=1 -DIBM=0 -DLIN=0 -O2 -g" \
 	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -L${CURDIR}/Libraries/Mac/SkyScript/cef -lChromiumEmbeddedFramework" \
-	go build -buildmode c-shared -o build/zoal-honeycomb/mac_arm.xpl \
+	go build -buildmode c-shared -o build/zoal-honeycomb/mac.xpl \
 		-ldflags="-X github.com/x-z7a/zoal-honeycomb/pkg/xplane.VERSION=${VERSION}"  plugin/plugin.go
-	GOOS=darwin \
-	GOARCH=amd64 \
-	CGO_ENABLED=1 \
-	CGO_CFLAGS="-DAPL=1 -DIBM=0 -DLIN=0 -O2 -g" \
-	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -L${CURDIR}/Libraries/Mac/SkyScript/cef -lChromiumEmbeddedFramework" \
-	go build -buildmode c-shared -o build/zoal-honeycomb/mac_amd.xpl \
-		-ldflags="-X github.com/x-z7a/zoal-honeycomb/pkg/xplane.VERSION=${VERSION}" plugin/plugin.go
-	lipo build/zoal-honeycomb/mac_arm.xpl build/zoal-honeycomb/mac_amd.xpl -create -output build/zoal-honeycomb/mac.xpl
 dev:
 	GOOS=darwin \
 	GOARCH=arm64 \
