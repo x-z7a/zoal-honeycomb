@@ -14,6 +14,9 @@ mac:
 	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -L${CURDIR}/Libraries/Mac/SkyScript/cef -lChromiumEmbeddedFramework" \
 	go build -buildmode c-shared -o build/zoal-honeycomb/mac.xpl \
 		-ldflags="-X github.com/x-z7a/zoal-honeycomb/pkg/xplane.VERSION=${VERSION}"  plugin/plugin.go
+	npm --prefix frontend run build
+	node frontend/inline-build.mjs
+	cp frontend/skyscript-manifest.yaml build/apps/zoal-honeycomb/manifest.yaml
 dev:
 	GOOS=darwin \
 	GOARCH=arm64 \

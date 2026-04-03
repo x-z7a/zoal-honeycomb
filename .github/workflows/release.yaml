@@ -19,6 +19,13 @@ jobs:
         with:
           go-version: "1.23.4"
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install frontend dependencies
+        run: npm --prefix frontend install
+
       - name: Import Apple code signing cert
         uses: apple-actions/import-codesign-certs@v3
         with:
@@ -42,6 +49,8 @@ jobs:
           name: build-mac
           path: |
             build/zoal-honeycomb/mac.xpl
+            build/apps
+            assets
 
   build-windows:
     runs-on: windows-latest
@@ -154,6 +163,10 @@ jobs:
           cp artifacts/mac/zoal-honeycomb/mac.xpl build/zoal-honeycomb/mac.xpl
           cp artifacts/windows/zoal-honeycomb/win.xpl build/zoal-honeycomb/win.xpl
           cp artifacts/linux/zoal-honeycomb/lin.xpl build/zoal-honeycomb/lin.xpl
+
+          # Assets and apps
+          cp -r artifacts/mac/assets build/zoal-honeycomb/
+          cp -r artifacts/mac/apps build/zoal-honeycomb/
 
           # Config and profiles
           cp skunkcrafts_updater.cfg build/zoal-honeycomb/
