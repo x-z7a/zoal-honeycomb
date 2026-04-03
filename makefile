@@ -1,5 +1,6 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+WIN_CURDIR := $(if $(findstring /,$(CURDIR)),$(shell cygpath -m "$(CURDIR)" 2>/dev/null || echo $(CURDIR)),$(CURDIR))
 
 all: mac win lin
 
@@ -10,14 +11,14 @@ mac:
 	GOARCH=arm64 \
 	CGO_ENABLED=1 \
 	CGO_CFLAGS="-DAPL=1 -DIBM=0 -DLIN=0 -O2 -g" \
-	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -F${CURDIR}/Libraries/Mac/SkyScript/cef -framework 'Chromium Embedded Framework'" \
+	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -L${CURDIR}/Libraries/Mac/SkyScript/cef -lChromiumEmbeddedFramework" \
 	go build -buildmode c-shared -o build/zoal-honeycomb/mac_arm.xpl \
 		-ldflags="-X github.com/x-z7a/zoal-honeycomb/pkg/xplane.VERSION=${VERSION}"  plugin/plugin.go
 	GOOS=darwin \
 	GOARCH=amd64 \
 	CGO_ENABLED=1 \
 	CGO_CFLAGS="-DAPL=1 -DIBM=0 -DLIN=0 -O2 -g" \
-	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -F${CURDIR}/Libraries/Mac/SkyScript/cef -framework 'Chromium Embedded Framework'" \
+	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -L${CURDIR}/Libraries/Mac/SkyScript/cef -lChromiumEmbeddedFramework" \
 	go build -buildmode c-shared -o build/zoal-honeycomb/mac_amd.xpl \
 		-ldflags="-X github.com/x-z7a/zoal-honeycomb/pkg/xplane.VERSION=${VERSION}" plugin/plugin.go
 	lipo build/zoal-honeycomb/mac_arm.xpl build/zoal-honeycomb/mac_amd.xpl -create -output build/zoal-honeycomb/mac.xpl
@@ -26,7 +27,7 @@ dev:
 	GOARCH=arm64 \
 	CGO_ENABLED=1 \
 	CGO_CFLAGS="-DAPL=1 -DIBM=0 -DLIN=0 -O2 -g" \
-	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -F${CURDIR}/Libraries/Mac/SkyScript/cef -framework 'Chromium Embedded Framework'" \
+	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -L${CURDIR}/Libraries/Mac/SkyScript/cef -lChromiumEmbeddedFramework" \
 	go build -buildmode c-shared -o ~/X-Plane\ 12/Resources/plugins/zoal-honeycomb/mac.xpl \
 		-ldflags="-X github.com/x-z7a/zoal-honeycomb/pkg/xplane.VERSION=development" plugin/plugin.go
 	cp -r profiles ~/X-Plane\ 12/Resources/plugins/zoal-honeycomb/
@@ -38,7 +39,7 @@ dev:
 	cp -r build/apps ~/X-Plane\ 12/Resources/plugins/zoal-honeycomb/
 win:
 	CGO_CFLAGS="-DIBM=1 -static -O2 -g" \
-	CGO_LDFLAGS="${CURDIR}/Libraries/Win/XPLM_64.lib ${CURDIR}/Libraries/Win/SkyScript/SkyScriptLib.lib ${CURDIR}/Libraries/Win/SkyScript/libcef_dll_wrapper.lib -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL" \
+	CGO_LDFLAGS="$(WIN_CURDIR)/Libraries/Win/XPLM_64.lib $(WIN_CURDIR)/Libraries/Win/SkyScript/SkyScriptLib.lib $(WIN_CURDIR)/Libraries/Win/SkyScript/libcef_dll_wrapper.lib -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL" \
 	GOOS=windows \
 	GOARCH=amd64 \
 	CGO_ENABLED=1 \
@@ -61,7 +62,7 @@ mac-test:
 	GOARCH=arm64 \
 	CGO_ENABLED=1 \
 	CGO_CFLAGS="-DAPL=1 -DIBM=0 -DLIN=0" \
-	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -F${CURDIR}/Libraries/Mac/SkyScript/cef -framework 'Chromium Embedded Framework'" \
+	CGO_LDFLAGS="-F/System/Library/Frameworks/ -F${CURDIR}/Libraries/Mac -framework XPLM -L${CURDIR}/Libraries/Mac/SkyScript -lSkyScriptLib -lcef_dll_wrapper -framework OpenGL -framework Cocoa -lc++ -L${CURDIR}/Libraries/Mac/SkyScript/cef -lChromiumEmbeddedFramework" \
 	DYLD_FRAMEWORK_PATH="/Users/dzou/git//zoal-honeycomb/Libraries/Mac" \
 	go test -race -coverprofile=coverage.txt -covermode=atomic ./... -v
 
