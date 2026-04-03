@@ -22,5 +22,9 @@ func (s *xplaneService) menuHandler(menuRef interface{}, itemRef interface{}) {
 		s.Logger.Info("Reload Profile Clicked")
 		s.profile = nil
 	}
+	if itemId == 2 {
+		s.Logger.Info("Open SkyScript Window Clicked")
+		s.toggleSkyScriptWindow()
+	}
 	s.Logger.Debugf("menu clicked: %v", itemRef)
 }

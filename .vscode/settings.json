@@ -1,0 +1,9 @@
+{
+    "makefile.configureOnOpen": true,
+    "chat.tools.terminal.autoApprove": {
+        "go": true,
+        "unzip": true,
+        "gh": true,
+        "npm install": true
+    }
+}
