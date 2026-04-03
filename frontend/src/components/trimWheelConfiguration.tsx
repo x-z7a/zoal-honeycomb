@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {pkg} from "../../wailsjs/go/models";
+import type { TrimWheels } from "../types";
 import {
   Box,
   Card,
@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 
 interface TrimWheelConfigurationProps {
-  trimWheels?: pkg.TrimWheels;
+  trimWheels?: TrimWheels;
   editable?: boolean;
   onTrimWheelsChange?: (nextTrimWheels: TrimWheelsEntry | undefined) => void;
 }

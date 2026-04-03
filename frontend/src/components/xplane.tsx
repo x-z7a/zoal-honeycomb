@@ -3,9 +3,8 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import {useEffect} from 'react';
-import {GetXplane} from "../../wailsjs/go/main/App";
 import {Chip, Divider, Stack} from "@mui/material";
-import {decodeDatarefText} from "../utils/datarefs";
+import {getXplaneInfo} from "../api";
 
 export default function Xplane() {
   const [icao, setIcao] = React.useState("");
@@ -13,11 +12,10 @@ export default function Xplane() {
 
   useEffect(() => {
     const refresh = () => {
-      GetXplane()
-        .then((res) => {
-          const values = res || [];
-          setIcao(decodeDatarefText(values[0]));
-          setName(decodeDatarefText(values[1]));
+      getXplaneInfo()
+        .then(({ icao, name }) => {
+          setIcao(icao);
+          setName(name);
         })
         .catch(() => {
           setIcao("");

@@ -56,6 +56,7 @@ func (s *xplaneService) onPluginStart() {
 	menuContainerId := menus.AppendMenuItem(menuId, "ZOAL Honeycomb", 0, false)
 	s.myMenuId = menus.CreateMenu("ZOAL Honeycomb", menuId, menuContainerId, s.menuHandler, nil)
 	menus.AppendMenuItem(s.myMenuId, "Reload Profile", 0, true)
+	menus.AppendMenuItem(s.myMenuId, "Profiles Editor", 2, true)
 	menus.AppendMenuSeparator(s.myMenuId)
 	s.myMenuItemIndex = menus.AppendMenuItem(s.myMenuId, "Enable Debug", 1, true)
 
@@ -67,11 +68,13 @@ func (s *xplaneService) onPluginStart() {
 	s.setupKnobsCmds()
 	s.setupApCmds()
 	s.setupTrimCmds()
+	s.initSkyScript()
 	s.checkForNewReleaseVersion()
 
 }
 
 func (s *xplaneService) onPluginStop() {
+	s.shutdownSkyScript()
 	s.BravoService.Exit()
 	s.Logger.Info("Plugin stopped")
 	if s.usesTolissTrimHold() {

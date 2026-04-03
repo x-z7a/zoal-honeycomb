@@ -1,7 +1,7 @@
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-import {pkg} from "../../wailsjs/go/models";
+import type { Knobs } from "../types";
 import {
   AccordionDetails,
   AccordionSummary,
@@ -27,7 +27,7 @@ import DatarefValue from './datarefValue';
 
 interface KnobConfigurationProps {
   title: string;
-  knobs?: pkg.Knobs;
+  knobs?: Knobs;
   keys: string[];
   editable?: boolean;
   collapsible?: boolean;

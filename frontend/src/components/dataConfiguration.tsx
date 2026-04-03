@@ -1,7 +1,7 @@
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-import {pkg} from "../../wailsjs/go/models";
+import type { Data } from "../types";
 import {
   AccordionDetails,
   AccordionSummary,
@@ -21,7 +21,7 @@ import DatarefValue from './datarefValue';
 
 interface DataConfigurationProps {
   title: string;
-  data?: pkg.Data;
+  data?: Data;
   keys: string[];
   editable?: boolean;
   collapsible?: boolean;
