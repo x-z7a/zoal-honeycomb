@@ -32,7 +32,7 @@ dev:
 	cp frontend/skyscript-manifest.yaml build/apps/zoal-honeycomb/manifest.yaml
 	rm -rf ~/X-Plane\ 12/Resources/plugins/zoal-honeycomb/apps
 	cp -r build/apps ~/X-Plane\ 12/Resources/plugins/zoal-honeycomb/
-MSVC_LIBS := $(if $(MSVC_LIB_DIR),$(MSVC_LIB_DIR)/msvcprt.lib $(MSVC_LIB_DIR)/vcruntime.lib $(MSVC_LIB_DIR)/ucrt.lib,)
+MSVC_LIBS := $(if $(MSVC_LIB_DIR),-L$(MSVC_LIB_DIR) -lmsvcp140 -lvcruntime140 -lucrtbase,)
 win:
 	CGO_CFLAGS="-DIBM=1 -static -O2 -g" \
 	CGO_LDFLAGS="$(WIN_CURDIR)/Libraries/Win/XPLM_64.lib $(WIN_CURDIR)/Libraries/Win/SkyScript/SkyScriptLib.lib $(WIN_CURDIR)/Libraries/Win/SkyScript/libcef_dll_wrapper.lib $(MSVC_LIBS) -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL" \

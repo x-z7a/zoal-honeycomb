@@ -73,28 +73,21 @@ jobs:
         with:
           go-version: "1.23.4"
 
-      - name: Locate MSVC libraries
-        shell: pwsh
+      - name: Generate MinGW import libs for MSVC runtime
+        shell: msys2 {0}
         run: |
-          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
-          $msvcVersion = Get-ChildItem "$vsPath\VC\Tools\MSVC" | Sort-Object Name -Descending | Select-Object -First 1 -ExpandProperty Name
-          $msvcLibDir = "$vsPath\VC\Tools\MSVC\$msvcVersion\lib\x64"
-          $dest = "D:\msvclibs"
-          New-Item -ItemType Directory -Path $dest -Force | Out-Null
-          Copy-Item "$msvcLibDir\msvcprt.lib" $dest
-          Copy-Item "$msvcLibDir\vcruntime.lib" $dest
-          # ucrt is in the Windows SDK
-          $sdkLibDir = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\Lib" | Sort-Object Name -Descending | Select-Object -First 1 -ExpandProperty FullName
-          Copy-Item "$sdkLibDir\ucrt\x64\ucrt.lib" $dest
-          Write-Host "Copied MSVC libs to $dest"
-          Get-ChildItem $dest
-          "MSVC_LIB_DIR=$dest" | Out-File -FilePath $env:GITHUB_ENV -Append
+          mkdir -p /d/msvclibs
+          for dll in msvcp140 vcruntime140 ucrtbase; do
+            gendef /c/Windows/System32/${dll}.dll
+            dlltool -d ${dll}.def -l /d/msvclibs/lib${dll}.a -D ${dll}.dll
+            rm ${dll}.def
+          done
+          ls -la /d/msvclibs/
 
       - name: Build Windows XPL plugin
         shell: msys2 {0}
         run: |
-          MSVC_LIB_DIR_UNIX=$(cygpath -m "$MSVC_LIB_DIR")
-          VERSION=${GITHUB_REF##*/} MSVC_LIB_DIR="$MSVC_LIB_DIR_UNIX" make win
+          VERSION=${GITHUB_REF##*/} MSVC_LIB_DIR="D:/msvclibs" make win
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
