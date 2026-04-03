@@ -56,7 +56,7 @@ func (s *xplaneService) onPluginStart() {
 	menuContainerId := menus.AppendMenuItem(menuId, "ZOAL Honeycomb", 0, false)
 	s.myMenuId = menus.CreateMenu("ZOAL Honeycomb", menuId, menuContainerId, s.menuHandler, nil)
 	menus.AppendMenuItem(s.myMenuId, "Reload Profile", 0, true)
-	menus.AppendMenuItem(s.myMenuId, "Open SkyScript Window", 2, true)
+	menus.AppendMenuItem(s.myMenuId, "Profiles Editor", 2, true)
 	menus.AppendMenuSeparator(s.myMenuId)
 	s.myMenuItemIndex = menus.AppendMenuItem(s.myMenuId, "Enable Debug", 1, true)
 
