@@ -22,7 +22,7 @@ require (
 
 require (
 	github.com/wailsapp/wails/v2 v2.11.0
-	github.com/x-z7a/skyscript v0.2.4
+	github.com/x-z7a/skyscript v0.3.0
 )
 
 require (
@@ -55,3 +55,6 @@ require (
 )
 
 // replace github.com/wailsapp/wails/v2 v2.8.1 => /Users/dzou/.gvm/pkgsets/go1.23/global/pkg/mod
+
+// Workaround for const char* type conflict in v0.3.0 Go bindings (https://github.com/x-z7a/SkyScript/issues/18)
+replace github.com/x-z7a/skyscript v0.3.0 => /tmp/skyscript-v0.3.0-patched

@@ -1,7 +1,7 @@
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-import { pkg } from "../../wailsjs/go/models";
+import type { Leds, Knobs, Conditions } from "../types";
 import {
   AccordionDetails,
   AccordionSummary,
@@ -27,7 +27,7 @@ import DatarefValue from './datarefValue';
 
 interface LightConfigurationProps {
   title: string;
-  sectionData?: pkg.Leds | pkg.Knobs | pkg.Conditions;
+  sectionData?: Leds | Knobs | Conditions;
   keys: string[];
   editable?: boolean;
   collapsible?: boolean;

@@ -1,7 +1,7 @@
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-import { pkg } from "../../wailsjs/go/models";
+import type { Buttons } from "../types";
 import {
   AccordionDetails,
   AccordionSummary,
@@ -17,7 +17,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 interface ButtonConfigurationProps {
-  buttons?: pkg.Buttons;
+  buttons?: Buttons;
   keys: string[];
   editable?: boolean;
   onButtonsChange?: (nextData: Record<string, ButtonEntry | undefined>) => void;

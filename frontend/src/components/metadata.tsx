@@ -3,14 +3,14 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import {Button, Chip, Stack, TextField} from "@mui/material";
-import {pkg} from "../../wailsjs/go/models";
+import type { Metadata } from "../types";
 
 interface ListProps {
-  metadata?: pkg.Metadata;
+  metadata?: Metadata;
   filePath?: string;
   source?: string;
   editable?: boolean;
-  onMetadataChange?: (metadata: pkg.Metadata) => void;
+  onMetadataChange?: (metadata: Metadata) => void;
 }
 
 function parseSelectorsInput(raw: string): string[] {
@@ -44,11 +44,11 @@ export default function Metadata(props: ListProps) {
     }
   }, [props.editable]);
 
-  const handleMetadataChange = (field: keyof pkg.Metadata, value: string | string[]) => {
-    props.onMetadataChange?.(pkg.Metadata.createFrom({
+  const handleMetadataChange = (field: keyof Metadata, value: string | string[]) => {
+    props.onMetadataChange?.({
       ...(props.metadata || {}),
       [field]: value
-    }));
+    } as Metadata);
   };
 
   return (
