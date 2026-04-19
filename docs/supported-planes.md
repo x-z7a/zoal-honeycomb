@@ -4,16 +4,19 @@ This page is generated from the YAML profiles in `profiles/` and excludes `defau
 Do not edit the generated section by hand. Run `npm --prefix docs run docs:generate:supported-planes` instead.
 
 <!-- BEGIN GENERATED SUPPORTED PLANES -->
-There are currently `55` profile files. The `Matches` column shows the exact
+There are currently `58` profile files. The `Matches` column shows the exact
 `metadata.selectors` values used by runtime profile selection, so a single
 profile can cover multiple aircraft variants.
 
 | Profile file | Display name | Matches (`metadata.selectors`) |
 | --- | --- | --- |
 | `A20N.yaml` | Toliss A320 NEO | `Toliss Airbus A320 Neo` |
+| `A21N.yaml` | Toliss A321 | `ToLiss Airbus A321 Hi Def`<br>`ToLiss Airbus A321 Std Def` |
 | `A319.yaml` | Toliss A319 | `ToLiSs A319 Hi Def`<br>`ToLiSs A319 Std Def` |
 | `A320.yaml` | Toliss A320 | `Toliss Airbus A320 Neo`<br>`Toliss Airbus A320 Std` |
 | `A321.yaml` | Toliss A321 | `ToLiss Airbus A321 Hi Def`<br>`ToLiss Airbus A321 Std Def` |
+| `A333.yaml` | Airbus A330-300 | `Airbus A330-300` |
+| `A333_Aerogenesis.yaml` | Airbus A330 | `Airbus A330-300`<br>`AeroGenesis Airbus A330-300` |
 | `A339.yaml` | Toliss A339 | `ToLiss Airbus A330-941 Hi Def`<br>`ToLiss Airbus A330-941 Std Def` |
 | `AMF.yaml` | Metro III AC Freighter | `Metro III AC Freighter` |
 | `B350.yaml` | Beechcraft King Air 350 | `B350` |
@@ -32,8 +35,8 @@ profile can cover multiple aircraft variants.
 | `BE58.yaml` | Beechcraft Baron 58 | `Baron_58` |
 | `BE76.yaml` | Beechcraft Duchess 76 | `BE76` |
 | `BE9L.yaml` | Beechcraft King Air C90B | `BE9L` |
-| `C172 G1000.yaml` | Laminar C172 Skyhawk (G1000) | `Cessna Skyhawk (G1000)` |
-| `C172 Steam.yaml` | Laminar C172 Skyhawk | `Cessna Skyhawk` |
+| `C172 G1000.yaml` | Laminar C172 Skyhawk (G1000) | `Cessna Skyhawk (G1000)`<br>`Cessna 172 SP Skyhawk - 180HP - G1000` |
+| `C172 Steam.yaml` | Laminar C172 Skyhawk | `Cessna Skyhawk`<br>`Cessna 172 SP Skyhawk - 180HP` |
 | `C172_airfoilabs.yaml` | C172 NG ANALOG | `C172 NG ANALOG`<br>`C172 NG DIGITAL` |
 | `C208.yaml` | Cessna 208 Caravan | `Cessna 208 Caravan`<br>`Cessna 208 Caravan Amphibian`<br>`Cessna 208 Grand Caravan`<br>`Cessna 208 Grand Caravan Amphibian` |
 | `C750.yaml` | Cessna Citation X | `Cessna Citation X` |
