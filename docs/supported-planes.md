@@ -4,7 +4,7 @@ This page is generated from the YAML profiles in `profiles/` and excludes `defau
 Do not edit the generated section by hand. Run `npm --prefix docs run docs:generate:supported-planes` instead.
 
 <!-- BEGIN GENERATED SUPPORTED PLANES -->
-There are currently `58` profile files. The `Matches` column shows the exact
+There are currently `59` profile files. The `Matches` column shows the exact
 `metadata.selectors` values used by runtime profile selection, so a single
 profile can cover multiple aircraft variants.
 
@@ -59,6 +59,7 @@ profile can cover multiple aircraft variants.
 | `GLF650.yaml` | GLF650 AKD XP12 | `GLF650_AKD` |
 | `GLF650ER.yaml` | GLF650ER AKD XP12 | `GLF650ER_AKD` |
 | `MD11.yaml` | Rotate MD-11 | `Rotate MD-11F`<br>`Rotate MD-11` |
+| `MD82.yaml` | McDonnell Douglas MD-82 | `McDonnell Douglas MD-82` |
 | `P06T Steam.yaml` | VSKYLABS P2006T Analog | `VSKYLABS P2006T-Analog` |
 | `P06T-G1000.yaml` | VSKYLABS P2006T-G1000 | `VSKYLABS P2006T-G1000` |
 | `P28R_VFA_Arrow_III_E1000.yaml` | vFlyteAir Arrow III E1000 | `vFlyteAir Arrow III E1000` |
