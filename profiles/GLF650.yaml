@@ -21,9 +21,9 @@ buttons:
             - command_str: sim/autopilot/altitude_hold
     apr:
         single_click:
-            - command_str: sim/autopilot/approach
+            - command_str: AKD/autopilot/APR_cmd
         double_click:
-            - command_str: sim/autopilot/approach
+            - command_str: AKD/autopilot/APR_cmd
     vs:
         single_click:
             - command_str: sim/autopilot/vertical_speed
@@ -38,7 +38,7 @@ buttons:
         single_click:
             - command_str: sim/autopilot/speed_hold
         double_click:
-            - command_str: sim/autopilot/speed_hold
+            - command_str: AKD/autopilot/VNAV_cmd
     rev:
         single_click:
             - command_str: sim/autopilot/back_course
@@ -79,7 +79,7 @@ leds:
     alt:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/altitude_hold_status
-              operator: '>='
+              operator: '>'
               threshold: 1
     apr:
         datarefs:
@@ -101,6 +101,7 @@ leds:
             - dataref_str: sim/cockpit2/autopilot/altitude_mode
               operator: ==
               threshold: 5
+        condition: any
     rev:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/backcourse_status
