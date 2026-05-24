@@ -172,6 +172,9 @@ jobs:
           name: build-mac
           path: artifacts/mac
 
+      - name: Restore executable permissions on macOS app
+        run: chmod +x artifacts/mac/bin/bravo.app/Contents/MacOS/bravo
+
       - name: Download Windows artifacts
         uses: actions/download-artifact@v4
         with:
