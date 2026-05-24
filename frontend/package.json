@@ -22,8 +22,8 @@
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@types/react-resizable": "^3.0.8",
-    "@vitejs/plugin-react": "^2.0.1",
+    "@vitejs/plugin-react": "^6.0.2",
     "typescript": "^4.6.4",
-    "vite": "^3.0.7"
+    "vite": "^8.0.14"
   }
 }
