@@ -38,6 +38,7 @@ jobs:
         run: |
           codesign \
             --force --deep --timestamp --options runtime \
+            --entitlements ${{ github.workspace }}/build/darwin/Entitlements.plist \
             --sign "${{ secrets.CODESIGN_IDENTITY }}" \
             ${{ github.workspace }}/build/bin/bravo.app
 

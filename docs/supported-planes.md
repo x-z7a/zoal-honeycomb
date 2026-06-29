@@ -4,7 +4,7 @@ This page is generated from the YAML profiles in `profiles/` and excludes `defau
 Do not edit the generated section by hand. Run `npm --prefix docs run docs:generate:supported-planes` instead.
 
 <!-- BEGIN GENERATED SUPPORTED PLANES -->
-There are currently `62` profile files. The `Matches` column shows the exact
+There are currently `63` profile files. The `Matches` column shows the exact
 `metadata.selectors` values used by runtime profile selection, so a single
 profile can cover multiple aircraft variants.
 
@@ -26,6 +26,7 @@ profile can cover multiple aircraft variants.
 | `B463.yaml` | JF12_BAe_146 300 | `JF12_BAe_146 300` |
 | `B736_level_up.yaml` | Level Up 737-600 NG | `Boeing 737-600NG` |
 | `B737_level_up.yaml` | Level Up 737-700 NG | `Boeing 737-700NG` |
+| `B738_Laminar.yaml` | Boeing 737-800 | `Boeing 737-800` |
 | `B738_level_up.yaml` | Level Up 737-800 NG | `Boeing 737-800NG` |
 | `B738_zibo.yaml` | Zibo 738 | `Boeing 737-800X`<br>`Boeing 737-800X (4k)` |
 | `B739_level_up.yaml` | Level Up 737-900 NG | `Boeing 737-900NG`<br>`Boeing 737-900ER` |
