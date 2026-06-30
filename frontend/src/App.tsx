@@ -10,7 +10,8 @@ import {
   GetProfilesStatus,
   GetXplane,
   SaveProfileByIndex,
-  SelectImportFile
+  SelectImportFile,
+  SelectProfilesFolder
 } from "../wailsjs/go/main/App";
 import { Quit } from "../wailsjs/runtime/runtime";
 import {
@@ -174,6 +175,7 @@ function App() {
   const [hasUserSelectedProfile, setHasUserSelectedProfile] = useState(false);
   const [planeInfo, setPlaneInfo] = useState<PlaneInfo>({ icao: "", name: "", connected: false });
   const [profilesStatus, setProfilesStatus] = useState<main.ProfilesStatus | null>(null);
+  const [isSelectingProfilesFolder, setIsSelectingProfilesFolder] = useState(false);
   const [editorTab, setEditorTab] = useState(0);
   const [isAddProfileModalOpen, setIsAddProfileModalOpen] = useState(false);
   const [addProfileStep, setAddProfileStep] = useState(0);
@@ -337,6 +339,23 @@ function App() {
 
   const handleExitApp = () => {
     Quit();
+  };
+
+  const handleSelectProfilesFolder = async () => {
+    if (isSelectingProfilesFolder) {
+      return;
+    }
+
+    setIsSelectingProfilesFolder(true);
+    try {
+      await SelectProfilesFolder();
+    } catch {
+      // Backend updates profiles status/load error for cancelled or invalid selections.
+    } finally {
+      await refreshProfiles().catch(() => {
+      });
+      setIsSelectingProfilesFolder(false);
+    }
   };
 
   const handleProfileSelect = (index: number) => {
@@ -597,15 +616,16 @@ function App() {
   return (
     <div id="app">
       <Dialog open={showProfilesModal} disableEscapeKeyDown fullWidth maxWidth="sm">
-        <DialogTitle>Return App To Plugin Folder</DialogTitle>
+        <DialogTitle>Select Profiles Folder</DialogTitle>
         <DialogContent>
           <Stack spacing={1.25} sx={{ pt: 0.5 }}>
             <Typography variant="body2">
-              Put <code>bravo.app</code> back into your <code>zoal-honeycomb</code> plugin folder so it is next to
-              <code> profiles/</code>, then relaunch.
+              Select the folder that contains your YAML profile files (usually
+              <code> .../X-Plane 12/Resources/plugins/zoal-honeycomb/profiles</code>).
             </Typography>
             <Typography variant="body2">
-              Expected location example: <code>.../X-Plane 12/Resources/plugins/zoal-honeycomb</code>.
+              You can also select your <code>zoal-honeycomb</code> plugin folder and the app will use
+              <code> profiles/</code> automatically.
             </Typography>
             {profilesStatus?.profilesDir && (
               <Typography variant="caption">Current folder: {profilesStatus.profilesDir}</Typography>
@@ -618,8 +638,16 @@ function App() {
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button
             variant="contained"
+            onClick={handleSelectProfilesFolder}
+            disabled={isSelectingProfilesFolder}
+          >
+            {isSelectingProfilesFolder ? "Opening Picker..." : "Choose Folder"}
+          </Button>
+          <Button
+            variant="outlined"
             color="error"
             onClick={handleExitApp}
+            disabled={isSelectingProfilesFolder}
           >
             Exit App
           </Button>

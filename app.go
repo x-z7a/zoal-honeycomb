@@ -21,15 +21,15 @@ import (
 )
 
 const (
-	profilesDirEnvVar        = "ZOAL_PROFILES_DIR"
-	profilesFolderName       = "profiles"
-	userProfilesFolderName   = "user profiles"
-	defaultProfileTemplate   = "default.yaml"
-	selectionErrorMsg        = "no profiles folder selected. Please select a folder containing YAML profiles"
-	missingProfilesMsg       = "profiles folder not found. Please select your external profiles folder"
-	invalidProfilesMsg       = "selected folder does not contain valid YAML profiles"
-	profileSourceUser        = "user"
-	profileSourceDefault     = "default"
+	profilesDirEnvVar      = "ZOAL_PROFILES_DIR"
+	profilesFolderName     = "profiles"
+	userProfilesFolderName = "user profiles"
+	defaultProfileTemplate = "default.yaml"
+	selectionErrorMsg      = "no profiles folder selected. Please select a folder containing YAML profiles"
+	missingProfilesMsg     = "profiles folder not found. Please select your external profiles folder"
+	invalidProfilesMsg     = "selected folder does not contain valid YAML profiles"
+	profileSourceUser      = "user"
+	profileSourceDefault   = "default"
 )
 
 var (
@@ -49,12 +49,12 @@ type ListResponse struct {
 }
 
 type ProfilesStatus struct {
-	ProfilesDir      string `json:"profilesDir"`
-	UserProfilesDir  string `json:"userProfilesDir"`
-	ProfilesCount    int    `json:"profilesCount"`
-	NeedsSelection   bool   `json:"needsSelection"`
-	LoadError        string `json:"loadError"`
-	ParseErrors      int    `json:"parseErrors"`
+	ProfilesDir     string `json:"profilesDir"`
+	UserProfilesDir string `json:"userProfilesDir"`
+	ProfilesCount   int    `json:"profilesCount"`
+	NeedsSelection  bool   `json:"needsSelection"`
+	LoadError       string `json:"loadError"`
+	ParseErrors     int    `json:"parseErrors"`
 }
 
 // App struct
@@ -362,7 +362,15 @@ func (a *App) selectProfilesFolder(ctx context.Context) error {
 	}
 
 	selectedDirectory = normalizeDir(selectedDirectory)
-	if err := a.loadProfilesFromDir(selectedDirectory); err != nil {
+	profilesDirectory := selectedDirectory
+	if !isValidProfilesDir(profilesDirectory) {
+		pluginProfilesDir := normalizeDir(filepath.Join(selectedDirectory, profilesFolderName))
+		if isValidProfilesDir(pluginProfilesDir) {
+			profilesDirectory = pluginProfilesDir
+		}
+	}
+
+	if err := a.loadProfilesFromDir(profilesDirectory); err != nil {
 		a.setProfilesError(fmt.Sprintf("%s: %v", invalidProfilesMsg, err), true)
 		return err
 	}
