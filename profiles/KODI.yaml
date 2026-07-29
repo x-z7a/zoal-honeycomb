@@ -1,8 +1,8 @@
 metadata:
-    name: Beechcraft Baron 58
-    description: Laminar Beechcraft Baron 58
+    name: Daher Kodiak
+    description: Thranda Daher Kodiak  XPlane
     selectors:
-        - Beechcraft Baron 58
+        - Thranda_Daher_Kodiak_100
 buttons:
     hdg:
         single_click:
@@ -48,7 +48,7 @@ knobs:
             - dataref_str: sim/cockpit2/autopilot/vvi_dial_fpm
     ap_alt:
         datarefs:
-            - dataref_str: sim/cockpit/autopilot/current_altitude
+            - dataref_str: sim/cockpit/autopilot/altitude
     ap_ias:
         commands:
             - command_str: sim/autopillot/vertical_speed_up
@@ -173,7 +173,7 @@ leds:
         condition: any
 data:
     ap_alt_step:
-        value: 50
+        value: 20
     ap_vs_step:
         datarefs:
             - dataref_str: sim/aircraft/autopilot/vvi_step_ft

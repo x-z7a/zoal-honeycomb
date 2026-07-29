@@ -4,7 +4,7 @@ This page is generated from the YAML profiles in `profiles/` and excludes `defau
 Do not edit the generated section by hand. Run `npm --prefix docs run docs:generate:supported-planes` instead.
 
 <!-- BEGIN GENERATED SUPPORTED PLANES -->
-There are currently `63` profile files. The `Matches` column shows the exact
+There are currently `65` profile files. The `Matches` column shows the exact
 `metadata.selectors` values used by runtime profile selection, so a single
 profile can cover multiple aircraft variants.
 
@@ -36,7 +36,7 @@ profile can cover multiple aircraft variants.
 | `B764.yaml` | Flight Factor 757/767 | `Boeing 767-400 XP12` |
 | `B772.yaml` | Flight Factor B772 | `Boeing 777-200ER` |
 | `B77L.yaml` | Flight Factor B777-F Freighter | `B77L` |
-| `BE58.yaml` | Beechcraft Baron 58 | `Baron_58` |
+| `BE58.yaml` | Beechcraft Baron 58 | `Beechcraft Baron 58` |
 | `BE76.yaml` | Beechcraft Duchess 76 | `BE76` |
 | `BE9L.yaml` | Beechcraft King Air C90B | `BE9L` |
 | `C172 G1000.yaml` | Laminar C172 Skyhawk (G1000) | `Cessna Skyhawk (G1000)`<br>`Cessna 172 SP Skyhawk - 180HP - G1000` |
@@ -44,6 +44,7 @@ profile can cover multiple aircraft variants.
 | `C172_airfoilabs.yaml` | C172 NG ANALOG | `C172 NG ANALOG`<br>`C172 NG DIGITAL` |
 | `C208.yaml` | Cessna 208 Caravan | `Cessna 208 Caravan`<br>`Cessna 208 Caravan Amphibian`<br>`Cessna 208 Grand Caravan`<br>`Cessna 208 Grand Caravan Amphibian` |
 | `C750.yaml` | Cessna Citation X | `Cessna Citation X` |
+| `D328.yaml` | Dornier 328-110 | `Dornier Do-328-110v1.7.0` |
 | `DA42NG_Aerobask.yaml` | Diamond DA42NG | `Diamond DA42 by Aerobask` |
 | `DC3.yaml` | Douglas DC-3 | `Douglas C-47 Classic`<br>`Douglas C-47 GNS530`<br>`Douglas C-47 Passenger`<br>`Douglas CX-47 Float`<br>`Douglas DC-3 NXG` |
 | `DH8D.yaml` | FlyJSim Q400 | `DH8D` |
@@ -62,6 +63,7 @@ profile can cover multiple aircraft variants.
 | `EVOT.yaml` | Lancair Evolution | `Lancair Evolution`<br>`Lancair Evolution EVOT-550`<br>`Lancair Evolution EVOT-750`<br>`Lancair Evolution EVOT-850` |
 | `GLF650.yaml` | GLF650 AKD XP12 | `GLF650_AKD` |
 | `GLF650ER.yaml` | GLF650ER AKD XP12 | `GLF650ER_AKD` |
+| `KODI.yaml` | Daher Kodiak | `Thranda_Daher_Kodiak_100` |
 | `MD11.yaml` | Rotate MD-11 | `Rotate MD-11F`<br>`Rotate MD-11` |
 | `MD82.yaml` | McDonnell Douglas MD-82 | `McDonnell Douglas MD-82` |
 | `P06T Steam.yaml` | VSKYLABS P2006T Analog | `VSKYLABS P2006T-Analog` |
