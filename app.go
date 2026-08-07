@@ -25,6 +25,8 @@ const (
 	profilesFolderName     = "profiles"
 	userProfilesFolderName = "user profiles"
 	defaultProfileTemplate = "default.yaml"
+	configFolderName       = ".zoal/honeycomb"
+	configFileName         = "config.yaml"
 	selectionErrorMsg      = "no profiles folder selected. Please select a folder containing YAML profiles"
 	missingProfilesMsg     = "profiles folder not found. Please select your external profiles folder"
 	invalidProfilesMsg     = "selected folder does not contain valid YAML profiles"
@@ -35,9 +37,14 @@ const (
 var (
 	executablePathFn = os.Executable
 	getwdFn          = os.Getwd
+	userHomeDirFn    = os.UserHomeDir
 
 	errProfilesSelectionCancelled = errors.New("profiles folder selection cancelled")
 )
+
+type appConfig struct {
+	ProfilesDir string `yaml:"profilesDir"`
+}
 
 type ListResponse struct {
 	Data []struct {
@@ -319,6 +326,9 @@ func (a *App) resolveProfilesDir() string {
 	if envDir := strings.TrimSpace(os.Getenv(profilesDirEnvVar)); envDir != "" {
 		candidates = append(candidates, envDir)
 	}
+	if configDir := loadProfilesDirFromConfig(); configDir != "" {
+		candidates = append(candidates, configDir)
+	}
 	if exePath, err := executablePathFn(); err == nil {
 		if siblingDir := siblingProfilesDirFromExecutable(exePath); siblingDir != "" {
 			candidates = append(candidates, siblingDir)
@@ -426,6 +436,10 @@ func (a *App) loadProfilesFromDir(profilesDir string) error {
 	a.profilesLoadErr = ""
 	a.needsProfilesSelection = false
 	a.mu.Unlock()
+
+	if err := saveProfilesDirToConfig(normalized); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: failed to persist profiles dir config: %v\n", err)
+	}
 
 	return nil
 }
@@ -619,6 +633,64 @@ func normalizeProfileFilename(filename string) (string, error) {
 	}
 
 	return base + ".yaml", nil
+}
+
+func loadProfilesDirFromConfig() string {
+	configPath, err := appConfigPath()
+	if err != nil {
+		return ""
+	}
+
+	content, err := os.ReadFile(configPath)
+	if err != nil {
+		return ""
+	}
+
+	var cfg appConfig
+	if err := yaml.Unmarshal(content, &cfg); err != nil {
+		return ""
+	}
+
+	return normalizeDir(cfg.ProfilesDir)
+}
+
+func saveProfilesDirToConfig(profilesDir string) error {
+	normalized := normalizeDir(profilesDir)
+	if normalized == "" {
+		return nil
+	}
+
+	configPath, err := appConfigPath()
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
+		return fmt.Errorf("failed to create config directory: %w", err)
+	}
+
+	payload, err := yaml.Marshal(appConfig{ProfilesDir: normalized})
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	if err := os.WriteFile(configPath, payload, 0o644); err != nil {
+		return fmt.Errorf("failed to write config file: %w", err)
+	}
+
+	return nil
+}
+
+func appConfigPath() (string, error) {
+	homeDir, err := userHomeDirFn()
+	if err != nil {
+		return "", fmt.Errorf("failed to determine home directory: %w", err)
+	}
+	if strings.TrimSpace(homeDir) == "" {
+		return "", errors.New("home directory is empty")
+	}
+
+	return filepath.Join(homeDir, configFolderName, configFileName), nil
 }
 
 func normalizeSelectors(selectors []string) []string {

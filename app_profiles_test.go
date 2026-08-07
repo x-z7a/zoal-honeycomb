@@ -113,6 +113,36 @@ func TestResolveProfilesDirFallsBackToCwdProfiles(t *testing.T) {
 	}
 }
 
+func TestResolveProfilesDirUsesConfigBeforeSiblingAndCwd(t *testing.T) {
+	restoreFns := stubPathFns(t)
+	defer restoreFns()
+
+	t.Setenv(profilesDirEnvVar, "")
+	homeDir := t.TempDir()
+	userHomeDirFn = func() (string, error) { return homeDir, nil }
+
+	configProfiles := createProfilesDir(t, "configured")
+	if err := saveProfilesDirToConfig(configProfiles); err != nil {
+		t.Fatalf("saveProfilesDirToConfig returned error: %v", err)
+	}
+
+	siblingRoot := t.TempDir()
+	executablePath := filepath.Join(siblingRoot, "bravo.app", "Contents", "MacOS", "bravo")
+	if err := os.MkdirAll(filepath.Dir(executablePath), 0o755); err != nil {
+		t.Fatalf("failed to create app executable dir: %v", err)
+	}
+	executablePathFn = func() (string, error) { return executablePath, nil }
+
+	cwd := t.TempDir()
+	getwdFn = func() (string, error) { return cwd, nil }
+
+	app := NewApp()
+	got := app.resolveProfilesDir()
+	if got != normalizeDir(configProfiles) {
+		t.Fatalf("expected config profiles dir %q, got %q", normalizeDir(configProfiles), got)
+	}
+}
+
 func TestSaveProfileByIndexDoesNotMarshalRuntimeFunctionFields(t *testing.T) {
 	root := t.TempDir()
 	profilesDir := filepath.Join(root, profilesFolderName)
@@ -163,6 +193,40 @@ leds:
 	savedText := string(saved)
 	if strings.Contains(savedText, "On:") || strings.Contains(savedText, "Off:") {
 		t.Fatalf("saved yaml should not contain runtime function fields, got:\n%s", savedText)
+	}
+}
+
+func TestLoadProfilesFromDirPersistsConfigUnderHome(t *testing.T) {
+	restoreFns := stubPathFns(t)
+	defer restoreFns()
+
+	homeDir := t.TempDir()
+	userHomeDirFn = func() (string, error) { return homeDir, nil }
+
+	profilesDir := createProfilesDir(t, "persisted")
+
+	app := NewApp()
+	if err := app.loadProfilesFromDir(profilesDir); err != nil {
+		t.Fatalf("loadProfilesFromDir returned error: %v", err)
+	}
+
+	configPath, err := appConfigPath()
+	if err != nil {
+		t.Fatalf("appConfigPath returned error: %v", err)
+	}
+
+	content, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatalf("failed to read config file: %v", err)
+	}
+
+	var cfg appConfig
+	if err := yaml.Unmarshal(content, &cfg); err != nil {
+		t.Fatalf("failed to parse config file: %v", err)
+	}
+
+	if cfg.ProfilesDir != normalizeDir(profilesDir) {
+		t.Fatalf("expected persisted profiles dir %q, got %q", normalizeDir(profilesDir), cfg.ProfilesDir)
 	}
 }
 
@@ -391,10 +455,12 @@ func stubPathFns(t *testing.T) func() {
 
 	originalExecutableFn := executablePathFn
 	originalGetwdFn := getwdFn
+	originalUserHomeDirFn := userHomeDirFn
 
 	return func() {
 		executablePathFn = originalExecutableFn
 		getwdFn = originalGetwdFn
+		userHomeDirFn = originalUserHomeDirFn
 	}
 }
 
