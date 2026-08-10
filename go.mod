@@ -3,7 +3,7 @@ module github.com/x-z7a/zoal-honeycomb
 go 1.24.0
 
 require (
-	github.com/expr-lang/expr v1.16.9
+	github.com/expr-lang/expr v1.17.7
 	github.com/sstallion/go-hid v0.14.1
 	github.com/stretchr/testify v1.10.0
 	github.com/xairline/goplane v1.301.5
