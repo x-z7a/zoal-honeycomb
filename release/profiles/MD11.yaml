@@ -1,0 +1,285 @@
+metadata:
+  name: Rotate MD-11
+  description: Profile for the Rotate MD-11
+  selectors:
+    - Rotate MD-11F
+    - Rotate MD-11
+
+buttons:
+  # rev:
+  # vs:
+  hdg:
+    single_click:
+      - command_str: "Rotate/aircraft/controls_c/fgs_hdg_mode_sel_up"
+    double_click:
+      - command_str: "Rotate/aircraft/controls_c/fgs_hdg_mode_sel_dn"
+  ias:
+    single_click:
+      - command_str: "Rotate/aircraft/controls_c/fgs_spd_sel_mode_up"
+    double_click:
+      - command_str: "Rotate/aircraft/controls_c/fgs_spd_sel_mode_dn"
+  alt:
+    single_click:
+      - command_str: "Rotate/aircraft/controls_c/fgs_alt_mode_sel_up"
+    double_click:
+      - command_str: "Rotate/aircraft/controls_c/fgs_alt_mode_sel_dn"
+  apr:
+    single_click:
+      - command_str: "Rotate/aircraft/controls_c/fgs_appr_land"
+  ap:
+    single_click:
+      - command_str: "Rotate/aircraft/controls_c/fgs_autoflight"
+  nav:
+    single_click:
+      - command_str: "Rotate/aircraft/controls_c/fgs_nav"
+    double_click:
+      - command_str: "Rotate/aircraft/controls_c/fgs_prof"
+
+##### AP KNOBS #####
+knobs:
+  ap_hdg:
+    profile_type: knob
+    commands:
+      - command_str: Rotate/aircraft/controls_c/fgs_hdg_sel_up
+      - command_str: Rotate/aircraft/controls_c/fgs_hdg_sel_dn
+  ap_alt:
+    profile_type: knob
+    commands:
+      - command_str: Rotate/aircraft/controls_c/fgs_alt_sel_up
+      - command_str: Rotate/aircraft/controls_c/fgs_alt_sel_dn
+  ap_vs:
+    profile_type: knob
+    commands:
+      - command_str: Rotate/aircraft/controls_c/fgs_pitch_sel_up
+      - command_str: Rotate/aircraft/controls_c/fgs_pitch_sel_dn
+  ap_ias:
+    profile_type: knob
+    commands:
+      - command_str: Rotate/aircraft/controls_c/fgs_spd_sel_up
+      - command_str: Rotate/aircraft/controls_c/fgs_spd_sel_dn
+  ap_crs:
+    profile_type: knob
+    # repurpose to qnh
+    datarefs:
+      - dataref_str: "sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot"
+
+
+##### LEDS #####
+leds:
+  volt_low:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/elec_bat_chgr_volt"
+        operator: "<"
+        threshold: 5
+
+  gear:
+    datarefs:
+      - dataref_str: "sim/flightmodel2/gear/deploy_ratio"
+        operator: "!="
+        threshold: 0
+
+  hdg:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/afs_roll_mode"
+        operator: "=="
+        threshold: 4
+
+  nav:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/afs_roll_mode"
+        operator: "=="
+        threshold: 1
+
+  apr:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/afs_appr_engaged"
+        operator: "=="
+        threshold: 1
+
+  rev:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/backcourse_status"
+        operator: "=="
+        threshold: 1
+
+  alt:
+    condition: "any"
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/afs_pitch_mode"
+        operator: "=="
+        threshold: 6
+      - dataref_str: "Rotate/aircraft/systems/afs_pitch_mode"
+        operator: "=="
+        threshold: 7
+
+  vs:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/afs_pitch_mode"
+        operator: "=="
+        threshold: 4
+
+  ias:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/afs_fms_spd_engaged"
+        operator: "=="
+        threshold: 1
+
+  ap:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/afs_ap_engaged"
+        operator: ">"
+        threshold: 0.01
+
+  master_warn:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/alert_m_warning_lt"
+        operator: "=="
+        threshold: 1
+
+  fire:
+    condition: "any"
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/fire_cabin_fwd_fail"
+        operator: ">"
+        threshold: 0.01
+      - dataref_str: "Rotate/aircraft/systems/fire_cabin_ctr_fail"
+        operator: ">"
+        threshold: 0.01
+      - dataref_str: "Rotate/aircraft/systems/fire_cabin_aft_fail"
+        operator: ">"
+        threshold: 0.01
+      - dataref_str: "Rotate/aircraft/systems/fire_cargo_fwd_fail"
+        operator: ">"
+        threshold: 0.01
+      - dataref_str: "Rotate/aircraft/systems/fire_cargo_ctr_fail"
+        operator: ">"
+        threshold: 0.01
+      - dataref_str: "Rotate/aircraft/systems/fire_cargo_aft_fail"
+        operator: ">"
+        threshold: 0.01
+
+  oil_low_pressure:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/eng_oil_press_psi"
+        operator: "<"
+        threshold: 15
+
+  fuel_low_pressure:
+    datarefs:
+      - dataref_str: "sim/cockpit2/engine/indicators/fuel_pressure_psi"
+        operator: "<"
+        threshold: 20
+
+  anti_ice:
+    condition: "any"
+    datarefs:
+      - dataref_str: "Rotate/aircraft/controls/anti_ice_eng_1"
+        operator: "=="
+        threshold: 1
+      - dataref_str: "Rotate/aircraft/controls/anti_ice_eng_2"
+        operator: "=="
+        threshold: 1
+      - dataref_str: "Rotate/aircraft/controls/anti_ice_eng_3"
+        operator: "=="
+        threshold: 1
+      - dataref_str: "Rotate/aircraft/controls/anti_ice_tail"
+        operator: "=="
+        threshold: 1
+      - dataref_str: "Rotate/aircraft/controls/anti_ice_wing"
+        operator: "=="
+        threshold: 1
+      - dataref_str: "Rotate/aircraft/controls/anti_ice_wshld_l"
+        operator: "=="
+        threshold: 1
+      - dataref_str: "Rotate/aircraft/controls/anti_ice_wshld_r"
+        operator: "=="
+        threshold: 1
+
+  eng_starter:
+    datarefs:
+      - dataref_str: "sim/cockpit2/engine/actuators/starter_hit"
+        operator: ">"
+        threshold: 0.01
+
+  apu:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/elec_apu_avail_lt"
+        operator: "=="
+        threshold: 1
+
+  master_caution:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/alert_m_caution_lt"
+        operator: "=="
+        threshold: 1
+
+  vacuum:
+    condition: "any"
+    datarefs:
+      - dataref_str: "sim/cockpit/misc/vacuum"
+        operator: "<"
+        threshold: 4
+      - dataref_str: "sim/cockpit/misc/vacuum2"
+        operator: "<"
+        threshold: 4
+
+  hydro_low_pressure:
+    condition: "any"
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/hyd_sys_1_press_psi"
+        operator: "<"
+        threshold: 2500
+      - dataref_str: "Rotate/aircraft/systems/hyd_sys_2_press_psi"
+        operator: "<"
+        threshold: 2500
+      - dataref_str: "Rotate/aircraft/systems/hyd_sys_3_press_psi"
+        operator: "<"
+        threshold: 2500
+
+  parking_brake:
+    datarefs:
+      - dataref_str: "Rotate/aircraft/controls/park_brake"
+        operator: "=="
+        threshold: 1
+
+  doors:
+    condition: "any"
+    datarefs:
+      - dataref_str: "Rotate/aircraft/systems/main_cargo_door_ratio"
+        operator: ">"
+        threshold: 0.9
+      - dataref_str: "Rotate/aircraft/systems/fwd_r_cargo_door_ratio"
+        operator: ">"
+        threshold: 0.9
+      - dataref_str: "Rotate/aircraft/systems/ctr_r_cargo_door_ratio"
+        operator: ">"
+        threshold: 0.9
+      - dataref_str: "Rotate/aircraft/systems/aft_l_cargo_door_ratio"
+        operator: ">"
+        threshold: 0.9
+
+  aux_fuel_pump:
+    condition: "any"
+    datarefs:
+      - dataref_str: "Rotate/aircraft/controls/tank_aux_trans_l"
+        operator: ">"
+        threshold: 0.01
+      - dataref_str: "Rotate/aircraft/controls/tank_aux_trans_r"
+        operator: ">"
+        threshold: 0.01
+      - dataref_str: "Rotate/aircraft/controls/tank_aux_trans_tail"
+        operator: ">"
+        threshold: 0.01
+
+conditions:
+  retractable_gear:
+    datarefs:
+      - dataref_str: "sim/aircraft/gear/acf_gear_retract"
+        operator: "!="
+        threshold: 0
+
+  bus_voltage:
+    datarefs:
+      - dataref_str: "sim/cockpit/electrical/battery_array_on"
+        operator: "=="
+        threshold: 1
