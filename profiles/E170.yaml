@@ -50,7 +50,7 @@ knobs:
             - dataref_str: sim/cockpit/autopilot/heading_mag
     ap_vs:
         datarefs:
-            - dataref_str: sim/cockpit2/autopilot/vvi_dial_fpm
+            - dataref_str: XCrafts/ERJ/autopilot/vertical_velocity
     ap_alt:
         datarefs:
             - dataref_str: XCrafts/ERJ/autopilot/altitude
