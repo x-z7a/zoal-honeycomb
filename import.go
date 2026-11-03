@@ -126,16 +126,18 @@ var ledMapping = map[int]string{
 	ledMapKey(4, 3): "doors",
 }
 
-// Bravo hardware button numbers → YAML button names.
+// Bravo hardware button numbers (0-based, as stored by the Configurator) →
+// YAML button names. 12/13 are the encoder, 16-20 the mode selector and
+// 21/22 the trim wheel.
 var apButtonMapping = map[int]string{
-	21: "hdg",
-	22: "nav",
-	23: "apr",
-	24: "rev",
-	25: "alt",
-	26: "vs",
-	27: "ias",
-	28: "ap",
+	0: "hdg",
+	1: "nav",
+	2: "apr",
+	3: "rev",
+	4: "alt",
+	5: "vs",
+	6: "ias",
+	7: "ap",
 }
 
 // FCU_SELECTOR condition values → YAML knob names.
@@ -155,7 +157,7 @@ const (
 
 // ---------- Parsing helpers ----------
 
-var conditionValueRegex = regexp.MustCompile(`^(>=|<=|!=|>|<|=)(.+)$`)
+var conditionValueRegex = regexp.MustCompile(`^(>=|<=|!=|==|>|<|=)?(.+)$`)
 
 func parseConditionValue(raw string) (string, *float32, error) {
 	raw = strings.TrimSpace(raw)
@@ -168,8 +170,9 @@ func parseConditionValue(raw string) (string, *float32, error) {
 		return "", nil, fmt.Errorf("cannot parse condition value %q", raw)
 	}
 
+	// A bare value ("1") means equality in the Configurator.
 	op := matches[1]
-	if op == "=" {
+	if op == "" || op == "=" {
 		op = "=="
 	}
 
@@ -199,10 +202,9 @@ func convertLEDConditions(old ConfiguratorLED) ([]pkg.DatarefCondition, string) 
 	datarefs := make([]pkg.DatarefCondition, 0, len(old.Conditions))
 
 	for _, cond := range old.Conditions {
-		if cond.ConditionIsCustom {
-			continue
-		}
-		if cond.Condition == "" {
+		// ConditionIsCustom only means the dataref was typed in by hand rather
+		// than picked from the Configurator's list; it is still a real dataref.
+		if cond.Condition == "" || strings.HasPrefix(cond.Condition, "INT:") {
 			continue
 		}
 
@@ -262,35 +264,32 @@ func extractEncoderKnobCommands(data []ConfiguratorButton) (map[string][2]string
 		if btn == nil {
 			continue
 		}
-		if len(btn.PressEvent) == 0 {
-			continue
-		}
-		event := btn.PressEvent[0]
-		for _, cond := range event.Conditions {
-			if !strings.Contains(cond.Condition, "FCU_SELECTOR") {
-				continue
-			}
-			if cond.VariableIsCustom {
+		for _, event := range btn.PressEvent {
+			for _, cond := range event.Conditions {
+				if !strings.Contains(cond.Condition, "FCU_SELECTOR") {
+					continue
+				}
 				selectorVal := strings.ToUpper(strings.TrimSpace(cond.ConditionValue))
 				knobName, ok := fcuSelectorToKnob[selectorVal]
-				if ok {
-					warnings = append(warnings, fmt.Sprintf("Knob %s: skipped — uses custom variable", knobName))
+				if !ok {
+					continue
 				}
-				continue
-			}
-			cmd := strings.TrimSpace(cond.Variable)
-			if cmd == "" {
-				continue
-			}
-			selectorVal := strings.ToUpper(strings.TrimSpace(cond.ConditionValue))
-			knobName, ok := fcuSelectorToKnob[selectorVal]
-			if !ok {
-				continue
-			}
-			if btnNum == encoderUpButton {
-				incCmds[knobName] = cmd
-			} else {
-				decCmds[knobName] = cmd
+				cmd := strings.TrimSpace(cond.Variable)
+				if cmd == "" {
+					continue
+				}
+				// A Variable with a Value is a dataref write, which knobs can't express.
+				if strings.TrimSpace(cond.Value) != "" {
+					warnings = append(warnings, fmt.Sprintf("Knob %s: %s sets a dataref value — skipped", knobName, cmd))
+					continue
+				}
+				target := decCmds
+				if btnNum == encoderUpButton {
+					target = incCmds
+				}
+				if _, exists := target[knobName]; !exists {
+					target[knobName] = cmd
+				}
 			}
 		}
 	}
@@ -344,9 +343,19 @@ func extractAPButtonCommand(btn *ConfiguratorButton) (string, string) {
 		return cmd, ""
 	}
 
-	// If only the Variables array is populated (sets internal state, no command) skip.
+	// Unconditional Variables: an entry without a Value is a command; an entry
+	// with a Value is a dataref write (not expressible as a button command).
 	if len(event.Variables) > 0 && len(event.Conditions) == 0 {
-		return "", fmt.Sprintf("Button %s (%d): only sets internal variables — using default", label, btn.ButtonNumber)
+		for _, v := range event.Variables {
+			name := strings.TrimSpace(v.Variable)
+			if name == "" || strings.HasPrefix(name, "INT:") {
+				continue
+			}
+			if strings.TrimSpace(v.Value) == "" {
+				return name, ""
+			}
+		}
+		return "", fmt.Sprintf("Button %s (%d): sets dataref/internal values instead of a command — using default", label, btn.ButtonNumber)
 	}
 
 	// If conditions are used, it's too complex for a simple single_click mapping.
@@ -634,6 +643,7 @@ func applyImportedButtons(profile *pkg.Profile, data []ConfiguratorButton) {
 
 		bp := pkg.ButtonProfile{
 			SingleClick: []pkg.Command{{CommandStr: cmd}},
+			DoubleClick: []pkg.Command{{CommandStr: cmd}},
 		}
 
 		switch btnName {
@@ -666,17 +676,21 @@ func applyImportedKnobs(profile *pkg.Profile, data []ConfiguratorButton) {
 			{CommandStr: cmds[1]}, // decrement
 		}
 
+		// adjust() fires commands AND writes datarefs, so keeping the template
+		// datarefs would move the value twice per detent.
+		kp := pkg.KnobProfile{Commands: commands}
+
 		switch knobName {
 		case "ap_hdg":
-			profile.Knobs.AP_HDG.Commands = commands
+			profile.Knobs.AP_HDG = kp
 		case "ap_vs":
-			profile.Knobs.AP_VS.Commands = commands
+			profile.Knobs.AP_VS = kp
 		case "ap_alt":
-			profile.Knobs.AP_ALT.Commands = commands
+			profile.Knobs.AP_ALT = kp
 		case "ap_ias":
-			profile.Knobs.AP_IAS.Commands = commands
+			profile.Knobs.AP_IAS = kp
 		case "ap_crs":
-			profile.Knobs.AP_CRS.Commands = commands
+			profile.Knobs.AP_CRS = kp
 		}
 	}
 }
