@@ -89,7 +89,8 @@ mac: $(MAC_LIB)
 	cp "$(MAC_LIB)" $(OUT)/
 
 # The import library names SkyScriptLib.dll; patch that name in the .xpl and
-# ship the DLL under the unique name.
+# ship the DLL under the unique name. Not sed: msys2's sed rewrites binaries
+# in text mode and corrupts the PE file (Windows error 193).
 WIN_CC ?= x86_64-w64-mingw32-gcc
 # Under msys2, make sees POSIX paths (/d/a/...) but go and ld.exe are native
 # Windows programs, and MSYS only converts the first path in an environment
@@ -105,8 +106,7 @@ win: $(SKYSCRIPT_STAMP)
 	CGO_LDFLAGS="$(WIN_LIBS) -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL" \
 	go build -buildmode c-shared -o $(OUT)/win.xpl -ldflags="$(LDFLAGS)" plugin/plugin.go
 	rm -f $(OUT)/win.h
-	grep -q SkyScriptLib.dll $(OUT)/win.xpl
-	LC_ALL=C sed -i.bak "s/SkyScriptLib\.dll/$(WIN_DLL)/g" $(OUT)/win.xpl && rm -f $(OUT)/win.xpl.bak
+	go run ./cmd/patch-pe-import $(OUT)/win.xpl SkyScriptLib.dll $(WIN_DLL)
 	cp "$(SKYSCRIPT_DIST)/win_x64/SkyScriptLib.dll" $(OUT)/$(WIN_DLL)
 
 # Built with the host's glibc toolchain (CI runs this on Ubuntu): the SkyScript
