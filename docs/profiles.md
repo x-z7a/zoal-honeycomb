@@ -4,7 +4,7 @@
 
 Edit profiles in the configurator inside X-Plane: **Plugins → ZOAL Honeycomb → Configurator** (X-Plane 12.4.4 or newer).
 
-- The configurator lists the profiles shipped in `profiles/` and your own in `user profiles/`. The one the plugin is using for the current aircraft is marked green with an **In use** tag.
+- The configurator lists the profiles shipped in `profiles/` and your own in `user profiles/`. The one the plugin is using for the current aircraft is pinned at the top, marked green with an **In use** tag.
 - The editor updates in memory while you work.
 - **Save YAML** writes the profile to `user profiles/` (shipped profiles are never overwritten, so plugin updates keep your edits) and the plugin reloads it right away.
 

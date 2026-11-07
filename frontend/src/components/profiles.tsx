@@ -85,6 +85,132 @@ export default function Profiles(props: TabPanelProps) {
     }
   };
 
+  // The profile the plugin is using stays locked above the list, whatever
+  // the search or source filter, so it is always one glance away.
+  const activeItem = props.activeProfileIndex >= 0 && props.activeProfileIndex < props.profiles.length
+    ? {profile: props.profiles[props.activeProfileIndex], originalIndex: props.activeProfileIndex}
+    : null;
+  const listedProfiles = filteredProfiles.filter((item) => item.originalIndex !== props.activeProfileIndex);
+
+  const renderProfileItem = (item: {profile: pkg.Profile; originalIndex: number}) => {
+    const profile = item.profile;
+    const profileError = props.profileErrors[item.originalIndex] || "";
+    const hasError = profileError !== "";
+    const name = hasError
+      ? (profile.metadata?.name || basenameFromPath(item.originalIndex))
+      : (profile.metadata?.name || `Profile ${item.originalIndex + 1}`);
+    const description = hasError ? "YAML parse error" : (profile.metadata?.description || "No description");
+    const selectors = profile.metadata?.selectors || [];
+    const isSelected = props.selectedProfileIndex === item.originalIndex;
+    const source = props.profileSources[item.originalIndex] || "default";
+    const isUserProfile = source === "user";
+    const isActive = props.activeProfileIndex === item.originalIndex;
+    return (
+      <ListItemButton
+        key={`${name}-${item.originalIndex}`}
+        selected={isSelected}
+        onClick={() => props.onSelectProfile(item.originalIndex)}
+        sx={{
+          borderRadius: 2,
+          mb: 0.75,
+          border: hasError
+            ? "1px solid rgba(244, 67, 54, 0.4)"
+            : isActive ? `1px solid ${ACTIVE_BORDER}` : "1px solid transparent",
+          // The in-use profile keeps a green edge even while another is selected.
+          boxShadow: isActive && !hasError ? `inset 3px 0 0 ${ACTIVE_COLOR}` : undefined,
+          alignItems: "flex-start",
+          backgroundColor: hasError ? "rgba(244, 67, 54, 0.06)" : isActive ? ACTIVE_BACKGROUND : undefined,
+          "&.Mui-selected": {
+            backgroundColor: hasError ? "rgba(244, 67, 54, 0.14)" : "rgba(3, 169, 244, 0.16)",
+            borderColor: hasError ? "rgba(244, 67, 54, 0.55)" : isActive ? ACTIVE_COLOR : "rgba(3, 169, 244, 0.55)",
+          },
+          "&.Mui-selected:hover": {
+            backgroundColor: hasError ? "rgba(244, 67, 54, 0.18)" : "rgba(3, 169, 244, 0.2)",
+          },
+          "&:hover": {
+            backgroundColor: hasError ? "rgba(244, 67, 54, 0.1)" : "rgba(255,255,255,0.08)",
+          }
+        }}
+      >
+        <ListItemIcon sx={{minWidth: 34, mt: 0.35}}>
+          {hasError ? (
+            <ErrorOutlineIcon sx={{color: "#f44336"}}/>
+          ) : (
+            <LocalAirportOutlinedIcon sx={{color: isActive ? ACTIVE_COLOR : isSelected ? "#84d8ff" : "rgba(168, 200, 232, 0.7)"}}/>
+          )}
+        </ListItemIcon>
+        <ListItemText
+          primary={name}
+          secondary={description}
+          primaryTypographyProps={{
+            sx: {
+              fontWeight: isSelected ? 700 : 600,
+              color: hasError ? "rgba(244, 67, 54, 0.9)" : "rgba(247, 250, 252, 0.95)",
+              lineHeight: 1.2
+            }
+          }}
+          secondaryTypographyProps={{
+            sx: {
+              mt: 0.35,
+              color: hasError ? "rgba(244, 67, 54, 0.7)" : "rgba(236, 244, 252, 0.66)",
+              lineHeight: 1.25,
+              maxHeight: "2.5em",
+              overflow: "hidden"
+            }
+          }}
+        />
+        {!hasError && (
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5, mt: 0.2 }}>
+            {isActive && (
+              <Tooltip title="The plugin is using this profile for the current aircraft">
+                <Chip
+                  label="In use"
+                  size="small"
+                  sx={{
+                    height: 20,
+                    fontSize: "0.65rem",
+                    fontWeight: 800,
+                    color: "#06210f",
+                    backgroundColor: ACTIVE_COLOR
+                  }}
+                />
+              </Tooltip>
+            )}
+            <Chip
+              label={isUserProfile ? "User" : "Default"}
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: "0.65rem",
+                fontWeight: 700,
+                color: isUserProfile ? "#ffd59e" : "#a8c8e8",
+                border: isUserProfile
+                  ? "1px solid rgba(255,213,158,0.4)"
+                  : "1px solid rgba(168,200,232,0.3)",
+                backgroundColor: isUserProfile
+                  ? "rgba(255,213,158,0.1)"
+                  : "rgba(168,200,232,0.06)"
+              }}
+            />
+            {selectors.length > 0 && (
+              <Chip
+                label={selectors.length}
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: "0.68rem",
+                  color: "#b7f3ce",
+                  border: "1px solid rgba(183,243,206,0.35)",
+                  backgroundColor: "rgba(183,243,206,0.08)"
+                }}
+              />
+            )}
+          </Box>
+        )}
+      </ListItemButton>
+    );
+  };
+
   return (
     <Box sx={{height: "100%", display: "flex", flexDirection: "column"}}>
       <Box sx={{px: 2.25, pt: 2.25, pb: 1.5}}>
@@ -191,125 +317,23 @@ export default function Profiles(props: TabPanelProps) {
 
       <Divider sx={{borderColor: "rgba(255,255,255,0.08)"}}/>
 
-      <List sx={{px: 1.25, py: 1.25, overflowY: "auto", flex: 1}}>
-        {filteredProfiles.map((item, index) => {
-          const profile = item.profile;
-          const profileError = props.profileErrors[item.originalIndex] || "";
-          const hasError = profileError !== "";
-          const name = hasError
-            ? (profile.metadata?.name || basenameFromPath(item.originalIndex))
-            : (profile.metadata?.name || `Profile ${index + 1}`);
-          const description = hasError ? "YAML parse error" : (profile.metadata?.description || "No description");
-          const selectors = profile.metadata?.selectors || [];
-          const isSelected = props.selectedProfileIndex === item.originalIndex;
-          const source = props.profileSources[item.originalIndex] || "default";
-          const isUserProfile = source === "user";
-          const isActive = props.activeProfileIndex === item.originalIndex;
-          return (
-            <ListItemButton
-              key={`${name}-${item.originalIndex}`}
-              selected={isSelected}
-              onClick={() => props.onSelectProfile(item.originalIndex)}
-              sx={{
-                borderRadius: 2,
-                mb: 0.75,
-                border: hasError
-                  ? "1px solid rgba(244, 67, 54, 0.4)"
-                  : isActive ? `1px solid ${ACTIVE_BORDER}` : "1px solid transparent",
-                // The in-use profile keeps a green edge even while another is selected.
-                boxShadow: isActive && !hasError ? `inset 3px 0 0 ${ACTIVE_COLOR}` : undefined,
-                alignItems: "flex-start",
-                backgroundColor: hasError ? "rgba(244, 67, 54, 0.06)" : isActive ? ACTIVE_BACKGROUND : undefined,
-                "&.Mui-selected": {
-                  backgroundColor: hasError ? "rgba(244, 67, 54, 0.14)" : "rgba(3, 169, 244, 0.16)",
-                  borderColor: hasError ? "rgba(244, 67, 54, 0.55)" : isActive ? ACTIVE_COLOR : "rgba(3, 169, 244, 0.55)",
-                },
-                "&.Mui-selected:hover": {
-                  backgroundColor: hasError ? "rgba(244, 67, 54, 0.18)" : "rgba(3, 169, 244, 0.2)",
-                },
-                "&:hover": {
-                  backgroundColor: hasError ? "rgba(244, 67, 54, 0.1)" : "rgba(255,255,255,0.08)",
-                }
-              }}
+      {activeItem && (
+        <>
+          <Box sx={{px: 1.25, pt: 1.25}}>
+            <Typography
+              variant="overline"
+              sx={{display: "block", px: 0.75, lineHeight: 1.6, letterSpacing: "0.08em", color: ACTIVE_COLOR, fontWeight: 700}}
             >
-              <ListItemIcon sx={{minWidth: 34, mt: 0.35}}>
-                {hasError ? (
-                  <ErrorOutlineIcon sx={{color: "#f44336"}}/>
-                ) : (
-                  <LocalAirportOutlinedIcon sx={{color: isActive ? ACTIVE_COLOR : isSelected ? "#84d8ff" : "rgba(168, 200, 232, 0.7)"}}/>
-                )}
-              </ListItemIcon>
-              <ListItemText
-                primary={name}
-                secondary={description}
-                primaryTypographyProps={{
-                  sx: {
-                    fontWeight: isSelected ? 700 : 600,
-                    color: hasError ? "rgba(244, 67, 54, 0.9)" : "rgba(247, 250, 252, 0.95)",
-                    lineHeight: 1.2
-                  }
-                }}
-                secondaryTypographyProps={{
-                  sx: {
-                    mt: 0.35,
-                    color: hasError ? "rgba(244, 67, 54, 0.7)" : "rgba(236, 244, 252, 0.66)",
-                    lineHeight: 1.25,
-                    maxHeight: "2.5em",
-                    overflow: "hidden"
-                  }
-                }}
-              />
-              {!hasError && (
-                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5, mt: 0.2 }}>
-                  {isActive && (
-                    <Tooltip title="The plugin is using this profile for the current aircraft">
-                      <Chip
-                        label="In use"
-                        size="small"
-                        sx={{
-                          height: 20,
-                          fontSize: "0.65rem",
-                          fontWeight: 800,
-                          color: "#06210f",
-                          backgroundColor: ACTIVE_COLOR
-                        }}
-                      />
-                    </Tooltip>
-                  )}
-                  <Chip
-                    label={isUserProfile ? "User" : "Default"}
-                    size="small"
-                    sx={{
-                      height: 20,
-                      fontSize: "0.65rem",
-                      fontWeight: 700,
-                      color: isUserProfile ? "#ffd59e" : "#a8c8e8",
-                      border: isUserProfile
-                        ? "1px solid rgba(255,213,158,0.4)"
-                        : "1px solid rgba(168,200,232,0.3)",
-                      backgroundColor: isUserProfile
-                        ? "rgba(255,213,158,0.1)"
-                        : "rgba(168,200,232,0.06)"
-                    }}
-                  />
-                  {selectors.length > 0 && (
-                    <Chip
-                      label={selectors.length}
-                      size="small"
-                      sx={{
-                        height: 20,
-                        fontSize: "0.68rem",
-                        color: "#b7f3ce",
-                        border: "1px solid rgba(183,243,206,0.35)",
-                        backgroundColor: "rgba(183,243,206,0.08)"
-                      }}
-                    />
-                  )}
-                </Box>
-              )}
-            </ListItemButton>
-          );
-        })}
+              In use for this aircraft
+            </Typography>
+            {renderProfileItem(activeItem)}
+          </Box>
+          <Divider sx={{borderColor: "rgba(255,255,255,0.08)"}}/>
+        </>
+      )}
+
+      <List sx={{px: 1.25, py: 1.25, overflowY: "auto", flex: 1}}>
+        {listedProfiles.map((item) => renderProfileItem(item))}
 
         {filteredProfiles.length === 0 && (
           <Box
