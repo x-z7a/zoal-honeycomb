@@ -473,3 +473,65 @@ func TestLoadWithNoUserProfilesDirStillWorks(t *testing.T) {
 		t.Fatalf("expected source 'default', got %q", sources[0])
 	}
 }
+
+func TestDeleteUserProfilesRemovesUserFilesOnly(t *testing.T) {
+	root := t.TempDir()
+	profilesDir := filepath.Join(root, FolderName)
+	userDir := filepath.Join(root, UserFolderName)
+	for _, d := range []string{profilesDir, userDir} {
+		if err := os.MkdirAll(d, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeProfileYAML(t, profilesDir, "default.yaml", "Default")
+	writeProfileYAML(t, profilesDir, "A319.yaml", "Default A319")
+	writeProfileYAML(t, userDir, "A319.yaml", "User A319")
+	writeProfileYAML(t, userDir, "Custom.yaml", "Custom")
+
+	store := New(profilesDir)
+	if err := store.Reload(); err != nil {
+		t.Fatal(err)
+	}
+
+	// A shipped profile in the batch refuses the whole batch.
+	_, err := store.DeleteUserProfiles([]string{
+		filepath.Join(userDir, "Custom.yaml"),
+		filepath.Join(profilesDir, "A319.yaml"),
+	})
+	if err == nil {
+		t.Fatal("expected deleting a shipped profile to fail")
+	}
+	if _, err := os.Stat(filepath.Join(userDir, "Custom.yaml")); err != nil {
+		t.Fatalf("nothing should be deleted when the batch is refused: %v", err)
+	}
+
+	// Paths that escape the user folder are refused too.
+	if _, err := store.DeleteUserProfiles([]string{filepath.Join(userDir, "..", FolderName, "default.yaml")}); err == nil {
+		t.Fatal("expected a path outside user profiles to fail")
+	}
+
+	n, err := store.DeleteUserProfiles([]string{
+		filepath.Join(userDir, "A319.yaml"),
+		filepath.Join(userDir, "Custom.yaml"),
+		filepath.Join(userDir, "Custom.yaml"),
+	})
+	if err != nil {
+		t.Fatalf("DeleteUserProfiles returned error: %v", err)
+	}
+	if n != 2 {
+		t.Fatalf("expected 2 deleted, got %d", n)
+	}
+
+	// The shipped A319 remains, and the list was reloaded.
+	if _, err := os.Stat(filepath.Join(profilesDir, "A319.yaml")); err != nil {
+		t.Fatalf("shipped profile must stay: %v", err)
+	}
+	for _, src := range store.Sources() {
+		if src == SourceUser {
+			t.Fatalf("expected no user profiles after delete, got sources %v", store.Sources())
+		}
+	}
+	if len(store.Profiles()) != 2 {
+		t.Fatalf("expected 2 profiles after delete, got %d", len(store.Profiles()))
+	}
+}

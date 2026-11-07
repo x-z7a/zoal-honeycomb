@@ -59,6 +59,11 @@ export const SaveProfileByIndex = (index: number, profile: pkg.Profile) =>
 export const CreateProfileFromDefault = (filename: string, profileName: string, description: string, selectors: string[]) =>
   call<string>("CreateProfileFromDefault", filename, profileName, description, selectors);
 
+/** Reread the profile folders and reload the profile the plugin is using. */
+export const ReloadProfiles = () => call<void>("ReloadProfiles");
+/** Delete user profiles by file path; the plugin refuses shipped profiles. Returns how many were deleted. */
+export const DeleteUserProfiles = (files: string[]) => call<number>("DeleteUserProfiles", files);
+
 /** [acf_ICAO, acf_ui_name], each in the X-Plane web API's {"data": ...} form. */
 export const GetXplane = () => call<string[]>("GetXplane");
 export const GetXplaneDataref = (dataref: string) => call<string>("GetXplaneDataref", dataref);

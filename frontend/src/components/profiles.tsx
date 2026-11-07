@@ -2,6 +2,8 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import {pkg} from '../models';
 import {
+  Button,
+  Checkbox,
   Chip,
   Divider,
   IconButton,
@@ -17,12 +19,24 @@ import {
   Typography
 } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import ChecklistIcon from '@mui/icons-material/Checklist';
 import LocalAirportOutlinedIcon from '@mui/icons-material/LocalAirportOutlined';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
 type SourceFilter = "all" | "default" | "user";
 
+
+const HEADER_BUTTON_SX = {
+  backgroundColor: "rgba(255,255,255,0.1)",
+  color: "#d8f3dc",
+  border: "1px solid rgba(216,243,220,0.25)",
+  "&:hover": {
+    backgroundColor: "rgba(255,255,255,0.16)"
+  }
+};
 
 // Marks the profile the plugin is actually using.
 const ACTIVE_COLOR = "#5fd38d";
@@ -40,11 +54,59 @@ interface TabPanelProps {
   onSelectProfile: (index: number) => void;
   onOpenAddProfile: () => void;
   addProfileDisabled?: boolean;
+  /** Reread the profile folders and the in-use profile. */
+  onReload: () => void;
+  /** Ask to delete these user profiles (indices into profiles). */
+  onDeleteProfiles: (indices: number[]) => void;
+  /** Set while reload/delete must wait (e.g. unsaved changes); shown as the tooltip. */
+  busyReason?: string;
+  /** Changes after a successful delete; leaves selection mode. */
+  selectionEpoch?: number;
 }
 
 export default function Profiles(props: TabPanelProps) {
   const [query, setQuery] = React.useState("");
   const [sourceFilter, setSourceFilter] = React.useState<SourceFilter>("all");
+  // Bulk delete: while selecting, clicking a user profile toggles it.
+  const [selecting, setSelecting] = React.useState(false);
+  const [checked, setChecked] = React.useState<Set<string>>(new Set());
+
+  const isUserIndex = (index: number) => (props.profileSources[index] || "default") === "user";
+
+  // Selection is kept by file, so it survives the list reloading.
+  React.useEffect(() => {
+    setChecked((prev) => {
+      const files = new Set(props.profileFiles.filter((_, i) => isUserIndex(i)));
+      const next = new Set([...prev].filter((f) => files.has(f)));
+      return next.size === prev.size ? prev : next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.profileFiles, props.profileSources]);
+
+  const toggleChecked = (index: number) => {
+    const file = props.profileFiles[index];
+    if (!file || !isUserIndex(index)) {
+      return;
+    }
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(file)) {
+        next.delete(file);
+      } else {
+        next.add(file);
+      }
+      return next;
+    });
+  };
+
+  const stopSelecting = () => {
+    setSelecting(false);
+    setChecked(new Set());
+  };
+
+  React.useEffect(() => {
+    stopSelecting();
+  }, [props.selectionEpoch]);
 
   const basenameFromPath = (index: number): string => {
     const filePath = props.profileFiles[index] || "";
@@ -105,11 +167,14 @@ export default function Profiles(props: TabPanelProps) {
     const source = props.profileSources[item.originalIndex] || "default";
     const isUserProfile = source === "user";
     const isActive = props.activeProfileIndex === item.originalIndex;
+    const isChecked = checked.has(props.profileFiles[item.originalIndex] || "");
+    const selectable = selecting && isUserProfile;
     return (
       <ListItemButton
         key={`${name}-${item.originalIndex}`}
         selected={isSelected}
-        onClick={() => props.onSelectProfile(item.originalIndex)}
+        onClick={() => (selecting ? toggleChecked(item.originalIndex) : props.onSelectProfile(item.originalIndex))}
+        disabled={selecting && !isUserProfile}
         sx={{
           borderRadius: 2,
           mb: 0.75,
@@ -133,7 +198,16 @@ export default function Profiles(props: TabPanelProps) {
         }}
       >
         <ListItemIcon sx={{minWidth: 34, mt: 0.35}}>
-          {hasError ? (
+          {selectable ? (
+            <Checkbox
+              edge="start"
+              size="small"
+              checked={isChecked}
+              tabIndex={-1}
+              disableRipple
+              sx={{p: 0, color: "rgba(255,213,158,0.6)", "&.Mui-checked": {color: "#ff8a80"}}}
+            />
+          ) : hasError ? (
             <ErrorOutlineIcon sx={{color: "#f44336"}}/>
           ) : (
             <LocalAirportOutlinedIcon sx={{color: isActive ? ACTIVE_COLOR : isSelected ? "#84d8ff" : "rgba(168, 200, 232, 0.7)"}}/>
@@ -207,6 +281,24 @@ export default function Profiles(props: TabPanelProps) {
             )}
           </Box>
         )}
+        {isUserProfile && !selecting && (
+          <Tooltip title={props.busyReason || "Delete this user profile"}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete profile"
+                disabled={!!props.busyReason}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  props.onDeleteProfiles([item.originalIndex]);
+                }}
+                sx={{ml: 0.5, mt: 0.1, color: "rgba(255,138,128,0.75)", "&:hover": {color: "#ff8a80"}}}
+              >
+                <DeleteOutlineIcon fontSize="small"/>
+              </IconButton>
+            </span>
+          </Tooltip>
+        )}
       </ListItemButton>
     );
   };
@@ -219,6 +311,25 @@ export default function Profiles(props: TabPanelProps) {
             Profiles
           </Typography>
           <Box sx={{ display: "flex", gap: 0.75 }}>
+            <Tooltip title={props.busyReason || "Reload profiles from disk"}>
+              <span>
+                <IconButton onClick={props.onReload} disabled={!!props.busyReason} size="small" sx={HEADER_BUTTON_SX}>
+                  <RefreshIcon fontSize="small"/>
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title={props.busyReason || (selecting ? "Stop selecting" : "Select user profiles to delete")}>
+              <span>
+                <IconButton
+                  onClick={() => (selecting ? stopSelecting() : setSelecting(true))}
+                  disabled={!!props.busyReason && !selecting}
+                  size="small"
+                  sx={{...HEADER_BUTTON_SX, ...(selecting ? {color: "#ff8a80", borderColor: "rgba(255,138,128,0.5)"} : {})}}
+                >
+                  <ChecklistIcon fontSize="small"/>
+                </IconButton>
+              </span>
+            </Tooltip>
             <Tooltip title={props.addProfileDisabled ? "Creating a profile..." : "Create a new profile from default.yaml"}>
               <IconButton
                 onClick={props.onOpenAddProfile}
@@ -330,6 +441,31 @@ export default function Profiles(props: TabPanelProps) {
           </Box>
           <Divider sx={{borderColor: "rgba(255,255,255,0.08)"}}/>
         </>
+      )}
+
+      {selecting && (
+        <Box sx={{px: 2, py: 1, display: "flex", alignItems: "center", gap: 1, backgroundColor: "rgba(255,138,128,0.08)", borderBottom: "1px solid rgba(255,138,128,0.2)"}}>
+          <Typography variant="caption" noWrap sx={{flex: 1, minWidth: 0, color: "rgba(255,220,215,0.9)"}}>
+            {checked.size === 0 ? "Pick user profiles" : `${checked.size} selected`}
+          </Typography>
+          <Tooltip title="Select every user profile">
+            <Button size="small" sx={{minWidth: 0, whiteSpace: "nowrap"}} onClick={() => setChecked(new Set(props.profileFiles.filter((_, i) => isUserIndex(i))))}>
+              All
+            </Button>
+          </Tooltip>
+          <Button
+            size="small"
+            color="error"
+            variant="contained"
+            disabled={checked.size === 0 || !!props.busyReason}
+            onClick={() => props.onDeleteProfiles(
+              props.profileFiles.map((f, i) => (checked.has(f) ? i : -1)).filter((i) => i >= 0)
+            )}
+          >
+            Delete
+          </Button>
+          <Button size="small" sx={{minWidth: 0}} onClick={stopSelecting}>Cancel</Button>
+        </Box>
       )}
 
       <List sx={{px: 1.25, py: 1.25, overflowY: "auto", flex: 1}}>

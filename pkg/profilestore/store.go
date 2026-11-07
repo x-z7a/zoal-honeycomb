@@ -238,6 +238,48 @@ func (s *Store) CreateFromDefault(filename, profileName, description string, sel
 	return newProfilePath, nil
 }
 
+// DeleteUserProfiles removes the given profile files and reloads. Only
+// .yaml files directly inside "user profiles" may be deleted; shipped
+// profiles are refused, and nothing is removed unless every file is allowed.
+// It returns how many files were removed.
+func (s *Store) DeleteUserProfiles(files []string) (int, error) {
+	if len(files) == 0 {
+		return 0, errors.New("no profiles selected")
+	}
+
+	userDir := filepath.Clean(s.userDir)
+	targets := make([]string, 0, len(files))
+	seen := map[string]struct{}{}
+	for _, file := range files {
+		clean := filepath.Clean(file)
+		if filepath.Dir(clean) != userDir || !strings.EqualFold(filepath.Ext(clean), ".yaml") {
+			return 0, fmt.Errorf("only files in %q can be deleted: %q", UserFolderName, filepath.Base(file))
+		}
+		if _, dup := seen[clean]; dup {
+			continue
+		}
+		seen[clean] = struct{}{}
+		targets = append(targets, clean)
+	}
+
+	deleted := 0
+	for _, target := range targets {
+		if err := os.Remove(target); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				continue
+			}
+			_ = s.Reload()
+			return deleted, fmt.Errorf("failed to delete %q: %w", filepath.Base(target), err)
+		}
+		deleted++
+	}
+
+	if err := s.Reload(); err != nil {
+		return deleted, fmt.Errorf("deleted %d profile(s) but reload failed: %w", deleted, err)
+	}
+	return deleted, nil
+}
+
 // ReadDir parses every .yaml file in profilesDir, in name order. A file that
 // cannot be read or parsed still gets an entry, with an empty profile and the
 // reason in the errors slice.

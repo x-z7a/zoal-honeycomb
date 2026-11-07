@@ -60,7 +60,7 @@ func startConfigUI(logger pkg.Logger, pluginPath string, onProfilesChanged func(
 	cfg.Homepage = (&url.URL{Scheme: "file", Path: filepath.ToSlash(index)}).String()
 	cfg.HideAddressBar = true
 	cfg.Width = 1200
-	cfg.Height = 900
+	cfg.Height = 1200
 	cfg.MinimumWidth = 900
 
 	app := skyscript.CreateAppWindow("ZOAL Honeycomb", configUIAppID, &cfg)
@@ -189,6 +189,31 @@ func (ui *configUI) registerHandlers() {
 
 	ui.handle("GetActiveProfile", func([]json.RawMessage) (any, error) {
 		return ui.active, nil
+	})
+
+	// Manual reload: reread the profile folders and the in-use profile, for
+	// edits made outside the configurator.
+	ui.handle("ReloadProfiles", func([]json.RawMessage) (any, error) {
+		if err := ui.store.Reload(); err != nil {
+			return nil, err
+		}
+		ui.profilesChanged()
+		return nil, nil
+	})
+	ui.handle("DeleteUserProfiles", func(args []json.RawMessage) (any, error) {
+		var files []string
+		if err := arg(args, 0, &files); err != nil {
+			return nil, err
+		}
+		n, err := ui.store.DeleteUserProfiles(files)
+		if n > 0 {
+			// The in-use profile may be gone; fall back to the next match.
+			ui.profilesChanged()
+		}
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
 	})
 
 	ui.handle("SaveProfileByIndex", func(args []json.RawMessage) (any, error) {

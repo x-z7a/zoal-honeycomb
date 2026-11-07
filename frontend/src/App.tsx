@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './App.css';
 import {
   CreateProfileFromDefault,
+  DeleteUserProfiles,
   GetProfileErrors,
   GetProfileFiles,
   GetProfileSources,
@@ -10,6 +11,7 @@ import {
   GetProfilesStatus,
   GetXplane,
   onPluginMessage,
+  ReloadProfiles,
   SaveProfileByIndex
 } from "./api";
 import {
@@ -182,6 +184,13 @@ function App() {
   const [newProfileDescription, setNewProfileDescription] = useState("");
   const [newProfileSelectorsInput, setNewProfileSelectorsInput] = useState("");
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
+  // Indices of user profiles waiting for delete confirmation, or null.
+  const [deleteTargets, setDeleteTargets] = useState<number[] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  // Bumped after a delete so the sidebar leaves selection mode.
+  const [selectionEpoch, setSelectionEpoch] = useState(0);
   const [createProfileError, setCreateProfileError] = useState("");
 
   const refreshProfiles = useCallback(async () => {
@@ -322,9 +331,10 @@ function App() {
       return;
     }
 
+    // Status messages are cleared when the user picks another profile
+    // (handleProfileSelect), not here: this also runs after every list refresh,
+    // which would wipe "Saved", "Deleted" and "Reloaded" as they appear.
     setEditableProfile(cloneProfile(profilesData[selectedProfileIndex]));
-    setSaveMessage("");
-    setSaveError("");
   }, [profilesData, selectedProfileIndex]);
 
   useEffect(() => {
@@ -358,9 +368,87 @@ function App() {
   }, [profilesData, profileFiles, planeInfo, hasUserSelectedProfile, isDirty, selectedProfileIndex, activeProfileIndex]);
 
 
+  // Reload and delete replace the profile being edited, so they wait while
+  // there are unsaved changes.
+  const busyReason = isDirty
+    ? "Save or revert your changes first"
+    : (isSaving || isReloading || isDeleting || isCreatingProfile) ? "Working..." : "";
+
+  // After the list reloads, indices shift: find a profile again by its file.
+  const reselectByPath = (files: string[], path: string) => {
+    const index = path ? files.indexOf(path) : -1;
+    if (index >= 0) {
+      setSelectedProfileIndex(index);
+    } else {
+      setHasUserSelectedProfile(false);
+      setSelectedProfileIndex(-1);
+    }
+  };
+
+  const handleReload = async () => {
+    if (busyReason) {
+      return;
+    }
+    const keepPath = selectedProfilePath;
+    setIsReloading(true);
+    setSaveError("");
+    try {
+      await ReloadProfiles();
+      const refreshed = await refreshProfiles();
+      reselectByPath(refreshed.files, keepPath);
+      setSaveMessage("Profiles reloaded.");
+    } catch (error: any) {
+      setSaveError(getErrorMessage(error, "Failed to reload profiles."));
+    } finally {
+      setIsReloading(false);
+    }
+  };
+
+  const handleRequestDelete = (indices: number[]) => {
+    const userIndices = indices.filter((i) => profileSources[i] === "user");
+    if (userIndices.length === 0 || busyReason) {
+      return;
+    }
+    setDeleteError("");
+    setDeleteTargets(userIndices);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargets) {
+      return;
+    }
+    const files = deleteTargets.map((i) => profileFiles[i]).filter(Boolean);
+    const keepPath = deleteTargets.includes(selectedProfileIndex) ? "" : selectedProfilePath;
+    setIsDeleting(true);
+    setDeleteError("");
+    try {
+      const deleted = await DeleteUserProfiles(files);
+      const refreshed = await refreshProfiles();
+      reselectByPath(refreshed.files, keepPath);
+      setDeleteTargets(null);
+      setSelectionEpoch((n) => n + 1);
+      setSaveError("");
+      setSaveMessage(`Deleted ${deleted} user profile${deleted === 1 ? "" : "s"}.`);
+    } catch (error: any) {
+      setDeleteError(getErrorMessage(error, "Failed to delete profiles."));
+      refreshProfiles().catch(() => {
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const profileLabel = (index: number) => {
+    const file = (profileFiles[index] || "").replace(/\\/g, "/").split("/").pop() || "";
+    const name = profilesData[index]?.metadata?.name;
+    return name ? `${name} (${file})` : file;
+  };
+
   const handleProfileSelect = (index: number) => {
     setHasUserSelectedProfile(true);
     setSelectedProfileIndex(index);
+    setSaveMessage("");
+    setSaveError("");
   };
 
   const handleOpenAddProfileTutorial = () => {
@@ -650,6 +738,39 @@ function App() {
         </DialogActions>
       </Dialog>
 
+      <Dialog open={deleteTargets !== null} onClose={() => !isDeleting && setDeleteTargets(null)} fullWidth maxWidth="sm">
+        <DialogTitle>
+          Delete {deleteTargets?.length === 1 ? "user profile" : `${deleteTargets?.length || 0} user profiles`}?
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={1.25} sx={{ pt: 0.5 }}>
+            <Typography variant="body2">
+              These files are removed from <code>user profiles/</code>. This cannot be undone.
+            </Typography>
+            <Box component="ul" sx={{ m: 0, pl: 2.5, maxHeight: 220, overflowY: "auto" }}>
+              {(deleteTargets || []).map((i) => (
+                <li key={profileFiles[i] || i}>
+                  <Typography variant="body2">{profileLabel(i)}</Typography>
+                </li>
+              ))}
+            </Box>
+            {deleteTargets?.includes(activeProfileIndex) && (
+              <Alert severity="warning">
+                The plugin is using {profileLabel(activeProfileIndex)} for this aircraft. After deleting it,
+                the plugin switches to the next matching profile (the shipped copy, if there is one, or default).
+              </Alert>
+            )}
+            {deleteError && <Alert severity="error">{deleteError}</Alert>}
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteTargets(null)} disabled={isDeleting}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={handleConfirmDelete} disabled={isDeleting}>
+            {isDeleting ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Box className="appBackdrop" />
       <Box className="appLayout">
         <Box className="sidebarPane">
@@ -659,6 +780,10 @@ function App() {
             profileFiles={profileFiles}
             profileSources={profileSources}
             activeProfileIndex={activeProfileIndex}
+            onReload={handleReload}
+            onDeleteProfiles={handleRequestDelete}
+            busyReason={busyReason}
+            selectionEpoch={selectionEpoch}
             selectedProfileIndex={selectedProfileIndex}
             onSelectProfile={handleProfileSelect}
             onOpenAddProfile={handleOpenAddProfileTutorial}

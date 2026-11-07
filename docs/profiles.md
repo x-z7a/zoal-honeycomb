@@ -6,6 +6,8 @@ Edit profiles in the configurator inside X-Plane: **Plugins â†’ ZOAL Honeycomb â
 
 - The configurator lists the profiles shipped in `profiles/` and your own in `user profiles/`. The one the plugin is using for the current aircraft is pinned at the top, marked green with an **In use** tag.
 - The editor updates in memory while you work.
+- The **Reload** button rereads the profile folders, for YAML edited outside X-Plane.
+- User profiles can be deleted with their trash icon, or several at once with the select button. Shipped profiles cannot be deleted.
 - **Save YAML** writes the profile to `user profiles/` (shipped profiles are never overwritten, so plugin updates keep your edits) and the plugin reloads it right away.
 
 ![Bravo profile editor](/images/bravo-app-window.png)
