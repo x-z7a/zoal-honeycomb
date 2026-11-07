@@ -2,21 +2,23 @@
 
 ## Recommended Workflow: Use the UI
 
-Use the `bravo` app as the primary editing workflow.
+Edit profiles in the configurator inside X-Plane: **Plugins → ZOAL Honeycomb → Configurator** (X-Plane 12.4.4 or newer).
 
-- The app loads profile YAML files from `profiles/`.
+- The configurator lists the profiles shipped in `profiles/` and your own in `user profiles/`. The one the plugin is using for the current aircraft is pinned at the top, marked green with an **In use** tag.
 - The editor updates in memory while you work.
-- **Save YAML** writes the changes back to the profile file.
+- The **Reload** button rereads the profile folders, for YAML edited outside X-Plane.
+- User profiles can be deleted with their trash icon, or several at once with the select button. Shipped profiles cannot be deleted.
+- **Save YAML** writes the profile to `user profiles/` (shipped profiles are never overwritten, so plugin updates keep your edits) and the plugin reloads it right away.
 
 ![Bravo profile editor](/images/bravo-app-window.png)
 
 ## UI Editing Walkthrough
 
-1. Launch `bravo` and select a profile from the left sidebar.
+1. Open the configurator and select a profile from the left sidebar.
 2. Confirm the active profile card in the editor area.
 3. Edit each tab as needed.
 4. Click **Save YAML**.
-5. Test behavior in X-Plane.
+5. Test behavior in X-Plane. No reload needed.
 
 ## Tab Reference
 

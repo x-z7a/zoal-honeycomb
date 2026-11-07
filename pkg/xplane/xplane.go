@@ -63,6 +63,7 @@ type xplaneService struct {
 	tolissTrimMu    sync.Mutex
 	tolissTrimCmd   string
 	tolissTrimInput time.Time
+	configUI        *configUI
 }
 
 var xplaneSvcLock = &sync.Mutex{}

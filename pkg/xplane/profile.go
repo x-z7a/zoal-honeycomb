@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/expr-lang/expr"
 	"github.com/x-z7a/zoal-honeycomb/pkg"
 	"github.com/xairline/goplane/xplm/dataAccess"
-	"github.com/xairline/goplane/xplm/menus"
 	"github.com/xairline/goplane/xplm/utilities"
 	"gopkg.in/yaml.v3"
 )
@@ -26,15 +26,14 @@ func (s *xplaneService) tryLoadProfile() error {
 	// Try to load profiles using the aircraft's ICAO
 	aircraftIACODrf, found := dataAccess.FindDataRef("sim/aircraft/view/acf_ICAO")
 	if found {
-		var planeProfile pkg.Profile
 		aircraftIACO := dataAccess.GetString(aircraftIACODrf)
 		// Try to load the profile using the aircraft's ICAO
-		planeProfile, err := s.loadProfile(aircraftIACO)
+		planeProfile, planeProfileFile, err := s.loadProfile(aircraftIACO)
 		if err != nil {
 			// there is no profile for the aircraft
 			// we use default profile
 			s.Logger.Warningf("Cannot loading BravoProfile for %s: %v, using default", aircraftIACO, err)
-			planeProfile, err = s.loadProfile("default")
+			planeProfile, planeProfileFile, _ = s.loadProfile("default")
 		}
 
 		// try to load other profiles for this aircraft
@@ -59,13 +58,17 @@ func (s *xplaneService) tryLoadProfile() error {
 				for _, entry := range entries {
 					if !entry.IsDir() && path.Ext(entry.Name()) == ".yaml" && strings.HasPrefix(entry.Name(), aircraftIACO) {
 						s.Logger.Infof("Checking profile: %s", entry.Name())
-						profile, err := s.loadProfile(strings.Replace(entry.Name(), ".yaml", "", 1))
+						profile, profileFile, err := s.loadProfile(strings.Replace(entry.Name(), ".yaml", "", 1))
 						if err != nil {
 							s.Logger.Errorf("Error loading profile %s: %v", entry.Name(), err)
+						}
+						if profile.Metadata == nil {
+							continue
 						}
 						for _, selector := range profile.Metadata.Selectors {
 							if selector == aircraftName {
 								planeProfile = profile
+								planeProfileFile = profileFile
 								break
 							} else {
 								s.Logger.Infof("Skipping profile %s for %s, ui name: %s", entry.Name(), selector, aircraftName)
@@ -75,12 +78,17 @@ func (s *xplaneService) tryLoadProfile() error {
 				}
 			}
 		}
-		s.Logger.Infof("Loaded profile: %s", planeProfile.Metadata.Name)
-		menus.SetMenuItemName(s.myMenuId, 0, fmt.Sprintf("Reload Profile (Current: %s)", planeProfile.Metadata.Name), true)
+		if planeProfile.Metadata == nil {
+			planeProfile.Metadata = &pkg.Metadata{}
+		}
+		s.Logger.Infof("Loaded profile: %s (%s)", planeProfile.Metadata.Name, planeProfileFile)
 		if planeProfile.Metadata.Name == "Default" {
 			utilities.SpeakString("Warning! No Plane specific profile found! Using default profile!")
 		}
-		return s.setupProfile(planeProfile)
+		err = s.setupProfile(planeProfile)
+		// Tell the configurator which file is in use, so it can mark it.
+		s.configUI.setActiveProfile(planeProfileFile, planeProfile.Metadata.Name)
+		return err
 	}
 	return nil
 }
@@ -149,7 +157,20 @@ func (s *xplaneService) setupProfile(planeProfile pkg.Profile) error {
 	}
 }
 
-func (s *xplaneService) loadProfile(airplaneConfig string) (pkg.Profile, error) {
+// reloadProfile re-reads the active profile now, the way the flight loop does
+// when s.profile is nil. The configurator calls it after a save or create.
+func (s *xplaneService) reloadProfile() {
+	s.profile = nil
+	s.lastCounter = 0
+	if err := s.tryLoadProfile(); err != nil {
+		s.Logger.Errorf("Reloading profile: %v", err)
+		s.profile = nil
+	}
+}
+
+// loadProfile reads <airplaneConfig>.yaml from "user profiles" or, failing
+// that, "profiles", and returns it with the path it was read from.
+func (s *xplaneService) loadProfile(airplaneConfig string) (pkg.Profile, string, error) {
 	fileName := fmt.Sprintf("%s.yaml", airplaneConfig)
 
 	// Try user profiles first, then fall back to default profiles
@@ -169,10 +190,10 @@ func (s *xplaneService) loadProfile(airplaneConfig string) (pkg.Profile, error) 
 			s.Logger.Errorf("Error parsing profile %s: %v", configFilePath, err)
 			continue
 		}
-		return res, nil
+		return res, filepath.Clean(configFilePath), nil
 	}
 
-	return pkg.Profile{}, fmt.Errorf("profile %q not found in user profiles or default profiles", airplaneConfig)
+	return pkg.Profile{}, "", fmt.Errorf("profile %q not found in user profiles or default profiles", airplaneConfig)
 }
 
 func (s *xplaneService) loadDatarefProfile(fieldName string, fieldValue *pkg.DatarefProfile) error {

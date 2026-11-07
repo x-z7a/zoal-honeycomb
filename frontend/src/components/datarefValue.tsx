@@ -1,7 +1,7 @@
 import {Typography} from '@mui/material';
 import * as React from 'react';
 import {useEffect} from 'react';
-import {GetXplaneDataref} from "../../wailsjs/go/main/App";
+import {GetXplaneDataref} from '../api';
 
 interface ListProps {
   dataref: string;

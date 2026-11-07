@@ -3,7 +3,7 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import {Button, Chip, Stack, TextField} from "@mui/material";
-import {pkg} from "../../wailsjs/go/models";
+import {pkg} from '../models';
 
 interface ListProps {
   metadata?: pkg.Metadata;
@@ -45,10 +45,10 @@ export default function Metadata(props: ListProps) {
   }, [props.editable]);
 
   const handleMetadataChange = (field: keyof pkg.Metadata, value: string | string[]) => {
-    props.onMetadataChange?.(pkg.Metadata.createFrom({
+    props.onMetadataChange?.({
       ...(props.metadata || {}),
       [field]: value
-    }));
+    });
   };
 
   return (

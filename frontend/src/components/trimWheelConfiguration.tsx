@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {pkg} from "../../wailsjs/go/models";
+import {pkg} from '../models';
 import {
   Box,
   Card,
