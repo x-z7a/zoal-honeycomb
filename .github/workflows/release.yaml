@@ -164,7 +164,7 @@ jobs:
           # Create CRC32 checksums
           rm -f release/skunkcrafts_updater_whitelist.txt
           find release -type f ! \( -name '*skunkcrafts_updater*' -o -path '*skunkcrafts_updater*' \) -print0 | while IFS= read -r -d '' file; do
-            # macOS crc32 treats 8 hex digits in a file name (SkySc788309c.dll)
+            # macOS crc32 treats 8 hex digits in a file name (e.g. a hash-named DLL)
             # as an expected checksum and appends "BAD ..."; keep the value only.
             checksum_hex=$(crc32 "$file" | awk '{print $1}')
             checksum_decimal=$((16#$checksum_hex))

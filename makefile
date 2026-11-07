@@ -23,7 +23,7 @@ XPLANE_PLUGIN_DIR ?= $(HOME)/X-Plane 12/Resources/plugins/zoal-honeycomb
 # So each platform's copy is renamed before linking, and the .xpl records the
 # new name. Same scheme as SkyScript's scripts/unique-library-identity.sh.
 # https://github.com/x-z7a/skyscript/blob/main/docs/developer/multiple-plugins.md
-SKYSCRIPT_VERSION ?= 0.12.1
+SKYSCRIPT_VERSION ?= 0.12.2
 SKYSCRIPT_DIR     := $(CURDIR)/Libraries/SkyScript/$(SKYSCRIPT_VERSION)
 SKYSCRIPT_DIST    := $(SKYSCRIPT_DIR)/SkyScript-lib/lib
 SKYSCRIPT_STAMP   := $(SKYSCRIPT_DIR)/.downloaded
@@ -33,9 +33,9 @@ MAC_LIB_DIR    := $(SKYSCRIPT_DIR)/mac
 MAC_LIB        := $(MAC_LIB_DIR)/lib$(SKYSCRIPT_NAME).dylib
 LIN_LIB_DIR    := $(SKYSCRIPT_DIR)/lin
 LIN_LIB        := $(LIN_LIB_DIR)/lib$(SKYSCRIPT_NAME).so
-# PE import names are patched in place, so the new DLL name must be exactly
-# as long as "SkyScriptLib.dll": "SkyS" + 8 hex + ".dll".
-WIN_DLL        := SkyS$(shell printf '%s' zoal-honeycomb | { shasum -a 256 2>/dev/null || sha256sum; } | cut -c1-8).dll
+WIN_LIB_DIR    := $(SKYSCRIPT_DIR)/win
+WIN_DLL        := $(SKYSCRIPT_NAME).dll
+WIN_IMPLIB     := $(WIN_LIB_DIR)/lib$(SKYSCRIPT_NAME).dll.a
 
 MAC_CGO_CFLAGS  := -DAPL=1 -DIBM=0 -DLIN=0 -O2 -g
 MAC_CGO_LDFLAGS := -F/System/Library/Frameworks/ -F$(CURDIR)/Libraries/Mac -framework XPLM \
@@ -88,17 +88,26 @@ mac: $(MAC_LIB)
 	rm -f $(OUT)/mac.h
 	cp "$(MAC_LIB)" $(OUT)/
 
-# The import library names SkyScriptLib.dll; patch that name in the .xpl and
-# ship the DLL under the unique name. Not sed: msys2's sed rewrites binaries
-# in text mode and corrupts the PE file (Windows error 193).
-WIN_CC ?= x86_64-w64-mingw32-gcc
+# Windows has no install name or SONAME to rewrite: the DLL name comes from
+# the import library. So instead of linking SkyScript's SkyScriptLib.lib, build
+# an import library from its export list (SkyScriptLib.def) that names the
+# renamed DLL, and the .xpl links against that name directly.
+WIN_CC      ?= x86_64-w64-mingw32-gcc
+WIN_DLLTOOL ?= $(shell $(WIN_CC) -print-prog-name=dlltool)
+WIN_OBJDUMP ?= $(shell $(WIN_CC) -print-prog-name=objdump)
 # Under msys2, make sees POSIX paths (/d/a/...) but go and ld.exe are native
 # Windows programs, and MSYS only converts the first path in an environment
 # variable. Hand them native paths; elsewhere (cross-compiling) use as is.
 native_path = $(if $(shell command -v cygpath 2>/dev/null),$(shell cygpath -m '$(1)'),$(1))
 WIN_LIBS    = $(call native_path,$(CURDIR)/Libraries/Win/XPLM_64.lib) \
-	$(call native_path,$(SKYSCRIPT_DIST)/win_x64/SkyScriptLib.lib)
-win: $(SKYSCRIPT_STAMP)
+	$(call native_path,$(WIN_IMPLIB))
+
+$(WIN_IMPLIB): $(SKYSCRIPT_STAMP)
+	mkdir -p "$(WIN_LIB_DIR)"
+	sed 's/^LIBRARY .*/LIBRARY "$(WIN_DLL)"/' "$(SKYSCRIPT_DIST)/win_x64/SkyScriptLib.def" > "$(WIN_LIB_DIR)/$(SKYSCRIPT_NAME).def"
+	"$(WIN_DLLTOOL)" -d "$(WIN_LIB_DIR)/$(SKYSCRIPT_NAME).def" -l "$@"
+
+win: $(WIN_IMPLIB)
 	mkdir -p $(OUT)
 	rm -f $(OUT)/win.xpl
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=$(WIN_CC) \
@@ -106,7 +115,7 @@ win: $(SKYSCRIPT_STAMP)
 	CGO_LDFLAGS="$(WIN_LIBS) -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL" \
 	go build -buildmode c-shared -o $(OUT)/win.xpl -ldflags="$(LDFLAGS)" plugin/plugin.go
 	rm -f $(OUT)/win.h
-	go run ./cmd/patch-pe-import $(OUT)/win.xpl SkyScriptLib.dll $(WIN_DLL)
+	"$(WIN_OBJDUMP)" -p $(OUT)/win.xpl | grep -q "DLL Name: $(WIN_DLL)"
 	cp "$(SKYSCRIPT_DIST)/win_x64/SkyScriptLib.dll" $(OUT)/$(WIN_DLL)
 
 # Built with the host's glibc toolchain (CI runs this on Ubuntu): the SkyScript
