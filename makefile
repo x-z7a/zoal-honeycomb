@@ -91,12 +91,18 @@ mac: $(MAC_LIB)
 # The import library names SkyScriptLib.dll; patch that name in the .xpl and
 # ship the DLL under the unique name.
 WIN_CC ?= x86_64-w64-mingw32-gcc
+# Under msys2, make sees POSIX paths (/d/a/...) but go and ld.exe are native
+# Windows programs, and MSYS only converts the first path in an environment
+# variable. Hand them native paths; elsewhere (cross-compiling) use as is.
+native_path = $(if $(shell command -v cygpath 2>/dev/null),$(shell cygpath -m '$(1)'),$(1))
+WIN_LIBS    = $(call native_path,$(CURDIR)/Libraries/Win/XPLM_64.lib) \
+	$(call native_path,$(SKYSCRIPT_DIST)/win_x64/SkyScriptLib.lib)
 win: $(SKYSCRIPT_STAMP)
 	mkdir -p $(OUT)
 	rm -f $(OUT)/win.xpl
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=$(WIN_CC) \
 	CGO_CFLAGS="-DIBM=1 -static -O2 -g" \
-	CGO_LDFLAGS="$(CURDIR)/Libraries/Win/XPLM_64.lib $(SKYSCRIPT_DIST)/win_x64/SkyScriptLib.lib -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL" \
+	CGO_LDFLAGS="$(WIN_LIBS) -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL" \
 	go build -buildmode c-shared -o $(OUT)/win.xpl -ldflags="$(LDFLAGS)" plugin/plugin.go
 	rm -f $(OUT)/win.h
 	grep -q SkyScriptLib.dll $(OUT)/win.xpl
