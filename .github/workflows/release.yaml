@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - "v*"
+  # Pull requests run the platform builds only (make win also checks the
+  # Windows DLLs); nothing is released or pushed.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -100,6 +104,7 @@ jobs:
 
   release:
     needs: [build-mac, build-windows, build-linux]
+    if: github.event_name != 'pull_request'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
