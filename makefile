@@ -115,8 +115,8 @@ win: $(WIN_IMPLIB)
 	CGO_LDFLAGS="$(WIN_LIBS) -static-libgcc -static-libstdc++ -Wl,--exclude-libs,ALL" \
 	go build -buildmode c-shared -o $(OUT)/win.xpl -ldflags="$(LDFLAGS)" plugin/plugin.go
 	rm -f $(OUT)/win.h
-	"$(WIN_OBJDUMP)" -p $(OUT)/win.xpl | grep -q "DLL Name: $(WIN_DLL)"
 	cp "$(SKYSCRIPT_DIST)/win_x64/SkyScriptLib.dll" $(OUT)/$(WIN_DLL)
+	OBJDUMP="$(WIN_OBJDUMP)" scripts/check-win-dlls.sh $(OUT) $(WIN_DLL)
 
 # Built with the host's glibc toolchain (CI runs this on Ubuntu): the SkyScript
 # .so is linked against glibc.
