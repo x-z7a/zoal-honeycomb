@@ -6,6 +6,7 @@ import {
   GetProfileFiles,
   GetProfileSources,
   GetProfiles,
+  GetActiveProfile,
   GetProfilesStatus,
   GetXplane,
   onPluginMessage,
@@ -170,6 +171,8 @@ function App() {
   const [saveError, setSaveError] = useState("");
   const [hasUserSelectedProfile, setHasUserSelectedProfile] = useState(false);
   const [planeInfo, setPlaneInfo] = useState<PlaneInfo>({ icao: "", name: "", connected: false });
+  // File of the profile the plugin is actually using; "" when none is loaded.
+  const [activeProfileFile, setActiveProfileFile] = useState("");
   const [profilesStatus, setProfilesStatus] = useState<profilestore.Status | null>(null);
   const [editorTab, setEditorTab] = useState(0);
   const [isAddProfileModalOpen, setIsAddProfileModalOpen] = useState(false);
@@ -231,8 +234,25 @@ function App() {
     onPluginMessage("profilesChanged", () => {
       refreshProfiles().catch(() => {
       });
+      GetActiveProfile().then((p) => setActiveProfileFile(p?.file || "")).catch(() => {
+      });
     });
   }, [refreshProfiles]);
+
+  // The plugin pushes the active profile whenever it (re)loads one: on
+  // aircraft load and right after a save or create.
+  useEffect(() => {
+    GetActiveProfile().then((p) => setActiveProfileFile(p?.file || "")).catch(() => {
+    });
+    onPluginMessage("activeProfileChanged", (p: profilestore.ActiveProfile) => {
+      setActiveProfileFile(p?.file || "");
+    });
+  }, []);
+
+  const activeProfileIndex = useMemo(
+    () => (activeProfileFile === "" ? -1 : profileFiles.indexOf(activeProfileFile)),
+    [activeProfileFile, profileFiles]
+  );
 
   useEffect(() => {
     const refresh = () => {
@@ -313,6 +333,13 @@ function App() {
     }
 
     if (!hasUserSelectedProfile && !isDirty) {
+      // Open on the profile the plugin is using, when it has one.
+      if (activeProfileIndex >= 0) {
+        if (activeProfileIndex !== selectedProfileIndex) {
+          setSelectedProfileIndex(activeProfileIndex);
+        }
+        return;
+      }
       if (planeInfo.connected) {
         const planeIndex = findBestProfileIndex(planeInfo, profilesData, profileFiles);
         if (planeIndex >= 0 && planeIndex !== selectedProfileIndex) {
@@ -328,7 +355,7 @@ function App() {
     if (selectedProfileIndex < 0) {
       setSelectedProfileIndex(0);
     }
-  }, [profilesData, profileFiles, planeInfo, hasUserSelectedProfile, isDirty, selectedProfileIndex]);
+  }, [profilesData, profileFiles, planeInfo, hasUserSelectedProfile, isDirty, selectedProfileIndex, activeProfileIndex]);
 
 
   const handleProfileSelect = (index: number) => {
@@ -631,6 +658,7 @@ function App() {
             profileErrors={profileErrors}
             profileFiles={profileFiles}
             profileSources={profileSources}
+            activeProfileIndex={activeProfileIndex}
             selectedProfileIndex={selectedProfileIndex}
             onSelectProfile={handleProfileSelect}
             onOpenAddProfile={handleOpenAddProfileTutorial}

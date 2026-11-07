@@ -27,6 +27,7 @@ import (
 var roots = []any{
 	pkg.Profile{},
 	profilestore.Status{},
+	profilestore.ActiveProfile{},
 }
 
 const outputPath = "frontend/src/models.ts"

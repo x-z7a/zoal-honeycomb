@@ -55,11 +55,9 @@ func (s *xplaneService) onPluginStart() {
 	menuId := menus.FindPluginsMenu()
 	menuContainerId := menus.AppendMenuItem(menuId, "ZOAL Honeycomb", 0, false)
 	s.myMenuId = menus.CreateMenu("ZOAL Honeycomb", menuId, menuContainerId, s.menuHandler, nil)
-	menus.AppendMenuItem(s.myMenuId, "Reload Profile", 0, true)
-	s.configUI = startConfigUI(s.Logger, pluginPath, func() {
-		// Re-read the active profile on the next flight loop, as "Reload Profile" does.
-		s.profile = nil
-	})
+	// Profiles reload by themselves: on aircraft load, and right after the
+	// configurator saves or creates one.
+	s.configUI = startConfigUI(s.Logger, pluginPath, s.reloadProfile)
 	if s.configUI != nil {
 		menus.AppendMenuItem(s.myMenuId, "Configurator", 2, true)
 	}

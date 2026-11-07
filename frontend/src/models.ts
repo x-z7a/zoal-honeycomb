@@ -116,4 +116,8 @@ export namespace profilestore {
 		loadError: string;
 		parseErrors: number;
 	}
+	export interface ActiveProfile {
+		file: string;
+		name: string;
+	}
 }

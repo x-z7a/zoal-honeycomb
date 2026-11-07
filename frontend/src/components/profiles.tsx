@@ -23,12 +23,20 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
 type SourceFilter = "all" | "default" | "user";
 
+
+// Marks the profile the plugin is actually using.
+const ACTIVE_COLOR = "#5fd38d";
+const ACTIVE_BORDER = "rgba(95, 211, 141, 0.55)";
+const ACTIVE_BACKGROUND = "rgba(95, 211, 141, 0.1)";
+
 interface TabPanelProps {
   profiles: pkg.Profile[];
   profileErrors: string[];
   profileFiles: string[];
   profileSources: string[];
   selectedProfileIndex: number;
+  /** Index of the profile the plugin is using for the current aircraft, or -1. */
+  activeProfileIndex: number;
   onSelectProfile: (index: number) => void;
   onOpenAddProfile: () => void;
   addProfileDisabled?: boolean;
@@ -196,6 +204,7 @@ export default function Profiles(props: TabPanelProps) {
           const isSelected = props.selectedProfileIndex === item.originalIndex;
           const source = props.profileSources[item.originalIndex] || "default";
           const isUserProfile = source === "user";
+          const isActive = props.activeProfileIndex === item.originalIndex;
           return (
             <ListItemButton
               key={`${name}-${item.originalIndex}`}
@@ -204,12 +213,16 @@ export default function Profiles(props: TabPanelProps) {
               sx={{
                 borderRadius: 2,
                 mb: 0.75,
-                border: hasError ? "1px solid rgba(244, 67, 54, 0.4)" : "1px solid transparent",
+                border: hasError
+                  ? "1px solid rgba(244, 67, 54, 0.4)"
+                  : isActive ? `1px solid ${ACTIVE_BORDER}` : "1px solid transparent",
+                // The in-use profile keeps a green edge even while another is selected.
+                boxShadow: isActive && !hasError ? `inset 3px 0 0 ${ACTIVE_COLOR}` : undefined,
                 alignItems: "flex-start",
-                backgroundColor: hasError ? "rgba(244, 67, 54, 0.06)" : undefined,
+                backgroundColor: hasError ? "rgba(244, 67, 54, 0.06)" : isActive ? ACTIVE_BACKGROUND : undefined,
                 "&.Mui-selected": {
                   backgroundColor: hasError ? "rgba(244, 67, 54, 0.14)" : "rgba(3, 169, 244, 0.16)",
-                  borderColor: hasError ? "rgba(244, 67, 54, 0.55)" : "rgba(3, 169, 244, 0.55)",
+                  borderColor: hasError ? "rgba(244, 67, 54, 0.55)" : isActive ? ACTIVE_COLOR : "rgba(3, 169, 244, 0.55)",
                 },
                 "&.Mui-selected:hover": {
                   backgroundColor: hasError ? "rgba(244, 67, 54, 0.18)" : "rgba(3, 169, 244, 0.2)",
@@ -223,7 +236,7 @@ export default function Profiles(props: TabPanelProps) {
                 {hasError ? (
                   <ErrorOutlineIcon sx={{color: "#f44336"}}/>
                 ) : (
-                  <LocalAirportOutlinedIcon sx={{color: isSelected ? "#84d8ff" : "#7fd1a5"}}/>
+                  <LocalAirportOutlinedIcon sx={{color: isActive ? ACTIVE_COLOR : isSelected ? "#84d8ff" : "rgba(168, 200, 232, 0.7)"}}/>
                 )}
               </ListItemIcon>
               <ListItemText
@@ -248,6 +261,21 @@ export default function Profiles(props: TabPanelProps) {
               />
               {!hasError && (
                 <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5, mt: 0.2 }}>
+                  {isActive && (
+                    <Tooltip title="The plugin is using this profile for the current aircraft">
+                      <Chip
+                        label="In use"
+                        size="small"
+                        sx={{
+                          height: 20,
+                          fontSize: "0.65rem",
+                          fontWeight: 800,
+                          color: "#06210f",
+                          backgroundColor: ACTIVE_COLOR
+                        }}
+                      />
+                    </Tooltip>
+                  )}
                   <Chip
                     label={isUserProfile ? "User" : "Default"}
                     size="small"

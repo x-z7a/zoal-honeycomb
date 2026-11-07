@@ -51,6 +51,9 @@ export const GetProfileFiles = () => call<string[]>("GetProfileFiles");
 export const GetProfileErrors = () => call<string[]>("GetProfileErrors");
 export const GetProfileSources = () => call<string[]>("GetProfileSources");
 
+/** The profile the plugin has loaded for the current aircraft. */
+export const GetActiveProfile = () => call<profilestore.ActiveProfile>("GetActiveProfile");
+
 export const SaveProfileByIndex = (index: number, profile: pkg.Profile) =>
   call<void>("SaveProfileByIndex", index, profile);
 export const CreateProfileFromDefault = (filename: string, profileName: string, description: string, selectors: string[]) =>

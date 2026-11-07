@@ -21,6 +21,7 @@ On an older setup, stay on **[v1.18.0](https://github.com/x-z7a/zoal-honeycomb/r
 | Windows / Linux | x64 | x64 |
 | Configurator | Separate `bravo` app | Window inside X-Plane: **Plugins → ZOAL Honeycomb → Configurator** |
 | Import old Honeycomb Configurator `.json` | Yes | **Removed** |
+| Reloading after an edit | **Plugins → ZOAL Honeycomb → Reload Profile** | Automatic on save and create |
 | Profiles | YAML in `profiles/` and `user profiles/` | Same folders, same format |
 
 ## Steps
@@ -33,7 +34,7 @@ On an older setup, stay on **[v1.18.0](https://github.com/x-z7a/zoal-honeycomb/r
 
 ## Your profiles
 
-The YAML format did not change, so v1 profiles work in v2 as they are. As in v1, **Save YAML** writes to `user profiles/`, so updates to the shipped `profiles/` never overwrite your edits. In v2 a save also takes effect right away, without **Reload Profile**.
+The YAML format did not change, so v1 profiles work in v2 as they are. As in v1, **Save YAML** writes to `user profiles/`, so updates to the shipped `profiles/` never overwrite your edits. In v2 a save, or a new profile, takes effect right away. The **Reload Profile** menu item is gone because it is no longer needed.
 
 ## Importing old Honeycomb Configurator profiles
 

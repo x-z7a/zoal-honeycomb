@@ -34,8 +34,11 @@ type configUI struct {
 	app    *skyscript.App
 	store  *profilestore.Store
 	// onProfilesChanged runs after a save or create so the hardware side
-	// picks up the edit without a manual "Reload Profile".
+	// picks up the edit right away.
 	onProfilesChanged func()
+	// active is the profile the hardware side has loaded. Only touched on
+	// the X-Plane main thread (flight loop, menu and message handlers).
+	active profilestore.ActiveProfile
 }
 
 // startConfigUI initializes SkyScript and creates the (hidden) configurator
@@ -107,6 +110,20 @@ func (ui *configUI) reload() {
 	}
 }
 
+// setActiveProfile records the profile the hardware side just loaded and
+// tells an open page, so the sidebar can mark it.
+func (ui *configUI) setActiveProfile(file, name string) {
+	if ui == nil {
+		return
+	}
+	ui.active = profilestore.ActiveProfile{File: file, Name: name}
+	payload, err := json.Marshal(ui.active)
+	if err != nil {
+		return
+	}
+	ui.app.PostMessage("activeProfileChanged", string(payload))
+}
+
 func (ui *configUI) profilesChanged() {
 	if ui.onProfilesChanged != nil {
 		ui.onProfilesChanged()
@@ -168,6 +185,10 @@ func (ui *configUI) registerHandlers() {
 	})
 	ui.handle("GetProfileSources", func([]json.RawMessage) (any, error) {
 		return ui.store.Sources(), nil
+	})
+
+	ui.handle("GetActiveProfile", func([]json.RawMessage) (any, error) {
+		return ui.active, nil
 	})
 
 	ui.handle("SaveProfileByIndex", func(args []json.RawMessage) (any, error) {

@@ -38,6 +38,14 @@ type Status struct {
 	ParseErrors     int    `json:"parseErrors"`
 }
 
+// ActiveProfile is the profile the plugin has loaded for the current
+// aircraft. File matches an entry of Store.Files; both are empty when no
+// profile is loaded.
+type ActiveProfile struct {
+	File string `json:"file"`
+	Name string `json:"name"`
+}
+
 // Store holds the profiles loaded from one plugin's profile folders. The
 // parallel slices describe the same file at the same index. It is safe for
 // concurrent use.
