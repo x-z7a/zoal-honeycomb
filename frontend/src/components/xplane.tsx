@@ -3,7 +3,7 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import {useEffect} from 'react';
-import {GetXplane} from "../../wailsjs/go/main/App";
+import {GetXplane} from '../api';
 import {Chip, Divider, Stack} from "@mui/material";
 import {decodeDatarefText} from "../utils/datarefs";
 

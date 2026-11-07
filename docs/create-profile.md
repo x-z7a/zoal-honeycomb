@@ -9,13 +9,15 @@ Recommended flow is hybrid:
 
 ## Quick start
 
-1. Copy a close existing profile in `profiles/`.
+The configurator's **+** button (Plugins → ZOAL Honeycomb → Configurator) creates a new profile from `default.yaml` in `user profiles/`. To start from a similar aircraft instead:
+
+1. Copy a close existing profile from `profiles/` into `user profiles/`.
 2. Rename to match your ICAO/variant naming strategy.
 3. Update:
    - `metadata.name`
    - `metadata.description`
    - `metadata.selectors` (exact aircraft UI name)
-4. Open `bravo` and select your new profile.
+4. Open the configurator in X-Plane and select your new profile.
 5. Configure tabs in UI:
    - `Autopilot Buttons`
    - `Autopilot Lights`

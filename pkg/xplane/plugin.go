@@ -56,6 +56,13 @@ func (s *xplaneService) onPluginStart() {
 	menuContainerId := menus.AppendMenuItem(menuId, "ZOAL Honeycomb", 0, false)
 	s.myMenuId = menus.CreateMenu("ZOAL Honeycomb", menuId, menuContainerId, s.menuHandler, nil)
 	menus.AppendMenuItem(s.myMenuId, "Reload Profile", 0, true)
+	s.configUI = startConfigUI(s.Logger, pluginPath, func() {
+		// Re-read the active profile on the next flight loop, as "Reload Profile" does.
+		s.profile = nil
+	})
+	if s.configUI != nil {
+		menus.AppendMenuItem(s.myMenuId, "Configurator", 2, true)
+	}
 	menus.AppendMenuSeparator(s.myMenuId)
 	s.myMenuItemIndex = menus.AppendMenuItem(s.myMenuId, "Enable Debug", 1, true)
 
@@ -72,6 +79,7 @@ func (s *xplaneService) onPluginStart() {
 }
 
 func (s *xplaneService) onPluginStop() {
+	s.configUI.stop()
 	s.BravoService.Exit()
 	s.Logger.Info("Plugin stopped")
 	if s.usesTolissTrimHold() {

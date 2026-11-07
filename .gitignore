@@ -1,5 +1,5 @@
 
-build/bin
+build/
 node_modules
 frontend/dist
 docs/.vitepress/cache
@@ -11,3 +11,4 @@ AGENTS.md
 CLAUDE.md
 .claude
 user profiles/
+Libraries/SkyScript

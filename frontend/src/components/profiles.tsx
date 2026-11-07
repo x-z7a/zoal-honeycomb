@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import {pkg} from '../../wailsjs/go/models';
+import {pkg} from '../models';
 import {
   Chip,
   Divider,
@@ -17,7 +17,6 @@ import {
   Typography
 } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
-import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import LocalAirportOutlinedIcon from '@mui/icons-material/LocalAirportOutlined';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
@@ -32,7 +31,6 @@ interface TabPanelProps {
   selectedProfileIndex: number;
   onSelectProfile: (index: number) => void;
   onOpenAddProfile: () => void;
-  onOpenImport: () => void;
   addProfileDisabled?: boolean;
 }
 
@@ -87,24 +85,7 @@ export default function Profiles(props: TabPanelProps) {
             Profiles
           </Typography>
           <Box sx={{ display: "flex", gap: 0.75 }}>
-            <Tooltip title={props.addProfileDisabled ? "Profiles folder required first" : "Import from Configurator JSON"}>
-              <IconButton
-                onClick={props.onOpenImport}
-                disabled={props.addProfileDisabled}
-                size="small"
-                sx={{
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                  color: "#d8f3dc",
-                  border: "1px solid rgba(216,243,220,0.25)",
-                  "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.16)"
-                  }
-                }}
-              >
-                <FileUploadOutlinedIcon fontSize="small"/>
-              </IconButton>
-            </Tooltip>
-            <Tooltip title={props.addProfileDisabled ? "Profiles folder required first" : "Create a new profile from default.yaml"}>
+            <Tooltip title={props.addProfileDisabled ? "Creating a profile..." : "Create a new profile from default.yaml"}>
               <IconButton
                 onClick={props.onOpenAddProfile}
                 disabled={props.addProfileDisabled}

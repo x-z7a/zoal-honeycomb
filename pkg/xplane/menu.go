@@ -18,6 +18,9 @@ func (s *xplaneService) menuHandler(menuRef interface{}, itemRef interface{}) {
 		}
 
 	}
+	if itemId == 2 {
+		s.configUI.toggle()
+	}
 	if itemId == 0 {
 		s.Logger.Info("Reload Profile Clicked")
 		s.profile = nil
