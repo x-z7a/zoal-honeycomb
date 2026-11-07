@@ -128,6 +128,7 @@ package: ui
 	rm -rf $(OUT)/ui $(OUT)/profiles
 	cp -R frontend/dist $(OUT)/ui
 	cp -R profiles $(OUT)/profiles
+	cp Changelog.txt $(OUT)/
 
 dev: VERSION = development
 dev: mac package

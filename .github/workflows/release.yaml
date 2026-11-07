@@ -126,7 +126,7 @@ jobs:
         run: |
           TAG=${GITHUB_REF##*/}
 
-          # Configurator UI and shipped profiles
+          # Configurator UI, shipped profiles and Changelog.txt
           make package
 
           # Plugins and their SkyScript libraries
