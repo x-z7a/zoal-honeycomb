@@ -36,9 +36,9 @@ buttons:
             - command_str: sim/autopilot/servos_toggle
     ias:
         single_click:
-            - command_str: sim/autopilot/speed_hold
+            - command_str: XCrafts/ERJ/SPD
         double_click:
-            - command_str: sim/autopilot/speed_hold
+            - command_str: XCrafts/ERJ/FLC
     rev:
         single_click:
             - command_str: sim/autopilot/back_course
@@ -70,15 +70,12 @@ leds:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/nav_status
               operator: ==
-              threshold: 1
-            - dataref_str: sim/cockpit2/autopilot/gpss_status
-              operator: ==
-              threshold: 1
+              threshold: 2
         condition: any
     alt:
         datarefs:
             - dataref_str: sim/cockpit2/autopilot/altitude_hold_status
-              operator: ==
+              operator: '>'
               threshold: 1
     apr:
         datarefs:
@@ -167,11 +164,11 @@ leds:
     aux_fuel_pump:
         datarefs:
             - dataref_str: XCrafts/ERJ/fuel/fuel_pump_left_state
-              operator: '!='
-              threshold: 2
+              operator: ==
+              threshold: 0
             - dataref_str: XCrafts/ERJ/fuel/fuel_pump_right_state
-              operator: '!='
-              threshold: 2
+              operator: ==
+              threshold: 0
         condition: any
     parking_brake:
         datarefs:
@@ -182,7 +179,7 @@ leds:
         datarefs:
             - dataref_str: sim/cockpit2/electrical/bus_volts
               operator: <
-              threshold: 27
+              threshold: 19
     doors:
         datarefs:
             - dataref_str: XCrafts/doors/FM_OPEN
