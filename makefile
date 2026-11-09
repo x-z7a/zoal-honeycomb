@@ -23,7 +23,7 @@ XPLANE_PLUGIN_DIR ?= $(HOME)/X-Plane 12/Resources/plugins/zoal-honeycomb
 # So each platform's copy is renamed before linking, and the .xpl records the
 # new name. Same scheme as SkyScript's scripts/unique-library-identity.sh.
 # https://github.com/x-z7a/skyscript/blob/main/docs/developer/multiple-plugins.md
-SKYSCRIPT_VERSION ?= 0.12.2
+SKYSCRIPT_VERSION ?= 0.14.0
 SKYSCRIPT_DIR     := $(CURDIR)/Libraries/SkyScript/$(SKYSCRIPT_VERSION)
 SKYSCRIPT_DIST    := $(SKYSCRIPT_DIR)/SkyScript-lib/lib
 SKYSCRIPT_STAMP   := $(SKYSCRIPT_DIR)/.downloaded
