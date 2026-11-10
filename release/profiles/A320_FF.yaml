@@ -1,0 +1,221 @@
+metadata:
+    name: Airbus A320-214 XP12
+    description: Profile for Airbus A320-214 XP12
+    selectors:
+        - Airbus A320-214 XP12
+buttons:
+    hdg:
+        single_click:
+            - command_str: a320/Panel/FCU_LateralMode_switch_push
+        double_click:
+            - command_str: a320/Panel/FCU_LateralMode_switch_pull
+    alt:
+        single_click:
+            - command_str: a320/Panel/FCU_AltitudeMode_switch_push
+        double_click:
+            - command_str: a320/Panel/FCU_AltitudeMode_switch_pull
+    apr:
+        single_click:
+            - command_str: a320/Panel/FCU_Localizer_button
+        double_click:
+            - command_str: a320/Panel/FCU_Approach_button
+    vs:
+        single_click:
+            - command_str: a320/Panel/FCU_VerticalMode_switch_push
+        double_click:
+            - command_str: a320/Panel/FCU_VerticalMode_switch_pull
+    ap:
+        single_click:
+            - command_str: a320/Panel/FCU_AutoPilot1_button
+        double_click:
+            - command_str: a320/Panel/FCU_AutoPilot2_button
+    ias:
+        single_click:
+            - command_str: a320/Panel/FCU_SpeedMode_switch_push
+        double_click:
+            - command_str: a320/Panel/FCU_SpeedMode_switch_pull
+    rev:
+        single_click:
+            - {}
+        double_click:
+            - {}
+knobs:
+    ap_hdg:
+        datarefs:
+            - dataref_str: a320/Panel/FCU_Lateral
+    ap_vs:
+        datarefs:
+            - dataref_str: a320/Panel/FCU_Vertical
+    ap_alt:
+        datarefs:
+            - dataref_str: a320/Panel/FCU_Altitude
+    ap_ias:
+        datarefs:
+            - dataref_str: a320/Panel/FCU_Speed
+    ap_crs:
+        datarefs:
+            - dataref_str: a320/Panel/FCU_AltitudeStep
+leds:
+    hdg:
+        datarefs:
+            - dataref_str: a320/Panel/FCU_LateralMode
+              operator: ==
+              threshold: 1
+    nav:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/nav_status
+              operator: '>='
+              threshold: 1
+            - dataref_str: sim/cockpit2/autopilot/gpss_status
+              operator: '>='
+              threshold: 1
+        condition: any
+    alt:
+        datarefs:
+            - dataref_str: a320/Panel/FCU_AltitudeMode
+              operator: '>='
+              threshold: 1
+    apr:
+        datarefs:
+            - dataref_str: a320/Aircraft/Cockpit/Panel/FCU_ApproachLight/Intensity
+              operator: '>='
+              threshold: 1
+    vs:
+        datarefs:
+            - dataref_str: a320/Panel/FCU_VerticalMode
+              operator: ==
+              threshold: 1
+    ap:
+        datarefs:
+            - dataref_str: a320/Aircraft/Cockpit/Panel/FCU_AutoPilotLight1/Intensity
+              operator: '>='
+              threshold: 0.99
+    ias:
+        datarefs:
+            - dataref_str: a320/Panel/FCU_SpeedMode
+              operator: ==
+              threshold: 5
+    rev:
+        datarefs:
+            - dataref_str: sim/cockpit2/autopilot/backcourse_status
+              operator: ==
+              threshold: 1
+    gear:
+        datarefs:
+            - dataref_str: sim/flightmodel2/gear/deploy_ratio
+              operator: '!='
+    master_warn:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/master_warning
+              operator: '>'
+              threshold: 0.01
+    master_caution:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/master_caution
+              operator: '>'
+              threshold: 0.01
+    fire:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/engine_fires
+              operator: '>'
+              threshold: 0.01
+    oil_low_pressure:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/oil_pressure_low
+              operator: ==
+              threshold: 1
+    fuel_low_pressure:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/fuel_pressure_low
+              operator: ==
+              threshold: 1
+    anti_ice:
+        datarefs:
+            - dataref_str: a320/Overhead/HeatEngine1
+              operator: '>'
+              threshold: 0.08
+            - dataref_str: a320/Overhead/HeatEngine2
+              operator: '>'
+              threshold: 0.08
+            - dataref_str: a320/Overhead/HeatWing
+              operator: '>'
+              threshold: 0.08
+        condition: any
+    eng_starter:
+        datarefs:
+            - dataref_str: a320/Pedestal/EngineMode
+              operator: ==
+              threshold: 2
+        condition: any
+    apu:
+        datarefs:
+            - dataref_str: a320/Aircraft/Cockpit/Overhead/APU_StartAvail/Intensity
+              operator: '>'
+              threshold: 0.09
+        condition: any
+    vacuum:
+        datarefs:
+            - dataref_str: sim/cockpit2/annunciators/low_vacuum
+              operator: '>'
+              threshold: 0
+    hydro_low_pressure:
+        datarefs:
+            - dataref_str: a320/Aircraft/Cockpit/Overhead/HydLeakValveB_Off/Intensity
+              operator: ==
+              threshold: 1
+            - dataref_str: a320/Aircraft/Cockpit/Overhead/HydLeakValveG_Off/Intensity
+              operator: ==
+              threshold: 1
+            - dataref_str: a320/Aircraft/Cockpit/Overhead/HydLeakValveY_Off/Intensity
+              operator: ==
+              threshold: 1
+            - dataref_str: a320/Aircraft/Cockpit/Overhead/HydLeakValveG_Off/Intensity
+              operator: ==
+              threshold: 1
+    aux_fuel_pump:
+        datarefs:
+            - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on
+              operator: '>'
+              threshold: 0.01
+            - dataref_str: sim/cockpit2/engine/actuators/fuel_pump_on
+              operator: '>'
+              threshold: 0.01
+        condition: any
+    parking_brake:
+        datarefs:
+            - dataref_str: sim/cockpit2/controls/parking_brake_ratio
+              operator: ==
+              threshold: 1
+    volt_low:
+        datarefs:
+            - dataref_str: sim/cockpit2/electrical/bus_volts
+              operator: <
+              threshold: 23
+    doors:
+        datarefs:
+            - dataref_str: model/controls/door_1l
+              operator: ==
+              threshold: 1
+            - dataref_str: model/controls/door_1r
+              operator: ==
+              threshold: 1
+            - dataref_str: model/controls/door_2l
+              operator: ==
+              threshold: 1
+            - dataref_str: model/controls/door_2r
+              operator: ==
+              threshold: 1
+        condition: any
+data:
+    ap_alt_step:
+        value: 1
+    ap_vs_step:
+        value: 10
+    ap_ias_step:
+        value: 1
+conditions:
+    bus_voltage:
+        datarefs:
+            - dataref_str: sim/cockpit2/electrical/bus_volts
+              operator: '>'
+              threshold: 0.01
