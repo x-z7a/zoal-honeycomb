@@ -22,11 +22,23 @@ import (
 	"github.com/x-z7a/zoal-honeycomb/pkg"
 	"github.com/x-z7a/zoal-honeycomb/pkg/profilestore"
 	"github.com/xairline/goplane/xplm/dataAccess"
+	"github.com/xairline/goplane/xplm/processing"
 )
 
 const (
 	configUIFolder = "ui"
 	configUIAppID  = "app-zoal-honeycomb"
+
+	// The window opens at this share of X-Plane's screen height.
+	configUIHeightShare = 0.75
+
+	// Room kept free above the page, in boxels: X-Plane's menu bar plus the
+	// window's own title bar, which X-Plane draws above the page rectangle.
+	// Dragging the window higher hides the title bar under the menu, leaving
+	// nothing to drag it back by.
+	configUITopReserve = 60
+	// How often, in seconds, the window position is checked.
+	configUIClampInterval = 0.25
 )
 
 type configUI struct {
@@ -39,6 +51,11 @@ type configUI struct {
 	// active is the profile the hardware side has loaded. Only touched on
 	// the X-Plane main thread (flight loop, menu and message handlers).
 	active profilestore.ActiveProfile
+	// lastGeometry is the window rectangle seen by the previous clamp check.
+	// The window is only moved once it has stopped moving, so the clamp does
+	// not fight X-Plane mid-drag.
+	lastGeometry [4]int
+	stopped      bool
 }
 
 // startConfigUI initializes SkyScript and creates the (hidden) configurator
@@ -61,6 +78,9 @@ func startConfigUI(logger pkg.Logger, pluginPath string, onProfilesChanged func(
 	cfg.HideAddressBar = true
 	cfg.Width = 1200
 	cfg.Height = 1200
+	if _, screenHeight := screenSize(); screenHeight > 0 {
+		cfg.Height = uint16(float64(screenHeight) * configUIHeightShare)
+	}
 	cfg.MinimumWidth = 900
 
 	app := skyscript.CreateAppWindow("ZOAL Honeycomb", configUIAppID, &cfg)
@@ -78,6 +98,7 @@ func startConfigUI(logger pkg.Logger, pluginPath string, onProfilesChanged func(
 	}
 	ui.registerHandlers()
 	ui.reload()
+	processing.RegisterFlightLoopCallback(ui.clampLoop, configUIClampInterval, nil)
 	logger.Infof("In-sim configurator ready (%s)", cfg.Homepage)
 	return ui
 }
@@ -86,7 +107,40 @@ func (ui *configUI) stop() {
 	if ui == nil {
 		return
 	}
+	ui.stopped = true
 	skyscript.Shutdown()
+}
+
+// clampLoop keeps the window's title bar below X-Plane's menu bar.
+func (ui *configUI) clampLoop(_, _ float32, _ int, _ interface{}) float32 {
+	if ui.stopped || !ui.app.Visible() {
+		return configUIClampInterval
+	}
+	left, top, right, bottom, ok := ui.app.Geometry()
+	if !ok {
+		return configUIClampInterval
+	}
+	current := [4]int{left, top, right, bottom}
+	settled := current == ui.lastGeometry
+	ui.lastGeometry = current
+	if !settled {
+		return configUIClampInterval
+	}
+
+	// The menu bar runs along the top of X-Plane's main window, whose global
+	// coordinates span 0..width, 0..height. A window entirely on another
+	// monitor is left alone.
+	screenWidth, screenHeight := screenSize()
+	if screenHeight <= 0 || right <= 0 || left >= screenWidth {
+		return configUIClampInterval
+	}
+	maxTop := screenHeight - configUITopReserve
+	if top > maxTop {
+		shift := top - maxTop
+		ui.app.SetGeometry(left, maxTop, right, bottom-shift)
+		ui.lastGeometry = [4]int{left, maxTop, right, bottom - shift}
+	}
+	return configUIClampInterval
 }
 
 func (ui *configUI) toggle() {
