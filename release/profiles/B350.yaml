@@ -1,0 +1,245 @@
+metadata:
+  name: Beechcraft King Air 350
+  description: AIRFOILLABS KING AIR 350
+  selectors:
+    - B350
+buttons:
+
+  rev:
+    single_click:
+      - command_str: "sim/autopilot/back_course"
+    double_click:
+      - command_str: "sim/autopilot/back_course"
+  nav:
+    single_click:
+      - command_str: "sim/autopilot/NAV"
+    double_click:
+      - command_str: "sim/autopilot/gpss"
+  hdg:
+    single_click:
+      - command_str: "sim/autopilot/heading"
+    double_click:
+      - command_str: "sim/autopilot/heading_sync_pilot"
+  ias:
+    single_click:
+      - command_str: "sim/autopilot/speed_hold"
+    double_click:
+      - command_str: "sim/autopilot/speed_hold"
+
+  alt:
+    single_click:
+      - command_str: "sim/autopilot/altitude_hold"
+    double_click:
+      - command_str: "sim/autopilot/altitude_hold"
+  vs:
+    single_click:
+      - command_str: "sim/autopilot/vertical_speed"
+    double_click:
+      - command_str: "sim/autopilot/vertical_speed"
+  apr:
+    single_click:
+      - command_str: "sim/autopilot/approach"
+    double_click:
+      - command_str: "sim/autopilot/approach"
+  ap:
+    single_click:
+      - command_str: "sim/autopilot/servos_toggle"
+    double_click:
+      - command_str: "sim/autopilot/servos_toggle"
+
+knobs:
+  ap_hdg:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/heading_dial_deg_mag_pilot"
+  ap_alt:
+    
+    commands:
+      - command_str: KA350/cmd/avpanel/alt/altSetInc
+      - command_str: KA350/cmd/avpanel/alt/altSetDec
+  ap_vs:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/vvi_dial_fpm"
+  ap_ias:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/airspeed_dial_kts_mach"
+  ap_crs:
+    datarefs:
+      - dataref_str: "sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot"
+leds:
+  hdg:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/heading_mode"
+        operator: "=="
+        threshold: 1
+
+  nav:
+    condition: any
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/nav_status"
+        operator: ">="
+        threshold: 1
+      - dataref_str: "sim/cockpit2/autopilot/gpss_status"
+        operator: ">="
+        threshold: 1
+
+  apr:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/approach_status"
+        operator: "=="
+        threshold: 2
+
+  rev:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/backcourse_status"
+        operator: "=="
+        threshold: 1
+
+  alt:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/altitude_hold_status"
+        operator: ">="
+        threshold: 1
+
+  vs:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/vvi_status"
+        operator: ">="
+        threshold: 1
+
+  ias:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/altitude_mode"
+        operator: "=="
+        threshold: 5
+
+  ap:
+    datarefs:
+      - dataref_str: "sim/cockpit2/autopilot/servos_on"
+        operator: ">"
+        threshold: 0.01
+
+  gear:
+    datarefs:
+      - dataref_str: "sim/flightmodel2/gear/deploy_ratio"
+        operator: "!="
+        threshold: 0
+
+  master_warn:
+    datarefs:
+      - dataref_str: "KA350/ann/masterWarning"
+        operator: ">"
+        threshold: 0.01
+
+  fire:
+    condition: any
+    datarefs:
+      - dataref_str: "KA350/ann/lEngFire"
+        operator: "!="
+        threshold: 0
+      - dataref_str: "KA350/ann/rEngFire"
+        operator: "!="
+        threshold: 0
+
+  oil_low_pressure:
+    datarefs:
+      - dataref_str: "KA350/ann/lOilPress"
+        operator: ">"
+        threshold: 0
+
+  fuel_low_pressure:
+    condition: any
+    datarefs:
+      - dataref_str: "KA350/ann/lFuelPress"
+        operator: ">"
+        threshold: 0
+      - dataref_str: "KA350/ann/rFuelPress"
+        operator: ">"
+        threshold: 0
+
+  anti_ice:
+    condition: any
+    datarefs:
+      - dataref_str: "KA350/ann/lPitotHeat"
+        operator: "!="
+        threshold: 0
+      - dataref_str: "KA350/ann/rPitotHeat"
+        operator: "!="
+        threshold: 0
+
+  eng_starter:
+    datarefs:
+      - dataref_str: "sim/cockpit2/engine/actuators/starter_hit"
+        operator: ">"
+        threshold: 0.01
+
+  apu:
+    datarefs:
+      - dataref_str: "sim/cockpit/electrical/gpu_on"
+        operator: ">="
+        threshold: 1
+
+  master_caution:
+    datarefs:
+      - dataref_str: "KA350/ann/masterCaution"
+        operator: ">"
+        threshold: 0.01
+
+  vacuum:
+    datarefs:
+      - dataref_str: "sim/cockpit/misc/vacuum"
+        operator: "<"
+        threshold: 1
+
+  hydro_low_pressure:
+    datarefs:
+      - dataref_str: "sim/cockpit2/annunciators/hydraulic_pressure"
+        operator: ">="
+        threshold: 1
+
+  aux_fuel_pump:
+    condition: any
+    datarefs:
+      - dataref_str: "KA350/ianim/sPanel/lStandbyPump"
+        operator: "<"
+        threshold: 1
+      - dataref_str: "KA350/ianim/sPanel/rStandbyPump"
+        operator: "<"
+        threshold: 1
+
+  parking_brake:
+    datarefs:
+      - dataref_str: "sim/cockpit2/controls/parking_brake_ratio"
+        operator: ">="
+        threshold: 0.9
+
+  volt_low:
+    datarefs:
+      - dataref_str: "sim/cockpit2/electrical/bus_volts"
+        operator: "<"
+        threshold: 27
+
+  doors:
+    datarefs:
+      - dataref_str: "KA350/ann/doorUnlocked"
+        operator: ">"
+        threshold: 0
+      
+conditions:
+  bus_voltage:
+    datarefs:
+      - dataref_str: "sim/cockpit2/electrical/bus_volts"
+        operator: ">"
+        threshold: 0.01
+
+  retractable_gear:
+    datarefs:
+      - dataref_str: "sim/aircraft/gear/acf_gear_retract"
+        operator: "!="
+        threshold: 0
+
+data:
+  ap_vs_step:
+    datarefs:
+      - dataref_str: "sim/aircraft/autopilot/vvi_step_ft"
+  ap_alt_step:
+    value: 20

@@ -1,0 +1,71 @@
+zoal-honeycomb v2 Changelog
+===========================
+
+This file tracks v2 releases only. For v1 (latest: v1.18.0), see
+https://github.com/x-z7a/zoal-honeycomb/releases/tag/v1.18.0
+
+
+BREAKING CHANGES IN v2
+----------------------
+
+* Requires X-Plane 12.4.4 or newer. X-Plane 11 is no longer supported.
+  Check your version on the first line of X-Plane's Log.txt, e.g.
+  "Log.txt for X-Plane 12.4.4-r1 ...".
+* macOS: Apple Silicon only. Intel Macs are no longer supported.
+  (Apple menu > About This Mac: "Chip: Apple M..." is Apple Silicon.)
+  Windows x64 and Linux x64 are still supported.
+* The separate "bravo" configurator app is gone. The configurator now runs
+  inside X-Plane: Plugins > ZOAL Honeycomb > Configurator.
+  You can delete bravo, bravo.app and bravo.exe from the plugin folder.
+* Importing old Honeycomb Bravo Configurator .json profiles is removed.
+  Import with v1.18.0, then copy the resulting .yaml into "user profiles".
+* The "Reload Profile" menu item is removed. Profiles reload by themselves
+  on aircraft load and whenever you save, create or delete one; to reload
+  by hand, use the Reload button in the configurator.
+
+On an older setup, stay on v1.18.0.
+Profile YAML files are unchanged: v1 profiles and "user profiles" keep
+working in v2.
+
+
+v2.0.0-beta.1
+-------------
+
+* New: delete user profiles from the configurator, one at a time (trash
+  icon) or in bulk (select button, then "All" or pick profiles). Shipped
+  profiles cannot be deleted. Deleting the profile in use switches the
+  plugin to the next match (the shipped copy, if any, or default).
+* New: Reload button in the configurator rereads the profile folders and
+  the profile in use, for edits made to the YAML files outside X-Plane.
+* Reload and delete wait while you have unsaved changes.
+* The configurator window now opens at 1200 x 1200.
+* Fixed: "Saved", "Deleted" and "Reloaded" messages could vanish as soon
+  as they appeared.
+
+
+v2.0.0-alpha.13
+---------------
+
+* Added this Changelog.txt, shipped in the plugin folder.
+
+
+v2.0.0-alpha.12
+---------------
+
+First v2 alpha built on X-Plane's built-in browser (SkyScript).
+
+* New: the configurator runs in a window inside X-Plane
+  (Plugins > ZOAL Honeycomb > Configurator).
+* New: the profile the plugin is using for the current aircraft is pinned
+  at the top of the profile list and marked green with an "In use" tag.
+  The configurator opens on it.
+* New: saving a profile or creating one from default.yaml applies it right
+  away. No reload needed.
+* Saves always go to "user profiles", so plugin updates never overwrite
+  your edits (same as v1).
+* Datarefs shown in the configurator are read directly from X-Plane; the
+  X-Plane web API is no longer needed.
+* Removed: the separate "bravo" app, configurator .json import and the
+  "Reload Profile" menu item (see BREAKING CHANGES).
+
+v2.0.0-alpha.10 and v2.0.0-alpha.11 failed to build and were not published.
